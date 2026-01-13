@@ -1,6 +1,5 @@
 venv/
-.env/
 __pycache__/
-*.pyc
+.env
 .DS_Store
-Thumbs.db
+sign_detection/Model/keras_model.h5
