@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRO | AI Assistant</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        miro: { bg: '#050505', glass: 'rgba(255, 255, 255, 0.05)', accent: '#00f3ff', purple: '#bd00ff', surface: '#121212' }
+                    },
+                    fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'wave': 'wave 1.2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        wave: { '0%, 100%': { height: '10px' }, '50%': { height: '30px' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .glass-panel { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-button { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+        .glass-button:hover { background: rgba(255, 255, 255, 0.1); border-color: #00f3ff; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); transform: translateY(-2px); }
+        .msg-user { background: linear-gradient(135deg, #00f3ff22, #00f3ff05); border: 1px solid #00f3ff44; color: #e0f2fe; }
+        .msg-ai { background: #1a1a1a; border: 1px solid #333; color: #d1d5db; }
+        
+        /* Orb Animation */
+        .voice-orb {
+            width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%);
+            border-radius: 50%;
+            filter: blur(10px);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* VISION PREVIEW WINDOW */
+        #vision-container { 
+            display: none; 
+            position: absolute; bottom: 100px; right: 20px; 
+            width: 240px; height: 180px; 
+            background: #000; border: 2px solid #00f3ff; 
+            border-radius: 12px; overflow: hidden; 
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            z-index: 40;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        #vision-status { position: absolute; bottom: 8px; left: 8px; font-size: 10px; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; color: #00f3ff; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-miro-bg text-white h-screen flex overflow-hidden">
+
+    <div id="vision-container">
+        <video id="webcam" autoplay playsinline></video>
+        <div id="vision-status">● VISION ACTIVE</div>
+    </div>
+
+    <aside class="w-64 hidden md:flex flex-col border-r border-miro-glassBorder bg-black/40">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-miro-accent to-miro-purple animate-pulse-slow"></div>
+            <h1 class="text-2xl font-bold tracking-widest">MIRO</h1>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            <div class="text-xs font-semibold text-gray-500 uppercase mb-2">History</div>
+            <div id="history-log" class="space-y-1"></div>
+        </div>
+        <div class="p-4 border-t border-miro-glassBorder bg-black/20">
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <span class="flex items-center gap-2">
+                    <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span id="connection-status">Offline</span>
+                </span>
+                <span>v3.5.0</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col relative z-10">
+        
+        <header class="h-16 border-b border-miro-glassBorder flex items-center justify-between px-6 bg-miro-bg/80 backdrop-blur-md sticky top-0 z-20">
+            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-miro-accent/10 border border-miro-accent/20">
+                <i class="fa-solid fa-bolt text-miro-accent text-xs"></i>
+                <span class="text-xs font-medium text-miro-accent tracking-wide">AI ACTIVE</span>
+            </div>
+        </header>
+
+        <div id="chat-view" class="flex-1 flex flex-col h-full relative">
+            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
+                <div class="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-80 mt-10">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple blur-xl opacity-20 absolute"></div>
+                    <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center text-3xl shadow-2xl animate-float">
+                        ✨
+                    </div>
+                    <h2 class="text-3xl font-light">Hello, <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-miro-accent to-white" id="user-display-name">Revanth</span></h2>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 pb-8 relative">
+                <div id="feature-picker" class="absolute bottom-24 left-6 z-30 glass-panel rounded-2xl p-4 w-72 shadow-2xl transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-none scale-95 border border-miro-glassBorder">
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Modes</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload</span></button>
+                        <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
+                        <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
+                        <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-800">
+                        <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-power-off"></i> <span class="text-xs font-bold">Disconnect Tools</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-center gap-2">
+                    <button id="plus-btn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-miro-accent/20 text-gray-400 transition"><i class="fa-solid fa-plus" id="plus-icon"></i></button>
+                    <input type="text" id="user-input" placeholder="Type here..." class="flex-1 bg-transparent border-none outline-none text-white h-10 px-2">
+                    
+                    <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
+
+                    <button id="send-btn" class="w-10 h-10 rounded-xl bg-miro-accent text-black font-bold hover:shadow-[0_0_15px_rgba(0,243,255,0.4)] transition"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="voice-overlay" class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden transition-opacity duration-500">
+            <button onclick="toggleVoiceMode()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="relative">
+                <div class="voice-orb"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fa-solid fa-microphone text-4xl text-white drop-shadow-lg"></i>
+                </div>
+            </div>
+            <div class="mt-12 text-center space-y-4 px-4">
+                <h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2>
+                <p id="voice-transcript" class="text-gray-400 text-lg max-w-2xl h-16 transition-all duration-300">Go ahead, I'm listening.</p>
+            </div>
+            <div class="mt-8 flex gap-2 h-8 items-end" id="voice-wave">
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0s"></div>
+                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.1s"></div>
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.2s"></div>
+                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.3s"></div>
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const wsUrl = 'ws://localhost:8000/ws';
+        let websocket = null;
+        let ttsEnabled = false; 
+        let isVoiceMode = false;
+        let selectedVoice = null;
+        let voiceLoadTimer = null;
+        let recognition = null;
+        
+        // VISION VARS
+        let visionActive = false;
+        let stream = null;
+        const video = document.getElementById("webcam");
+        const visionContainer = document.getElementById("vision-container");
+
+        // 1. VOICE LOADING
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) return;
+            selectedVoice = voices.find(v => v.name.includes("Google US English")) || 
+                            voices.find(v => v.name.includes("Zira")) || 
+                            voices.find(v => v.name.includes("Female"));
+            if (selectedVoice) clearInterval(voiceLoadTimer);
+        }
+        voiceLoadTimer = setInterval(loadVoices, 500);
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
+        // 2. SPEECH RECOGNITION
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                document.getElementById('voice-status').innerText = "LISTENING...";
+                document.getElementById('voice-wave').classList.remove('opacity-0');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voice-transcript').innerText = `"${transcript}"`;
+                if (event.results[0].isFinal) {
+                    handleVoiceCommand(transcript);
+                }
+            };
+
+            recognition.onend = () => {
+                if (isVoiceMode) {
+                    document.getElementById('voice-status').innerText = "PROCESSING...";
+                    document.getElementById('voice-wave').classList.add('opacity-0');
+                }
+            };
+        } else {
+            alert("Your browser does not support Voice Recognition. Please use Chrome or Edge.");
+        }
+
+        function handleVoiceCommand(text) {
+            addUserMessage(text);
+            sendMessage(text);
+            setTimeout(() => { if(isVoiceMode) document.getElementById('voice-transcript').innerText = "..."; }, 2000);
+        }
+
+        // --- 3. VOICE TOGGLE WITH GREETING (UPDATED) ---
+        function toggleVoiceMode() {
+            isVoiceMode = !isVoiceMode;
+            const overlay = document.getElementById('voice-overlay');
+            const micBtn = document.getElementById('mic-btn');
+            const userName = document.getElementById('user-display-name').innerText; // Get "Revanth"
+
+            if (isVoiceMode) {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioCtx.resume();
+                overlay.classList.remove('hidden');
+                micBtn.classList.add('text-miro-accent', 'bg-miro-accent/10');
+                ttsEnabled = true; 
+                recognition.start();
+
+                // --- GREETING LOGIC ---
+                const hour = new Date().getHours();
+                let greeting = `Good Evening, ${userName}!`;
+                if (hour < 12) greeting = `Good Morning, ${userName}!`;
+                else if (hour < 17) greeting = `Good Afternoon, ${userName}!`;
+                
+                // === CHANGED "I am listening" TO "I am Miro" ===
+                speak(`${greeting} I am Miro Your Personal Assistant.`);
+                // ------------------------------------------------
+
+            } else {
+                overlay.classList.add('hidden');
+                micBtn.classList.remove('text-miro-accent', 'bg-miro-accent/10');
+                ttsEnabled = false; 
+                recognition.stop();
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // 4. TEXT TO SPEECH
+        function speak(text) {
+            if (!ttsEnabled) return;
+            const cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            if (!selectedVoice) loadVoices();
+            if (selectedVoice) utterance.voice = selectedVoice;
+            utterance.pitch = 1.15;
+            utterance.rate = 1.05;
+            utterance.onend = () => { if (isVoiceMode) recognition.start(); };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 5. WEBSOCKET & LOGIC
+        function connectWebSocket() {
+            websocket = new WebSocket(wsUrl);
+            websocket.onopen = () => {
+                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
+                document.getElementById('connection-status').innerText = "Connected";
+            };
+            
+            websocket.onmessage = (event) => {
+                const text = event.data;
+                addAiMessage(text); 
+
+                // Only update status, don't show full text on overlay
+                if(isVoiceMode) {
+                    document.getElementById('voice-status').innerText = "AI SPEAKING...";
+                }
+                
+                speak(text);
+
+                if (text.includes("Vision Camera On")) startVisionMode();
+                if (text.includes("Disconnected") || text.includes("Stopped")) stopVisionMode();
+            };
+            
+            websocket.onclose = () => setTimeout(connectWebSocket, 3000);
+        }
+
+        // 6. VISION FUNCTIONS
+        async function startVisionMode() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                visionContainer.style.display = "block"; 
+                visionActive = true;
+                addAiMessage("📷 Webcam Started. I can now see you.");
+            } catch (err) {
+                addAiMessage("⚠️ Error: Could not verify camera permission.");
+            }
+        }
+
+        function stopVisionMode() {
+            if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; }
+            visionContainer.style.display = "none";
+            visionActive = false;
+        }
+
+        function sendMessage(text) {
+            if (visionActive) {
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext("2d").drawImage(video, 0, 0);
+                const imageData = canvas.toDataURL("image/jpeg");
+                const payload = JSON.stringify({ text: text, image: imageData });
+                websocket.send(payload);
+            } else {
+                websocket.send(text);
+            }
+        }
+
+        // 7. UI HELPERS
+        function addAiMessage(text) {
+            const div = document.createElement('div');
+            div.className = "flex justify-start items-start gap-3";
+            div.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shadow-lg mt-1 shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-xs text-white"></i></div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g, '<b class="text-miro-accent">$1</b>').replace(/\n/g, '<br>')}</div>`;
+            document.getElementById('chat-container').appendChild(div);
+            scrollToBottom();
+        }
+
+        function addUserMessage(text) {
+            const div = document.createElement('div');
+            div.className = "flex justify-end";
+            div.innerHTML = `<div class="msg-user max-w-[80%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm shadow-md">${text}</div>`;
+            document.getElementById('chat-container').appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }
+
+        const plusBtn = document.getElementById('plus-btn');
+        const featurePicker = document.getElementById('feature-picker');
+        const icon = document.getElementById('plus-icon');
+        plusBtn.addEventListener('click', () => {
+            featurePicker.classList.toggle('opacity-0');
+            featurePicker.classList.toggle('pointer-events-none');
+            featurePicker.classList.toggle('translate-y-10');
+            icon.classList.toggle('rotate-45');
+        });
+
+        window.triggerAction = (action) => {
+            plusBtn.click();
+            if(action === 'Disconnect') { websocket.send("Stop all"); return; }
+            const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : 
+                        action === 'Sign' ? "Activate Sign Language" : 
+                        action === 'Camera' ? "Activate Vision AI" : `Use ${action}`;
+            addUserMessage(cmd);
+            websocket.send(cmd);
+        };
+
+        const userInput = document.getElementById('user-input');
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const text = userInput.value.trim();
+            if(!text) return;
+            addUserMessage(text);
+            sendMessage(text);
+            userInput.value = '';
+        });
+        userInput.addEventListener('keypress', (e) => { if(e.key==='Enter') document.getElementById('send-btn').click(); });
+
+        connectWebSocket();
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+opencv-python
+numpy
+mediapipe
+cvzone
+tensorflow
+autopy
+pyautogui
+google-genai
+python-dotenv
+pyaudio
+sounddevice
+langchain_community
+duckduckgo-search
