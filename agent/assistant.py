@@ -10,7 +10,6 @@ import re
 import PyPDF2  # <--- NEW: For reading PDFs
 from PIL import Image
 from dotenv import load_dotenv
-from datetime import datetime
 
 # --- SETUP PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -24,6 +23,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 # IMPORT MEMORY
+
+# Around line 25-30 in assistant.py
+try:
+    # ADD SessionManager TO THIS LINE
+    from memory import MemoryManager, SessionManager 
+except ImportError:
+    # ADD SessionManager TO THIS LINE AS WELL
+    from agent.memory import MemoryManager, SessionManager
 try:
     from memory import MemoryManager
 except ImportError:
@@ -36,50 +43,6 @@ logging.getLogger("uvicorn.access").disabled = True
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# --- SESSION MANAGER ---
-class SessionManager:
-    def __init__(self, sessions_dir="sessions"):
-        self.sessions_dir = sessions_dir
-        if not os.path.exists(sessions_dir):
-            os.makedirs(sessions_dir)
-    
-    def create_session(self):
-        """Creates a new session with a unique ID."""
-        session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return session_id
-    
-    def save_session(self, session_id, history, title=None):
-        """Saves session data to a JSON file."""
-        session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
-        data = {
-            "id": session_id,
-            "title": title or "Chat",
-            "history": history,
-            "timestamp": datetime.now().isoformat()
-        }
-        with open(session_file, "w") as f:
-            json.dump(data, f, indent=2)
-    
-    def load_session(self, session_id):
-        """Loads session data from a JSON file."""
-        session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
-        if os.path.exists(session_file):
-            with open(session_file, "r") as f:
-                return json.load(f)
-        return None
-    
-    def get_all_sessions(self):
-        """Returns a list of all sessions."""
-        sessions = []
-        if os.path.exists(self.sessions_dir):
-            for file in os.listdir(self.sessions_dir):
-                if file.endswith(".json"):
-                    session_file = os.path.join(self.sessions_dir, file)
-                    with open(session_file, "r") as f:
-                        data = json.load(f)
-                        sessions.append({"id": data["id"], "title": data["title"]})
-        return sessions
 
 # --- HARDWARE CONNECTION ---
 SYSTEM_CALLBACK = None
