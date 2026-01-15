@@ -10,18 +10,6 @@
     {
       "role": "user",
       "parts": [
-        "Hello."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "hi"
       ]
     },
@@ -179,6 +167,18 @@
       "role": "model",
       "parts": [
         "Okay, I understand. I will not use Telugu unless you specifically ask me to. Also, it is currently 12:03 AM on Friday, January 16, 2026. How can I help you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
       ]
     }
   ]
