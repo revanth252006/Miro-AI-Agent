@@ -4,54 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "Decrease volume."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Decrease volume."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Take a screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Take a screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Take a screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Take another screen shot."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I have taken another screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Take a screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "The screenshot is saved."
       ]
     },
@@ -179,6 +131,54 @@
       "role": "model",
       "parts": [
         "Based on the content of the PDF, it seems highly likely that Revanth Akula created the document himself. It includes personal contact information, details about his education, specific projects he has worked on, and his own skills. These are the types of details that a person typically compiles themselves when creating a resume or personal profile. While AI could potentially generate a similar document, the specific details and personal touch suggest that it was created by Revanth."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "What is our previous conversation we are talking about?"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, here's a summary of our previous conversation:\n\nWe've been discussing a PDF document named \"Revanth AkulaAIML.pdf\". You asked me to:\n\n   Analyze it and give the important points.\n   Tell you the name of the PDF.\n   Summarize the PDF.\n   Determine whether the PDF was created by a person or by AI.\n\nI provided you with information based on the content of the PDF, including a summary of Revanth Akula's qualifications, projects, and skills. I also concluded that the document was likely created by Revanth himself."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Use Upload"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Use Upload"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
       ]
     }
   ]
