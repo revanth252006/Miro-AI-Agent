@@ -1,0 +1,37 @@
+{
+    "history": [
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "hi"
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "Hello! How can I help you today?\n"
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "Open Google."
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "Okay, I'm opening Google for you now.\n"
+                }
+            ]
+        }
+    ],
+    "title": "Open Google."
+}
