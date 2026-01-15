@@ -2,66 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        "Okay, I'm back to English. What can I do for you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "It happens because your browser picking the default."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I understand. Thanks for the explanation. I'll try my best to stick to the language you're currently using in the conversation. If I slip up again, please let me know!"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Speak in English."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I will speak in English from now on. How can I help you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Speak in Telugu."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c38\u0c30\u0c47, \u0c28\u0c47\u0c28\u0c41 \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c24\u0c3e\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3f? (Sar\u0113, n\u0113nu ippu\u1e0du telugul\u014d m\u0101\u1e6dl\u0101\u1e0dat\u0101nu. M\u012bku \u0113mi k\u0101v\u0101li?)"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Speak in Telugu."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c2e\u0c40 \u0c2a\u0c4d\u0c30\u0c36\u0c4d\u0c28\u0c15\u0c41 \u0c38\u0c2e\u0c3e\u0c27\u0c3e\u0c28\u0c02 \u0c07\u0c35\u0c4d\u0c35\u0c21\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c28\u0c3e\u0c15\u0c41 \u0c24\u0c17\u0c3f\u0c28\u0c02\u0c24 \u0c38\u0c2e\u0c3e\u0c1a\u0c3e\u0c30\u0c02 \u0c32\u0c47\u0c26\u0c41. \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c35\u0c47\u0c30\u0c47 \u0c2a\u0c4d\u0c30\u0c36\u0c4d\u0c28 \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f. (kshamin\u0304ca\u1e47\u1e0di, m\u012b pra\u015bnaku sam\u0101dh\u0101na\u1e41 ivva\u1e0d\u0101niki n\u0101ku taginanta sam\u0101c\u0101ra\u1e41 l\u0113du. dayac\u0113si v\u0113re pra\u015bna a\u1e0daga\u1e47\u1e0di.)"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I have read 'Revanth Resume-2 Ai.pdf'. Ask me anything about it!"
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         "transulate the pdf into telugu and give the same content"
@@ -179,6 +119,66 @@
       "role": "model",
       "parts": [
         "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Open Google."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I have opened Google for you. What would you like me to search for and summarize? Please provide me with the search query or topic you want me to summarize from Google."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Stop it."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "What is the latest conversation we had for?"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The latest conversation we had was about me opening Google for you and my asking you what you wanted me to search for and summarize. You had just instructed me to open Google."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I have read 'Revanth Resume-2 Ai.pdf'. You can now ask me questions about it!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "the content in this resume for which job it is sutable"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Based on the resume, Revanth Akula would be suitable for jobs such as:\n\n   Software Engineer/Developer: The projects, technical skills (C/C++, Python, HTML, CSS, JavaScript, Flask, MySQL), and coursework (Data Structures and Algorithms, OOPs) align with software development roles.\n   Full Stack Developer: The \"Full Stack Developer\" certification and projects involving both front-end and back-end technologies make him a potential candidate.\n   AI/ML Engineer (entry-level): Given his degree specialization (AIML) and the \"Sign Language Detection\" project, he could be considered for entry-level AI/ML positions.\n   Web Developer: Skills in HTML, CSS, JavaScript, Flask, and the \"AI Virtual Mouse\" project point to web development capabilities.\n\nIn general, the resume is geared towards entry-level software development positions with a focus on web development and some AI/ML experience."
       ]
     }
   ]

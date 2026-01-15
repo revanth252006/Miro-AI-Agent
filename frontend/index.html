@@ -240,7 +240,7 @@
             recognition.onstart = () => {
                 if(isVoiceMode && !isAiSpeaking) {
                     const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = `LISTENING ...`;
                     document.getElementById('voice-wave').classList.remove('opacity-0');
                 }
             };
@@ -337,7 +337,7 @@
                 isAiSpeaking = false;
                 if (isVoiceMode) {
                     const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = `LISTENING ...`;
                 }
             };
 
@@ -355,7 +355,7 @@
                 const text = event.data;
                 isProcessing = false;
                 addAiMessage(text); 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "AI SPEAKING...";
+                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro...";
                 speak(text);
 
                 if (text.includes("Vision Camera On")) startVisionMode();
