@@ -7,7 +7,7 @@ import json
 import base64
 import io
 import re
-import PyPDF2 # <--- ADDED: For reading PDFs
+import PyPDF2  # <--- NEW: For reading PDFs
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -63,7 +63,7 @@ class VoiceAssistant:
         # 1. Initialize Memory
         self.memory = MemoryManager()
         self.user_name = self.memory.get_name()
-        self.knowledge_base = "" # <--- ADDED: To store file content
+        self.knowledge_base = "" # <--- NEW: Stores text from uploaded files
         
         # 2. Load Past History
         past_history = self.memory.get_history()
@@ -83,17 +83,17 @@ class VoiceAssistant:
         self.email_mode = False; self.email_step = 0; self.email_draft = {}
 
     def _init_model(self):
-        """Re-initializes the model with the current personality."""
+        """Re-initializes the model with the current personality AND knowledge base."""
         
-        # --- ADDED: Inject Knowledge Base into Context ---
+        # --- NEW: Inject Knowledge Base (RAG) ---
         kb_context = ""
         if self.knowledge_base:
             kb_context = f"""
-            FILE CONTEXT (User uploaded this):
-            --- START ---
-            {self.knowledge_base[:30000]}
-            --- END ---
-            Use this to answer questions.
+            FILE CONTEXT (The user just uploaded this):
+            --- START OF FILE ---
+            {self.knowledge_base[:30000]} 
+            --- END OF FILE ---
+            Use the information above to answer questions.
             """
 
         base_instruction = f"""
@@ -102,9 +102,9 @@ class VoiceAssistant:
            - If User says "Hello" (English) -> You MUST reply in English.
            - If User says "Namaste" (Telugu) -> You MUST reply in Telugu.
            - Do NOT get stuck in one language. Switch instantly based on the latest input.
-        2. Memory: Remember the user's name and context.
-        3. Vision: Analyze images if provided.
-        4. System Control: You can open apps, change volume, and take screenshots.
+        2. KNOWLEDGE BASE: If file context is provided above, use it.
+        3. System Control: You can open apps, change volume, and take screenshots.
+        4. Vision: Analyze images if provided.
         5. Voice: Reply in plain spoken text (No markdown, no *bold*).
         {kb_context}
         """
@@ -124,26 +124,31 @@ class VoiceAssistant:
     def clean_response(self, text):
         return re.sub(r'[\*\#\`\_]', '', text).strip()
 
-    # --- ADDED: File Processing Logic ---
+    # --- NEW: PROCESS FILE UPLOAD ---
     async def process_file(self, file_data, filename):
+        """Extracts text from uploaded PDF or TXT files."""
         try:
-            print(f"📂 Processing: {filename}")
+            print(f"📂 Processing file: {filename}")
             decoded = base64.b64decode(file_data.split(",")[1])
             text = ""
+            
             if filename.lower().endswith(".pdf"):
                 reader = PyPDF2.PdfReader(io.BytesIO(decoded))
-                for page in reader.pages: text += page.extract_text() + "\n"
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
             else:
                 text = decoded.decode("utf-8")
             
+            # Store in Knowledge Base and Update Model
             self.knowledge_base = text
-            self.model = self._init_model() # Reload brain
+            self.model = self._init_model()
             self.chat = self.model.start_chat(history=self.chat_history)
             
-            resp = f"I have read '{filename}'. Ask me anything about it!"
+            resp = f"I have read '{filename}'. You can now ask me questions about it!"
             self.memory.add_message("model", resp)
             return resp
-        except Exception as e: return f"Error reading file: {str(e)}"
+        except Exception as e:
+            return f"❌ Error reading file: {str(e)}"
 
     async def process_message(self, data: str):
         global SYSTEM_CALLBACK
@@ -162,7 +167,7 @@ class VoiceAssistant:
         try:
             parsed = json.loads(data)
             
-            # --- ADDED: Check for File Upload ---
+            # --- NEW: CHECK FOR FILE UPLOAD ---
             if "type" in parsed and parsed["type"] == "upload":
                 return await self.process_file(parsed["file"], parsed["filename"])
 
@@ -204,7 +209,7 @@ class VoiceAssistant:
         if "minimize" in clean_text or "hide windows" in clean_text: return await minimize_windows()
         
         if "open" in clean_text:
-            # --- FIX: LIST SYNTAX ERROR FIXED ---
+            # --- STABLE FIX: LIST ITERATION (Do not change) ---
             apps_list = ["notepad", "calculator", "chrome", "vscode", "settings", "cmd", "terminal", "explorer"]
             for app in apps_list:
                 if app in clean_text: return await open_application(app)
