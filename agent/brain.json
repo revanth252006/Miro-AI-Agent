@@ -2,42 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "HELLO"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "HELLO! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Activate Vision AI"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "WHAT IS YOUR ANME"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "My name is Miro. I was created by Revanth and his team."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "NAME"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "Miro."
@@ -179,6 +143,42 @@
       "role": "model",
       "parts": [
         "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hello"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hello."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
       ]
     }
   ]
