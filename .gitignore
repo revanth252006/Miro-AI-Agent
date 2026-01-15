@@ -1,5 +1,21 @@
-venv/
-__pycache__/
+# --- Security (NEVER UPLOAD THESE) ---
 .env
+*credentials*.json
+*client_secret*.json
+web_credentials.json
+user_token.json
+
+# --- Python & System Junk ---
+__pycache__/
+*.pyc
+venv/
 .DS_Store
+
+# --- Large AI Models (GitHub blocks files >100MB) ---
 sign_detection/Model/keras_model.h5
+*.h5
+*.pt
+*.pth
+
+# --- Local Data ---
+long_term_memory.json
