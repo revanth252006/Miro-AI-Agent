@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,10 +21,6 @@
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'wave': 'wave 1.2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        wave: { '0%, 100%': { height: '10px' }, '50%': { height: '30px' } }
                     }
                 }
             }
@@ -41,31 +36,8 @@
         .glass-button:hover { background: rgba(255, 255, 255, 0.1); border-color: #00f3ff; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); transform: translateY(-2px); }
         .msg-user { background: linear-gradient(135deg, #00f3ff22, #00f3ff05); border: 1px solid #00f3ff44; color: #e0f2fe; }
         .msg-ai { background: #1a1a1a; border: 1px solid #333; color: #d1d5db; }
-        
-        .voice-orb {
-            width: 120px; height: 120px;
-            background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%);
-            border-radius: 50%;
-            filter: blur(10px);
-            animation: pulse-glow 2s infinite;
-        }
-        @keyframes pulse-glow {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        #vision-container { 
-            display: none; 
-            position: absolute; bottom: 100px; right: 20px; 
-            width: 240px; height: 180px; 
-            background: #000; border: 2px solid #00f3ff; 
-            border-radius: 12px; overflow: hidden; 
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            z-index: 40;
-        }
+        #vision-container { display: none; position: absolute; bottom: 100px; right: 20px; width: 240px; height: 180px; background: #000; border: 2px solid #00f3ff; border-radius: 12px; overflow: hidden; z-index: 40; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        #vision-status { position: absolute; bottom: 8px; left: 8px; font-size: 10px; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; color: #00f3ff; font-weight: bold; }
     </style>
 </head>
 <body class="bg-miro-bg text-white h-screen flex overflow-hidden">
@@ -92,7 +64,7 @@
                     <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
                     <span id="connection-status">Offline</span>
                 </span>
-                <span>v4.0.0</span>
+                <span>v6.0.0</span>
             </div>
         </div>
     </aside>
@@ -122,13 +94,15 @@
 
             <div class="p-4 md:p-6 pb-8 relative">
                 <div id="feature-picker" class="absolute bottom-24 left-6 z-30 glass-panel rounded-2xl p-4 w-72 shadow-2xl transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-none scale-95 border border-miro-glassBorder">
-                    <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Modes</div>
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Select Tool</div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload PDF</span></button>
-                        
+                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload</span></button>
                         <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
-                        <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
+                        <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-yellow-400"></i><span class="text-xs">Sign Lang</span></button>
                         <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
+                        
+                        <button onclick="triggerAction('screen')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-desktop text-xl text-purple-400"></i><span class="text-xs">Screen Share</span></button>
+                        <button onclick="triggerAction('search')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-globe text-xl text-green-400"></i><span class="text-xs">Web Search</span></button>
                     </div>
                     <div class="mt-2 pt-2 border-t border-gray-800">
                         <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition">
@@ -172,7 +146,6 @@
     </main>
 
     <script>
-        // --- YOUR NGROK URL ---
         const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws'; 
 
         let websocket = null;
@@ -191,7 +164,6 @@
         const visionContainer = document.getElementById("vision-container");
         const fileInput = document.getElementById("file-upload");
 
-        // --- NEW: FILE UPLOAD HANDLING ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -205,7 +177,6 @@
             reader.readAsDataURL(file);
         });
 
-        // --- LANGUAGE TOGGLE ---
         function toggleLanguage() {
             const btn = document.getElementById('lang-btn');
             if (currentLang === 'en-US') {
@@ -217,7 +188,7 @@
                 btn.innerText = "🇺🇸 English";
                 if (recognition) recognition.lang = 'en-US';
             }
-            if(recognition) recognition.stop(); // Restart
+            if(recognition) recognition.stop();
         }
 
         function loadVoices() {
@@ -231,7 +202,6 @@
         voiceLoadTimer = setInterval(loadVoices, 500);
         window.speechSynthesis.onvoiceschanged = loadVoices;
 
-        // --- CONTINUOUS RECOGNITION + WAKE WORD ---
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
@@ -250,9 +220,8 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
                 const lowerTranscript = transcript.toLowerCase();
 
-                // --- NEW: WAKE WORD LOGIC ---
                 if (!isVoiceMode && (lowerTranscript.includes("hey miro") || lowerTranscript.includes("hello miro"))) {
-                    toggleVoiceMode(); // Wake up!
+                    toggleVoiceMode(); 
                     speak("Yes Revanth?");
                     return;
                 }
@@ -270,12 +239,9 @@
             };
 
             recognition.onend = () => {
-                // ALWAYS restart to keep listening for Wake Word
                 recognition.lang = currentLang;
                 try { recognition.start(); } catch(e) {}
             };
-            
-            // Start Listening Automatically
             try { recognition.start(); } catch(e) {}
         } else {
             alert("Your browser does not support Voice Recognition.");
@@ -294,8 +260,7 @@
             isVoiceMode = !isVoiceMode;
             const overlay = document.getElementById('voice-overlay');
             const micBtn = document.getElementById('mic-btn');
-            const userName = document.getElementById('user-display-name').innerText;
-
+            
             if (isVoiceMode) {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 audioCtx.resume();
@@ -303,7 +268,7 @@
                 micBtn.classList.add('text-miro-accent', 'bg-miro-accent/10');
                 ttsEnabled = true; 
                 try { recognition.start(); } catch(e){}
-                speak(`Good Evening, ${userName}! I am Miro.`);
+                speak(`Good Evening, ${document.getElementById('user-display-name').innerText}! I am Miro.`);
             } else {
                 overlay.classList.add('hidden');
                 micBtn.classList.remove('text-miro-accent', 'bg-miro-accent/10');
@@ -316,14 +281,11 @@
 
         function speak(text) {
             if (!ttsEnabled) return;
-            
             const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
             isAiSpeaking = true;
             window.speechSynthesis.cancel();
-
             const utterance = new SpeechSynthesisUtterance(cleanText);
             
-            // Auto-Language
             const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
             if (hasTelugu) {
                 utterance.lang = 'te-IN';
@@ -341,7 +303,6 @@
                     document.getElementById('voice-status').innerText = `LISTENING ...`;
                 }
             };
-
             window.speechSynthesis.speak(utterance);
         }
 
@@ -372,9 +333,7 @@
                 visionContainer.style.display = "block"; 
                 visionActive = true;
                 addAiMessage("📷 Webcam Started.");
-            } catch (err) {
-                addAiMessage("⚠️ Error: Camera permission denied.");
-            }
+            } catch (err) { addAiMessage("⚠️ Error: Camera permission denied."); }
         }
 
         function stopVisionMode() {
@@ -383,7 +342,6 @@
             visionActive = false;
         }
 
-        // --- STABLE LAG FIX: COMPRESSED IMAGE ---
         function sendMessage(text) {
             if (visionActive) {
                 const canvas = document.createElement("canvas");
@@ -424,10 +382,26 @@
             icon.classList.toggle('rotate-45');
         });
 
+        // --- NEW: MENU ACTIONS ---
         window.triggerAction = (action) => {
-            plusBtn.click();
-            if (action === "Upload") { fileInput.click(); return; } // <--- TRIGGER HIDDEN INPUT
+            plusBtn.click(); // Close menu
+            
+            if (action === "Upload") { fileInput.click(); return; }
+            
+            // Screen Share & Search Logic
+            if (action === 'screen') { 
+                websocket.send("what is on my screen"); 
+                addUserMessage("Analyzing Screen..."); 
+                return; 
+            }
+            if (action === 'search') { 
+                let q = prompt("What do you want to search?");
+                if(q) { websocket.send("search for " + q); addUserMessage("Searching: " + q); }
+                return;
+            }
+
             if(action === 'Disconnect') { websocket.send("Stop all"); return; }
+            
             const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : 
                         action === 'Sign' ? "Activate Sign Language" : 
                         action === 'Camera' ? "Activate Vision AI" : `Use ${action}`;
