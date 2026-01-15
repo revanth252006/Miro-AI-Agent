@@ -2,90 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "What is our previous conversation we are talking about?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, here's a summary of our previous conversation:\n\nWe've been discussing a PDF document named \"Revanth AkulaAIML.pdf\". You asked me to:\n\n   Analyze it and give the important points.\n   Tell you the name of the PDF.\n   Summarize the PDF.\n   Determine whether the PDF was created by a person or by AI.\n\nI provided you with information based on the content of the PDF, including a summary of Revanth Akula's qualifications, projects, and skills. I also concluded that the document was likely created by Revanth himself."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Use Upload"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Use Upload"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I have read 'Revanth Resume-2 Ai.pdf'. You can now ask me questions about it!"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "WHAT ARE THE PROJECTS HE HAVE DONE"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Based on the uploaded PDF, Revanth has worked on the following projects:\n\n   Sign Language Detection: A machine learning project that takes a video as input and outputs the word being signed. It's intended to help deaf people communicate. (Tensorflow, Keras, Python)\n   Miro-Agent: A frontend-only clone of an Amazon dashboard showcasing product listings and UI interactivity. (HTML, CSS)\n   AI Virtual Mouse: A full-stack personal portfolio combining a frontend interface with backend functionality to highlight professional achievements and technical expertise. (Flask, HTML, CSS, Bootstrap, Javascript, MySQL)"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Speak Telugu."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c38\u0c30\u0c47, \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c4b \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f. (Okay, n\u0113nu telugul\u014d m\u0101\u1e6dl\u0101\u1e0dagalanu. M\u012bku \u0113mi k\u0101v\u0101l\u014d a\u1e0daga\u1e47\u1e0di.)"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Aim yes or no?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c28\u0c3e\u0c15\u0c41 \u0c05\u0c30\u0c4d\u0c25\u0c02 \u0c15\u0c3e\u0c32\u0c47\u0c26\u0c41. \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c2e\u0c40\u0c30\u0c41 \u0c0f\u0c2e\u0c3f \u0c05\u0c21\u0c41\u0c17\u0c41\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c4b \u0c35\u0c3f\u0c35\u0c30\u0c3f\u0c02\u0c1a\u0c17\u0c32\u0c30\u0c3e? (Kshamin\u0304ca\u1e47\u1e0di, n\u0101ku artha\u1e41 k\u0101l\u0113du. Dayac\u0113si m\u012bru \u0113mi a\u1e0dugutunn\u0101r\u014d vivarin\u0304cagalaraa?)"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "English."
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "Okay, I'm back to English. What can I do for you?"
@@ -179,6 +95,90 @@
       "role": "model",
       "parts": [
         "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c2e\u0c40 \u0c2a\u0c4d\u0c30\u0c36\u0c4d\u0c28\u0c15\u0c41 \u0c38\u0c2e\u0c3e\u0c27\u0c3e\u0c28\u0c02 \u0c07\u0c35\u0c4d\u0c35\u0c21\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c28\u0c3e\u0c15\u0c41 \u0c24\u0c17\u0c3f\u0c28\u0c02\u0c24 \u0c38\u0c2e\u0c3e\u0c1a\u0c3e\u0c30\u0c02 \u0c32\u0c47\u0c26\u0c41. \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c35\u0c47\u0c30\u0c47 \u0c2a\u0c4d\u0c30\u0c36\u0c4d\u0c28 \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f. (Kshamin\u0304ca\u1e47\u1e0di, m\u012b pra\u015bnaku sam\u0101dh\u0101na\u1e41 ivva\u1e0d\u0101niki n\u0101ku taginanta sam\u0101c\u0101ra\u1e41 l\u0113du. Dayac\u0113si v\u0113re pra\u015bna a\u1e0daga\u1e47\u1e0di.)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c4b \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c02\u0c21\u0c3f. (H\u0101y! M\u012bku \u0113mi k\u0101v\u0101l\u014d ceppa\u1e47\u1e0di.)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Talk in English."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I'm switching back to English. How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Why you are speaking in Telugu?"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "You asked me to speak in Telugu a few turns ago! I am designed to respond in the same language you are using. If you'd like me to only speak in English, just let me know, and I will!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Yeah, just beginning this."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, got it! I will stick to English from now on unless you specifically ask me to speak another language. What can I do for you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "OK, tell me a joke."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Why don't scientists trust atoms?\n\nBecause they make up everything!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Same thing tell me in Telugu."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c12\u0c15 \u0c1c\u0c4b\u0c15\u0c4d \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c21\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c28\u0c3e\u0c15\u0c41 \u0c24\u0c17\u0c3f\u0c28\u0c02\u0c24 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41 \u0c2a\u0c30\u0c3f\u0c1c\u0c4d\u0c1e\u0c3e\u0c28\u0c02 \u0c32\u0c47\u0c26\u0c41. \u0c28\u0c47\u0c28\u0c41 \u0c06 \u0c2a\u0c28\u0c3f \u0c1a\u0c47\u0c2f\u0c32\u0c47\u0c28\u0c41. (Kshamin\u0304ca\u1e47\u1e0di, oka j\u014dk ceppa\u1e0d\u0101niki n\u0101ku taginanta telugu parij\u00f1\u0101na\u1e41 l\u0113du. N\u0113nu \u0101 pani c\u0113yal\u0113nu.)\n\nI'm sorry, I don't have the Telugu language skills to tell a joke that would be funny and make sense. I can try something else for you though!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Use Upload"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
       ]
     }
   ]
