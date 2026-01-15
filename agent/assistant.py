@@ -10,6 +10,7 @@ import re
 import PyPDF2  # <--- NEW: For reading PDFs
 from PIL import Image
 from dotenv import load_dotenv
+from datetime import datetime
 
 # --- SETUP PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -35,6 +36,50 @@ logging.getLogger("uvicorn.access").disabled = True
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+# --- SESSION MANAGER ---
+class SessionManager:
+    def __init__(self, sessions_dir="sessions"):
+        self.sessions_dir = sessions_dir
+        if not os.path.exists(sessions_dir):
+            os.makedirs(sessions_dir)
+    
+    def create_session(self):
+        """Creates a new session with a unique ID."""
+        session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return session_id
+    
+    def save_session(self, session_id, history, title=None):
+        """Saves session data to a JSON file."""
+        session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
+        data = {
+            "id": session_id,
+            "title": title or "Chat",
+            "history": history,
+            "timestamp": datetime.now().isoformat()
+        }
+        with open(session_file, "w") as f:
+            json.dump(data, f, indent=2)
+    
+    def load_session(self, session_id):
+        """Loads session data from a JSON file."""
+        session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
+        if os.path.exists(session_file):
+            with open(session_file, "r") as f:
+                return json.load(f)
+        return None
+    
+    def get_all_sessions(self):
+        """Returns a list of all sessions."""
+        sessions = []
+        if os.path.exists(self.sessions_dir):
+            for file in os.listdir(self.sessions_dir):
+                if file.endswith(".json"):
+                    session_file = os.path.join(self.sessions_dir, file)
+                    with open(session_file, "r") as f:
+                        data = json.load(f)
+                        sessions.append({"id": data["id"], "title": data["title"]})
+        return sessions
 
 # --- HARDWARE CONNECTION ---
 SYSTEM_CALLBACK = None
@@ -62,10 +107,15 @@ class VoiceAssistant:
     def __init__(self):
         # 1. Initialize Memory
         self.memory = MemoryManager()
+        # --- NEW: Initialize Session Manager ---
+        self.session_manager = SessionManager() 
         self.user_name = self.memory.get_name()
-        self.knowledge_base = "" # <--- NEW: Stores text from uploaded files
+        self.knowledge_base = "" # Stores text from uploaded files
         
-        # 2. Load Past History
+        # --- NEW: Create a unique session ID for this startup ---
+        self.current_session_id = self.session_manager.create_session()
+
+        # 2. Load Past History (Maintaining your original logic)
         past_history = self.memory.get_history()
         
         # If no history, start fresh.
@@ -85,6 +135,14 @@ class VoiceAssistant:
     def _init_model(self):
         """Re-initializes the model with the current personality AND knowledge base."""
         
+        # Local copy of personalities to ensure lookup works within this method
+        PERSONALITIES = {
+            "Miro": "You are M.I.R.O. You are ultra-polite, highly intelligent, and formal. Call the user 'Sir'.",
+            "bro": "You are a chill bro. You use slang, you're relaxed, and you're funny. Call the user 'Bro' or 'Buddy'.",
+            "professional": "You are a highly efficient Executive Assistant. You are concise, precise, and serious.",
+            "default": "You are Miro, a helpful and friendly AI Assistant. You were created by Revanth and his team."
+        }
+
         # --- NEW: Inject Knowledge Base (RAG) ---
         kb_context = ""
         if self.knowledge_base:
@@ -108,7 +166,12 @@ class VoiceAssistant:
         5. Voice: Reply in plain spoken text (No markdown, no *bold*).
         {kb_context}
         """
-        full_instruction = f"{PERSONALITIES[self.current_persona]}\n{base_instruction}"
+
+        # Get the persona text, falling back to 'default' if the current persona is missing
+        persona_text = PERSONALITIES.get(self.current_persona, PERSONALITIES["default"])
+        full_instruction = f"{persona_text}\n{base_instruction}"
+
+        # Returns the fresh model instance with combined instructions
         return genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=full_instruction)
 
     def switch_personality(self, persona_key):
@@ -156,8 +219,8 @@ class VoiceAssistant:
         # --- LAZY IMPORT TOOLS ---
         try:
             from tools import (get_system_time, search_web, open_website, send_email, 
-                             search_product, get_weather, set_volume, take_screenshot, 
-                             minimize_windows, open_application)
+                               search_product, get_weather, set_volume, take_screenshot, 
+                               minimize_windows, open_application)
         except ImportError:
             return "Error: tools.py not found."
 
@@ -167,7 +230,26 @@ class VoiceAssistant:
         try:
             parsed = json.loads(data)
             
-            # --- NEW: CHECK FOR FILE UPLOAD ---
+            # --- 1. SESSION MANAGEMENT COMMANDS ---
+            # These handle signals from the frontend sidebar
+            if parsed.get("type") == "get_history":
+                return json.dumps({"type": "history_list", "data": self.session_manager.get_all_sessions()})
+            
+            if parsed.get("type") == "load_session":
+                sd = self.session_manager.load_session(parsed["id"])
+                if sd:
+                    self.current_session_id = parsed["id"]
+                    # Convert saved JSON history back into Gemini's internal format
+                    history = [{"role": h["role"], "parts": [h["parts"][0]["text"]]} for h in sd.get("history", [])]
+                    self.chat = self.model.start_chat(history=history)
+                    return json.dumps({"type": "chat_loaded", "history": sd.get("history", []), "title": sd.get("title")})
+            
+            if parsed.get("type") == "new_chat":
+                self.current_session_id = self.session_manager.create_session()
+                self.chat = self.model.start_chat(history=[])
+                return json.dumps({"type": "chat_loaded", "history": [], "title": "New Chat"})
+
+            # --- 2. FILE UPLOAD LOGIC ---
             if "type" in parsed and parsed["type"] == "upload":
                 return await self.process_file(parsed["file"], parsed["filename"])
 
@@ -193,13 +275,13 @@ class VoiceAssistant:
             self.memory.add_message("model", resp)
             return resp
 
-        # --- 1. PERSONALITY SWITCHING ---
+        # --- 3. PERSONALITY SWITCHING ---
         if "activate jarvis" in clean_text or "activate miro" in clean_text: return self.switch_personality("jarvis")
         if "activate bro" in clean_text: return self.switch_personality("bro")
         if "activate professional" in clean_text: return self.switch_personality("professional")
         if "reset mode" in clean_text: return self.switch_personality("default")
 
-        # --- 2. SYSTEM AUTOMATION ---
+        # --- 4. SYSTEM AUTOMATION & HARDWARE ---
         if "volume" in clean_text:
             if "up" in clean_text or "increase" in clean_text: return await set_volume("up")
             if "down" in clean_text or "decrease" in clean_text: return await set_volume("down")
@@ -209,12 +291,10 @@ class VoiceAssistant:
         if "minimize" in clean_text or "hide windows" in clean_text: return await minimize_windows()
         
         if "open" in clean_text:
-            # --- STABLE FIX: LIST ITERATION (Do not change) ---
             apps_list = ["notepad", "calculator", "chrome", "vscode", "settings", "cmd", "terminal", "explorer"]
             for app in apps_list:
                 if app in clean_text: return await open_application(app)
 
-        # --- 3. HARDWARE CONTROLS ---
         if "disconnect" in clean_text or "stop" in clean_text: 
             if SYSTEM_CALLBACK: SYSTEM_CALLBACK("stop")
             return "Disconnected."
@@ -227,46 +307,56 @@ class VoiceAssistant:
             if "vision" in clean_text or "camera" in clean_text: 
                 if SYSTEM_CALLBACK: SYSTEM_CALLBACK("vision"); return "Vision Camera On."
 
-        # --- 4. VISION & TOOLS ---
+        # --- 5. RESPONSE GENERATION ---
         try:
             tool_result = ""
             if user_image:
-                print("📸 Processing Image...")
                 response = self.chat.send_message([user_text, user_image])
-                clean_resp = self.clean_response(response.text)
-                self.memory.add_message("model", clean_resp)
-                return clean_resp
+            else:
+                # Tool Checks (Search, Weather, etc.)
+                if "open" in clean_text and "search" in clean_text:
+                    sites = ["youtube", "google", "amazon", "flipkart"]
+                    site = next((s for s in sites if clean_text.find(s) != -1), None)
+                    if site:
+                        query = clean_text.replace("open","").replace(site,"").replace("search","").replace("for","").replace("the","").strip()
+                        if site in ["amazon", "flipkart"]: tool_result = await search_product(query)
+                        else: tool_result = await open_website(site, search_query=query)
+                elif "search" in clean_text or "cost" in clean_text or "price" in clean_text:
+                    query = clean_text.replace("search","").replace("for","").strip()
+                    tool_result = await search_web(query)
+                elif "open" in clean_text:
+                    site = clean_text.replace("open","").strip()
+                    if len(site) > 2: tool_result = await open_website(site)
+                elif "time" in clean_text: tool_result = await get_system_time()
+                elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
 
-            # Tool Checks
-            if "open" in clean_text and "search" in clean_text:
-                sites = ["youtube", "google", "amazon", "flipkart"]
-                site = next((s for s in sites if clean_text.find(s) != -1), None)
-                if site:
-                    query = clean_text.replace("open","").replace(site,"").replace("search","").replace("for","").replace("the","").strip()
-                    if site in ["amazon", "flipkart"]: tool_result = await search_product(query)
-                    else: tool_result = await open_website(site, search_query=query)
-            elif "search" in clean_text or "cost" in clean_text or "price" in clean_text:
-                query = clean_text.replace("search","").replace("for","").strip()
-                tool_result = await search_web(query)
-            elif "open" in clean_text:
-                site = clean_text.replace("open","").strip()
-                if len(site) > 2: tool_result = await open_website(site)
-            elif "time" in clean_text: tool_result = await get_system_time()
-            elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
+                if tool_result:
+                    response = self.chat.send_message(f"User: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
+                else:
+                    response = self.chat.send_message(user_text)
 
-            if tool_result:
-                response = self.chat.send_message(f"User: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
-                clean_resp = self.clean_response(response.text)
-                self.memory.add_message("model", clean_resp)
-                return clean_resp
-            
-            # --- NORMAL CHAT ---
-            response = self.chat.send_message(user_text)
             clean_resp = self.clean_response(response.text)
             self.memory.add_message("model", clean_resp)
+
+            # --- 6. AUTO-SAVE TO SESSION FILE ---
+            # Save the updated history for the sidebar to remember
+            history_data = []
+            for turn in self.chat.history:
+                history_data.append({
+                    "role": turn.role,
+                    "parts": [{"text": p.text} for p in turn.parts]
+                })
+
+            new_title = None
+            if len(history_data) <= 2: # Set title on the very first message exchange
+                new_title = user_text[:30] + "..." if len(user_text) > 30 else user_text
+
+            self.session_manager.save_session(self.current_session_id, history_data, new_title)
+
             return clean_resp
 
-        except Exception as e: return f"Error: {str(e)}"
+        except Exception as e: 
+            return f"Error: {str(e)}"
 
     def run(self):
         print("🚀 Miro Server running on ws://localhost:8000/ws")

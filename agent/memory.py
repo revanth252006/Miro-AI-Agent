@@ -1,9 +1,18 @@
 import json
 import os
+import glob
+import uuid
 
-# Save file inside the agent folder
+# 1. Define BASE_DIR first (The folder where this script is located)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Define filenames using the newly created BASE_DIR
 MEMORY_FILE = os.path.join(BASE_DIR, "brain.json")
+SESSIONS_DIR = os.path.join(BASE_DIR, "sessions")
+
+# 3. Create the sessions folder if it doesn't exist
+if not os.path.exists(SESSIONS_DIR):
+    os.makedirs(SESSIONS_DIR)
 
 class MemoryManager:
     def __init__(self):
@@ -32,18 +41,50 @@ class MemoryManager:
         return self.data.get("user_name")
 
     def add_message(self, role, text):
-        """
-        Saves a message to history.
-        role: 'user' or 'model'
-        """
+        """Saves a message to history."""
         self.data["history"].append({"role": role, "parts": [text]})
-        
-        # Limit to last 30 messages to prevent errors
         if len(self.data["history"]) > 30:
             self.data["history"] = self.data["history"][-30:]
-        
         self.save()
 
     def get_history(self):
-        """Returns past conversations for Gemini."""
         return self.data["history"]
+
+class SessionManager:
+    """Manages separate JSON files for each chat conversation."""
+    def get_all_sessions(self):
+        sessions = []
+        files = glob.glob(os.path.join(SESSIONS_DIR, "*.json"))
+        # Sort by last modified time (newest first)
+        files.sort(key=os.path.getmtime, reverse=True)
+        for f in files:
+            try:
+                with open(f, 'r') as file:
+                    data = json.load(file)
+                    sessions.append({
+                        "id": os.path.basename(f).replace(".json", ""),
+                        "title": data.get("title", "New Chat")
+                    })
+            except: pass
+        return sessions
+
+    def load_session(self, session_id):
+        path = os.path.join(SESSIONS_DIR, f"{session_id}.json")
+        if os.path.exists(path):
+            with open(path, 'r') as f: return json.load(f)
+        return None
+
+    def save_session(self, session_id, history, title=None):
+        path = os.path.join(SESSIONS_DIR, f"{session_id}.json")
+        if os.path.exists(path) and not title:
+            try:
+                with open(path, 'r') as f: title = json.load(f).get("title", "New Chat")
+            except: title = "New Chat"
+        
+        with open(path, 'w') as f:
+            json.dump({"history": history, "title": title or "New Chat"}, f, indent=2)
+
+    def create_session(self):
+        session_id = str(uuid.uuid4())[:8]
+        self.save_session(session_id, [], "New Chat")
+        return session_id

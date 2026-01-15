@@ -352,15 +352,60 @@
             };
             
             websocket.onmessage = (event) => {
-                const text = event.data;
-                isProcessing = false;
-                addAiMessage(text); 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro...";
-                speak(text);
+            try {
+                // 1. Try to parse as a JSON Command (History list or Loaded Chat)
+                const data = JSON.parse(event.data);
+                
+                if (data.type === "history_list") {
+                    renderHistorySidebar(data.data);
+                } 
+                else if (data.type === "chat_loaded") {
+                    // This clears the screen and shows the loaded conversation
+                    const container = document.getElementById('chat-container');
+                    container.innerHTML = ""; 
+                    
+                    if (data.history.length === 0) {
+                        // Restore the welcome screen if it's a brand new chat
+                        container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-center opacity-50 mt-10">
+                            <h2 class="text-3xl font-light">Chat: <span class="text-miro-accent">${data.title}</span></h2>
+                        </div>`;
+                    } else {
+                        // Re-render the saved messages
+                        data.history.forEach(msg => {
+                            if(msg.role === "user") addUserMessage(msg.parts[0].text);
+                            else addAiMessage(msg.parts[0].text);
+                        });
+                    }
+                }
+            } catch(e) {
+                // 2. If parsing fails, it's a normal text reply from Miro
+                addAiMessage(event.data);
+                speak(event.data);
+                
+                // Refresh the history sidebar list to update titles instantly
+                websocket.send(JSON.stringify({ type: "get_history" }));
+            }
+        };
 
-                if (text.includes("Vision Camera On")) startVisionMode();
-                if (text.includes("Disconnected") || text.includes("Stopped")) stopVisionMode();
-            };
+        // Helper function to fill the sidebar with chat titles
+        function renderHistorySidebar(sessions) {
+            const list = document.getElementById('history-list');
+            list.innerHTML = ""; // Clear existing items
+            
+            sessions.forEach(s => {
+                const div = document.createElement('div');
+                div.className = "history-item p-3 hover:bg-white/5 rounded-lg cursor-pointer text-sm text-gray-400 truncate transition-all border-b border-white/5";
+                div.innerText = s.title;
+                // When clicked, tell backend to load this session
+                div.onclick = () => websocket.send(JSON.stringify({ type: "load_session", id: s.id }));
+                list.appendChild(div);
+            });
+        }
+
+        // Helper function for the "New Chat" button
+        function createNewChat() {
+            websocket.send(JSON.stringify({ type: "new_chat" }));
+        }
             websocket.onclose = () => setTimeout(connectWebSocket, 3000);
         }
 
