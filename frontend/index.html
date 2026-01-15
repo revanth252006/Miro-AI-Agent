@@ -69,8 +69,6 @@
 </head>
 <body class="bg-miro-bg text-white h-screen flex overflow-hidden">
 
-    <input type="file" id="file-upload" class="hidden" accept=".pdf,.txt">
-
     <div id="vision-container">
         <video id="webcam" autoplay playsinline></video>
         <div id="vision-status">● VISION ACTIVE</div>
@@ -91,7 +89,7 @@
                     <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
                     <span id="connection-status">Offline</span>
                 </span>
-                <span>v4.0.0</span>
+                <span>v3.5.0</span>
             </div>
         </div>
     </aside>
@@ -102,10 +100,6 @@
                 <i class="fa-solid fa-bolt text-miro-accent text-xs"></i>
                 <span class="text-xs font-medium text-miro-accent tracking-wide">AI ACTIVE</span>
             </div>
-            
-            <button id="lang-btn" onclick="toggleLanguage()" class="px-3 py-1 text-xs font-bold rounded-full bg-gray-800 border border-gray-600 hover:border-miro-accent transition">
-                🇺🇸 English
-            </button>
         </header>
 
         <div id="chat-view" class="flex-1 flex flex-col h-full relative">
@@ -123,8 +117,7 @@
                 <div id="feature-picker" class="absolute bottom-24 left-6 z-30 glass-panel rounded-2xl p-4 w-72 shadow-2xl transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-none scale-95 border border-miro-glassBorder">
                     <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Modes</div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload PDF</span></button>
-                        
+                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload</span></button>
                         <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
                         <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
                         <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
@@ -171,9 +164,7 @@
     </main>
 
     <script>
-        // --- YOUR NGROK URL ---
-        const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws'; 
-
+        const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws';
         let websocket = null;
         let ttsEnabled = false; 
         let isVoiceMode = false;
@@ -182,42 +173,14 @@
         let selectedVoice = null;
         let voiceLoadTimer = null;
         let recognition = null;
-        let currentLang = 'en-US'; 
+        
+        // Anti-Echo Variables
+        let lastSpokenText = "";
         
         let visionActive = false;
         let stream = null;
         const video = document.getElementById("webcam");
         const visionContainer = document.getElementById("vision-container");
-        const fileInput = document.getElementById("file-upload");
-
-        // --- NEW: FILE UPLOAD HANDLING ---
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64String = event.target.result;
-                const payload = JSON.stringify({ type: "upload", filename: file.name, file: base64String });
-                websocket.send(payload);
-                addUserMessage(`📂 Uploading ${file.name}...`);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // --- LANGUAGE TOGGLE ---
-        function toggleLanguage() {
-            const btn = document.getElementById('lang-btn');
-            if (currentLang === 'en-US') {
-                currentLang = 'te-IN';
-                btn.innerText = "🇮🇳 Telugu";
-                if (recognition) recognition.lang = 'te-IN';
-            } else {
-                currentLang = 'en-US';
-                btn.innerText = "🇺🇸 English";
-                if (recognition) recognition.lang = 'en-US';
-            }
-            if(recognition) recognition.stop(); // Restart
-        }
 
         function loadVoices() {
             const voices = window.speechSynthesis.getVoices();
@@ -230,61 +193,65 @@
         voiceLoadTimer = setInterval(loadVoices, 500);
         window.speechSynthesis.onvoiceschanged = loadVoices;
 
-        // --- CONTINUOUS RECOGNITION + WAKE WORD ---
+        // --- CONTINUOUS RECOGNITION (INTERRUPT ENABLED) ---
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;
+            recognition.continuous = true; // KEEP LISTENING
             recognition.interimResults = true;
-            recognition.lang = currentLang;
+            recognition.lang = 'en-US';
 
             recognition.onstart = () => {
                 if(isVoiceMode && !isAiSpeaking) {
-                    const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = "LISTENING...";
                     document.getElementById('voice-wave').classList.remove('opacity-0');
                 }
             };
 
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
-                const lowerTranscript = transcript.toLowerCase();
+                
+                // --- INTERRUPTION LOGIC ---
+                // If AI is speaking and we hear something, STOP AI
+                if (isAiSpeaking && transcript.length > 0) {
+                    
+                    // Simple Echo Check: If input is very similar to what AI said, ignore it
+                    if (lastSpokenText.includes(transcript) || transcript.includes(lastSpokenText.substring(0, 10))) {
+                        console.log("Ignored Echo");
+                        return;
+                    }
 
-                // --- NEW: WAKE WORD LOGIC ---
-                if (!isVoiceMode && (lowerTranscript.includes("hey miro") || lowerTranscript.includes("hello miro"))) {
-                    toggleVoiceMode(); // Wake up!
-                    speak("Yes Revanth?");
-                    return;
+                    console.log("Interruption Detected!");
+                    window.speechSynthesis.cancel(); // Stop AI Speech
+                    isAiSpeaking = false;
                 }
 
-                if (isVoiceMode) {
-                    if (isAiSpeaking && transcript.length > 0) {
-                        window.speechSynthesis.cancel();
-                        isAiSpeaking = false;
-                    }
-                    document.getElementById('voice-transcript').innerText = `"${transcript}"`;
-                    if (event.results[event.results.length - 1].isFinal) {
-                        handleVoiceCommand(transcript);
-                    }
+                document.getElementById('voice-transcript').innerText = `"${transcript}"`;
+                
+                if (event.results[event.results.length - 1].isFinal) {
+                    handleVoiceCommand(transcript);
                 }
             };
 
             recognition.onend = () => {
-                // ALWAYS restart to keep listening for Wake Word
-                recognition.lang = currentLang;
-                try { recognition.start(); } catch(e) {}
+                // If Voice Mode is ON, ALWAYS restart listening (unless manually stopped)
+                if (isVoiceMode) {
+                    try { recognition.start(); } catch(e) {}
+                }
             };
-            
-            // Start Listening Automatically
-            try { recognition.start(); } catch(e) {}
         } else {
             alert("Your browser does not support Voice Recognition.");
         }
 
         function handleVoiceCommand(text) {
+            // Prevent sending blank noise
             if(!text || text.length < 2) return;
+
             isProcessing = true;
-            document.getElementById('voice-status').innerText = "PROCESSING...";
+            document.getElementById('voice-status').innerText = "THINKING...";
+            
+            // Stop recognition briefly to process (avoid double send)
             recognition.stop();
+            
             addUserMessage(text);
             sendMessage(text);
         }
@@ -301,14 +268,25 @@
                 overlay.classList.remove('hidden');
                 micBtn.classList.add('text-miro-accent', 'bg-miro-accent/10');
                 ttsEnabled = true; 
+                
+                // Start Listening immediately
                 try { recognition.start(); } catch(e){}
-                speak(`Good Evening, ${userName}! I am Miro.`);
+
+                // Greet
+                const hour = new Date().getHours();
+                let greeting = `Good Evening, ${userName}!`;
+                if (hour < 12) greeting = `Good Morning, ${userName}!`;
+                else if (hour < 17) greeting = `Good Afternoon, ${userName}!`;
+                
+                speak(`${greeting} I am Miro Your Personal Assistant.`);
+
             } else {
                 overlay.classList.add('hidden');
                 micBtn.classList.remove('text-miro-accent', 'bg-miro-accent/10');
                 ttsEnabled = false; 
                 isAiSpeaking = false;
                 isProcessing = false;
+                recognition.stop();
                 window.speechSynthesis.cancel();
             }
         }
@@ -316,28 +294,26 @@
         function speak(text) {
             if (!ttsEnabled) return;
             
+            // Cleanup text
             const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+            lastSpokenText = cleanText; // Save for echo cancellation
+            
             isAiSpeaking = true;
-            window.speechSynthesis.cancel();
+            // NOTE: We do NOT stop recognition here. We keep listening for interruption.
+            
+            window.speechSynthesis.cancel(); // Stop any previous speech
 
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            
-            // Auto-Language
-            const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
-            if (hasTelugu) {
-                utterance.lang = 'te-IN';
-                const teluguVoice = window.speechSynthesis.getVoices().find(v => v.lang.includes('te'));
-                if (teluguVoice) utterance.voice = teluguVoice;
-            } else {
-                utterance.lang = 'en-US';
-                if (selectedVoice) utterance.voice = selectedVoice;
-            }
+            if (!selectedVoice) loadVoices();
+            if (selectedVoice) utterance.voice = selectedVoice;
+            utterance.pitch = 1.0;
+            utterance.rate = 1.0;
 
             utterance.onend = () => { 
                 isAiSpeaking = false;
+                // Update UI back to Listening
                 if (isVoiceMode) {
-                    const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = "LISTENING...";
                 }
             };
 
@@ -354,13 +330,15 @@
             websocket.onmessage = (event) => {
                 const text = event.data;
                 isProcessing = false;
+                
                 addAiMessage(text); 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "AI SPEAKING...";
+                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro ...";
                 speak(text);
 
                 if (text.includes("Vision Camera On")) startVisionMode();
                 if (text.includes("Disconnected") || text.includes("Stopped")) stopVisionMode();
             };
+            
             websocket.onclose = () => setTimeout(connectWebSocket, 3000);
         }
 
@@ -370,7 +348,7 @@
                 video.srcObject = stream;
                 visionContainer.style.display = "block"; 
                 visionActive = true;
-                addAiMessage("📷 Webcam Started.");
+                addAiMessage("📷 Webcam Started. I can now see you.");
             } catch (err) {
                 addAiMessage("⚠️ Error: Camera permission denied.");
             }
@@ -382,14 +360,13 @@
             visionActive = false;
         }
 
-        // --- STABLE LAG FIX: COMPRESSED IMAGE ---
         function sendMessage(text) {
             if (visionActive) {
                 const canvas = document.createElement("canvas");
-                canvas.width = 640; 
-                canvas.height = 480;
-                canvas.getContext("2d").drawImage(video, 0, 0, 640, 480);
-                const imageData = canvas.toDataURL("image/jpeg", 0.7);
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext("2d").drawImage(video, 0, 0);
+                const imageData = canvas.toDataURL("image/jpeg");
                 const payload = JSON.stringify({ text: text, image: imageData });
                 websocket.send(payload);
             } else {
@@ -402,7 +379,7 @@
             div.className = "flex justify-start items-start gap-3";
             div.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shadow-lg mt-1 shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-xs text-white"></i></div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g, '<b class="text-miro-accent">$1</b>').replace(/\n/g, '<br>')}</div>`;
             document.getElementById('chat-container').appendChild(div);
-            const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight;
+            scrollToBottom();
         }
 
         function addUserMessage(text) {
@@ -410,8 +387,10 @@
             div.className = "flex justify-end";
             div.innerHTML = `<div class="msg-user max-w-[80%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm shadow-md">${text}</div>`;
             document.getElementById('chat-container').appendChild(div);
-            const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight;
+            scrollToBottom();
         }
+
+        function scrollToBottom() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }
 
         const plusBtn = document.getElementById('plus-btn');
         const featurePicker = document.getElementById('feature-picker');
@@ -425,7 +404,6 @@
 
         window.triggerAction = (action) => {
             plusBtn.click();
-            if (action === "Upload") { fileInput.click(); return; } // <--- TRIGGER HIDDEN INPUT
             if(action === 'Disconnect') { websocket.send("Stop all"); return; }
             const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : 
                         action === 'Sign' ? "Activate Sign Language" : 
@@ -445,51 +423,6 @@
         userInput.addEventListener('keypress', (e) => { if(e.key==='Enter') document.getElementById('send-btn').click(); });
 
         connectWebSocket();
-        // --- IMPROVED SPEECH FUNCTION (Clearer Voice + Female Priority) ---
-        function speak(text) {
-            if (!ttsEnabled) return;
-            
-            // Remove special characters for smoother speech
-            const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
-            
-            isAiSpeaking = true;
-            window.speechSynthesis.cancel(); // Stop previous speech
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            const voices = window.speechSynthesis.getVoices();
-
-            // Detect Language
-            const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
-            
-            if (hasTelugu) {
-                utterance.lang = 'te-IN';
-                // 1. Try to find "Google" Telugu voice (Best quality, usually matches English tone)
-                // 2. Try to find "Shruti" (The high-quality Windows Female voice)
-                // 3. Fallback to any Telugu voice
-                let teluguVoice = voices.find(v => v.lang.includes('te') && v.name.includes('Google')) || 
-                                  voices.find(v => v.name.includes('Shruti')) || 
-                                  voices.find(v => v.lang.includes('te'));
-                
-                if (teluguVoice) utterance.voice = teluguVoice;
-            } else {
-                utterance.lang = 'en-US';
-                // Use the selected English voice (Google US or Zira)
-                if (selectedVoice) utterance.voice = selectedVoice;
-            }
-
-            utterance.pitch = 1.0; // Normal pitch
-            utterance.rate = 1.0;  // Normal speed
-
-            utterance.onend = () => { 
-                isAiSpeaking = false;
-                if (isVoiceMode) {
-                    const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
-                }
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
     </script>
 </body>
 </html>
