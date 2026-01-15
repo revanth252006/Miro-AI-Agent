@@ -4,30 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "Same thing tell me in Telugu."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c12\u0c15 \u0c1c\u0c4b\u0c15\u0c4d \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c21\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c28\u0c3e\u0c15\u0c41 \u0c24\u0c17\u0c3f\u0c28\u0c02\u0c24 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41 \u0c2a\u0c30\u0c3f\u0c1c\u0c4d\u0c1e\u0c3e\u0c28\u0c02 \u0c32\u0c47\u0c26\u0c41. \u0c28\u0c47\u0c28\u0c41 \u0c06 \u0c2a\u0c28\u0c3f \u0c1a\u0c47\u0c2f\u0c32\u0c47\u0c28\u0c41. (Kshamin\u0304ca\u1e47\u1e0di, oka j\u014dk ceppa\u1e0d\u0101niki n\u0101ku taginanta telugu parij\u00f1\u0101na\u1e41 l\u0113du. N\u0113nu \u0101 pani c\u0113yal\u0113nu.)\n\nI'm sorry, I don't have the Telugu language skills to tell a joke that would be funny and make sense. I can try something else for you though!"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Use Upload"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "Hey, Miro."
       ]
     },
@@ -179,6 +155,30 @@
       "role": "user",
       "parts": [
         "activate virtual mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! What can I do for you today?"
       ]
     }
   ]

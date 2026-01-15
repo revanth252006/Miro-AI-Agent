@@ -284,7 +284,7 @@
         function handleVoiceCommand(text) {
             if(!text || text.length < 2) return;
             isProcessing = true;
-            document.getElementById('voice-status').innerText = "PROCESSING...";
+            document.getElementById('voice-status').innerText = "THINKING...";
             recognition.stop();
             addUserMessage(text);
             sendMessage(text);
