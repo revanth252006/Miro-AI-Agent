@@ -4,30 +4,6 @@
     {
       "role": "model",
       "parts": [
-        "Okay, here are some important points from the uploaded PDF:\n\n   Personal Information: Revanth Akula is a B.Tech student in Computer Science Engineering with a specialization in AIML (Artificial Intelligence and Machine Learning) at Malla Reddy University, expected to graduate in 2028. His contact information includes a phone number (+91-7670844796) and email address (a.revanth2006@gmail.com).\n\n   Education: He has a strong academic record, including 97.6% in Senior Secondary (TSBIE Board) and 9.8 CGPA in Secondary School (SSC Board).\n\n   Certifications: Revanth has completed or is expected to complete certifications in Full Stack Development, SQL, Cybersecurity, CSS, and Data Science.\n\n   Projects: He has worked on several projects, including a Sign Language Detection project using machine learning, an Amazon dashboard clone using HTML and CSS, and a personal portfolio website using Flask, HTML, CSS, JavaScript, and MySQL.\n\n   Technical Skills: His technical skills include programming languages (C/C++, Python), web development (HTML, CSS, JavaScript, Flask, Django), databases (MySQL, MongoDB), and knowledge of computer science subjects like Data Structures and Algorithms, OOPs concepts, and Operating Systems.\n\nLet me know if you would like me to elaborate on any of these points or provide more details."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey miro"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hey! How can I help you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey, baro."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
         "\u0ca8\u0cae\u0cb8\u0ccd\u0c95\u0cbe\u0cb0! \u0ca8\u0cbe\u0ca8\u0cc1 \u0ca8\u0cbf\u0cae\u0c97\u0cc6 \u0cb9\u0cc7\u0c97\u0cc6 \u0cb8\u0cb9\u0cbe\u0caf \u0cae\u0cbe\u0ca1\u0cac\u0cb9\u0cc1\u0ca6\u0cc1? (Namaskara! Nanu nimage hege sahaya madabahudu?)"
       ]
     },
@@ -179,6 +155,30 @@
       "role": "model",
       "parts": [
         "I understand. Thanks for the explanation. I'll try my best to stick to the language you're currently using in the conversation. If I slip up again, please let me know!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Speak in English."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I will speak in English from now on. How can I help you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Speak in Telugu."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c38\u0c30\u0c47, \u0c28\u0c47\u0c28\u0c41 \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c24\u0c3e\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3f? (Sar\u0113, n\u0113nu ippu\u1e0du telugul\u014d m\u0101\u1e6dl\u0101\u1e0dat\u0101nu. M\u012bku \u0113mi k\u0101v\u0101li?)"
       ]
     }
   ]

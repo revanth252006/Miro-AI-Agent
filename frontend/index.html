@@ -190,7 +190,7 @@
         const visionContainer = document.getElementById("vision-container");
         const fileInput = document.getElementById("file-upload");
 
-        // --- NEW: FILE UPLOAD HANDLING ---
+        // --- ADDED: FILE UPLOAD HANDLING ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -249,7 +249,7 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
                 const lowerTranscript = transcript.toLowerCase();
 
-                // --- NEW: WAKE WORD LOGIC ---
+                // --- ADDED: WAKE WORD LOGIC ---
                 if (!isVoiceMode && (lowerTranscript.includes("hey miro") || lowerTranscript.includes("hello miro"))) {
                     toggleVoiceMode(); // Wake up!
                     speak("Yes Revanth?");
@@ -274,7 +274,7 @@
                 try { recognition.start(); } catch(e) {}
             };
             
-            // Start Listening Automatically
+            // Start Listening Automatically for Wake Word
             try { recognition.start(); } catch(e) {}
         } else {
             alert("Your browser does not support Voice Recognition.");
@@ -445,51 +445,6 @@
         userInput.addEventListener('keypress', (e) => { if(e.key==='Enter') document.getElementById('send-btn').click(); });
 
         connectWebSocket();
-        // --- IMPROVED SPEECH FUNCTION (Clearer Voice + Female Priority) ---
-        function speak(text) {
-            if (!ttsEnabled) return;
-            
-            // Remove special characters for smoother speech
-            const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
-            
-            isAiSpeaking = true;
-            window.speechSynthesis.cancel(); // Stop previous speech
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            const voices = window.speechSynthesis.getVoices();
-
-            // Detect Language
-            const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
-            
-            if (hasTelugu) {
-                utterance.lang = 'te-IN';
-                // 1. Try to find "Google" Telugu voice (Best quality, usually matches English tone)
-                // 2. Try to find "Shruti" (The high-quality Windows Female voice)
-                // 3. Fallback to any Telugu voice
-                let teluguVoice = voices.find(v => v.lang.includes('te') && v.name.includes('Google')) || 
-                                  voices.find(v => v.name.includes('Shruti')) || 
-                                  voices.find(v => v.lang.includes('te'));
-                
-                if (teluguVoice) utterance.voice = teluguVoice;
-            } else {
-                utterance.lang = 'en-US';
-                // Use the selected English voice (Google US or Zira)
-                if (selectedVoice) utterance.voice = selectedVoice;
-            }
-
-            utterance.pitch = 1.0; // Normal pitch
-            utterance.rate = 1.0;  // Normal speed
-
-            utterance.onend = () => { 
-                isAiSpeaking = false;
-                if (isVoiceMode) {
-                    const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
-                }
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
     </script>
 </body>
 </html>
