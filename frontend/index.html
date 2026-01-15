@@ -41,7 +41,6 @@
         .msg-user { background: linear-gradient(135deg, #00f3ff22, #00f3ff05); border: 1px solid #00f3ff44; color: #e0f2fe; }
         .msg-ai { background: #1a1a1a; border: 1px solid #333; color: #d1d5db; }
         
-        /* Orb Animation */
         .voice-orb {
             width: 120px; height: 120px;
             background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%);
@@ -55,7 +54,6 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* VISION PREVIEW WINDOW */
         #vision-container { 
             display: none; 
             position: absolute; bottom: 100px; right: 20px; 
@@ -97,7 +95,6 @@
     </aside>
 
     <main class="flex-1 flex flex-col relative z-10">
-        
         <header class="h-16 border-b border-miro-glassBorder flex items-center justify-between px-6 bg-miro-bg/80 backdrop-blur-md sticky top-0 z-20">
             <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-miro-accent/10 border border-miro-accent/20">
                 <i class="fa-solid fa-bolt text-miro-accent text-xs"></i>
@@ -135,11 +132,9 @@
                 <div class="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-center gap-2">
                     <button id="plus-btn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-miro-accent/20 text-gray-400 transition"><i class="fa-solid fa-plus" id="plus-icon"></i></button>
                     <input type="text" id="user-input" placeholder="Type here..." class="flex-1 bg-transparent border-none outline-none text-white h-10 px-2">
-                    
                     <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()">
                         <i class="fa-solid fa-microphone text-lg"></i>
                     </button>
-
                     <button id="send-btn" class="w-10 h-10 rounded-xl bg-miro-accent text-black font-bold hover:shadow-[0_0_15px_rgba(0,243,255,0.4)] transition"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
@@ -169,21 +164,24 @@
     </main>
 
     <script>
-        const wsUrl = 'ws://localhost:8000/ws';
+        const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws';
         let websocket = null;
         let ttsEnabled = false; 
         let isVoiceMode = false;
+        let isAiSpeaking = false; 
+        let isProcessing = false;
         let selectedVoice = null;
         let voiceLoadTimer = null;
         let recognition = null;
         
-        // VISION VARS
+        // Anti-Echo Variables
+        let lastSpokenText = "";
+        
         let visionActive = false;
         let stream = null;
         const video = document.getElementById("webcam");
         const visionContainer = document.getElementById("vision-container");
 
-        // 1. VOICE LOADING
         function loadVoices() {
             const voices = window.speechSynthesis.getVoices();
             if (voices.length === 0) return;
@@ -195,48 +193,74 @@
         voiceLoadTimer = setInterval(loadVoices, 500);
         window.speechSynthesis.onvoiceschanged = loadVoices;
 
-        // 2. SPEECH RECOGNITION
+        // --- CONTINUOUS RECOGNITION (INTERRUPT ENABLED) ---
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
+            recognition.continuous = true; // KEEP LISTENING
             recognition.interimResults = true;
             recognition.lang = 'en-US';
 
             recognition.onstart = () => {
-                document.getElementById('voice-status').innerText = "LISTENING...";
-                document.getElementById('voice-wave').classList.remove('opacity-0');
+                if(isVoiceMode && !isAiSpeaking) {
+                    document.getElementById('voice-status').innerText = "LISTENING...";
+                    document.getElementById('voice-wave').classList.remove('opacity-0');
+                }
             };
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                
+                // --- INTERRUPTION LOGIC ---
+                // If AI is speaking and we hear something, STOP AI
+                if (isAiSpeaking && transcript.length > 0) {
+                    
+                    // Simple Echo Check: If input is very similar to what AI said, ignore it
+                    if (lastSpokenText.includes(transcript) || transcript.includes(lastSpokenText.substring(0, 10))) {
+                        console.log("Ignored Echo");
+                        return;
+                    }
+
+                    console.log("Interruption Detected!");
+                    window.speechSynthesis.cancel(); // Stop AI Speech
+                    isAiSpeaking = false;
+                }
+
                 document.getElementById('voice-transcript').innerText = `"${transcript}"`;
-                if (event.results[0].isFinal) {
+                
+                if (event.results[event.results.length - 1].isFinal) {
                     handleVoiceCommand(transcript);
                 }
             };
 
             recognition.onend = () => {
+                // If Voice Mode is ON, ALWAYS restart listening (unless manually stopped)
                 if (isVoiceMode) {
-                    document.getElementById('voice-status').innerText = "PROCESSING...";
-                    document.getElementById('voice-wave').classList.add('opacity-0');
+                    try { recognition.start(); } catch(e) {}
                 }
             };
         } else {
-            alert("Your browser does not support Voice Recognition. Please use Chrome or Edge.");
+            alert("Your browser does not support Voice Recognition.");
         }
 
         function handleVoiceCommand(text) {
+            // Prevent sending blank noise
+            if(!text || text.length < 2) return;
+
+            isProcessing = true;
+            document.getElementById('voice-status').innerText = "PROCESSING...";
+            
+            // Stop recognition briefly to process (avoid double send)
+            recognition.stop();
+            
             addUserMessage(text);
             sendMessage(text);
-            setTimeout(() => { if(isVoiceMode) document.getElementById('voice-transcript').innerText = "..."; }, 2000);
         }
 
-        // --- 3. VOICE TOGGLE WITH GREETING (UPDATED) ---
         function toggleVoiceMode() {
             isVoiceMode = !isVoiceMode;
             const overlay = document.getElementById('voice-overlay');
             const micBtn = document.getElementById('mic-btn');
-            const userName = document.getElementById('user-display-name').innerText; // Get "Revanth"
+            const userName = document.getElementById('user-display-name').innerText;
 
             if (isVoiceMode) {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -244,41 +268,58 @@
                 overlay.classList.remove('hidden');
                 micBtn.classList.add('text-miro-accent', 'bg-miro-accent/10');
                 ttsEnabled = true; 
-                recognition.start();
+                
+                // Start Listening immediately
+                try { recognition.start(); } catch(e){}
 
-                // --- GREETING LOGIC ---
+                // Greet
                 const hour = new Date().getHours();
                 let greeting = `Good Evening, ${userName}!`;
                 if (hour < 12) greeting = `Good Morning, ${userName}!`;
                 else if (hour < 17) greeting = `Good Afternoon, ${userName}!`;
                 
-                // === CHANGED "I am listening" TO "I am Miro" ===
                 speak(`${greeting} I am Miro Your Personal Assistant.`);
-                // ------------------------------------------------
 
             } else {
                 overlay.classList.add('hidden');
                 micBtn.classList.remove('text-miro-accent', 'bg-miro-accent/10');
                 ttsEnabled = false; 
+                isAiSpeaking = false;
+                isProcessing = false;
                 recognition.stop();
                 window.speechSynthesis.cancel();
             }
         }
 
-        // 4. TEXT TO SPEECH
         function speak(text) {
             if (!ttsEnabled) return;
-            const cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+            
+            // Cleanup text
+            const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+            lastSpokenText = cleanText; // Save for echo cancellation
+            
+            isAiSpeaking = true;
+            // NOTE: We do NOT stop recognition here. We keep listening for interruption.
+            
+            window.speechSynthesis.cancel(); // Stop any previous speech
+
             const utterance = new SpeechSynthesisUtterance(cleanText);
             if (!selectedVoice) loadVoices();
             if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 1.15;
-            utterance.rate = 1.05;
-            utterance.onend = () => { if (isVoiceMode) recognition.start(); };
+            utterance.pitch = 1.0;
+            utterance.rate = 1.0;
+
+            utterance.onend = () => { 
+                isAiSpeaking = false;
+                // Update UI back to Listening
+                if (isVoiceMode) {
+                    document.getElementById('voice-status').innerText = "LISTENING...";
+                }
+            };
+
             window.speechSynthesis.speak(utterance);
         }
 
-        // 5. WEBSOCKET & LOGIC
         function connectWebSocket() {
             websocket = new WebSocket(wsUrl);
             websocket.onopen = () => {
@@ -288,13 +329,10 @@
             
             websocket.onmessage = (event) => {
                 const text = event.data;
-                addAiMessage(text); 
-
-                // Only update status, don't show full text on overlay
-                if(isVoiceMode) {
-                    document.getElementById('voice-status').innerText = "AI SPEAKING...";
-                }
+                isProcessing = false;
                 
+                addAiMessage(text); 
+                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro ...";
                 speak(text);
 
                 if (text.includes("Vision Camera On")) startVisionMode();
@@ -304,7 +342,6 @@
             websocket.onclose = () => setTimeout(connectWebSocket, 3000);
         }
 
-        // 6. VISION FUNCTIONS
         async function startVisionMode() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -313,7 +350,7 @@
                 visionActive = true;
                 addAiMessage("📷 Webcam Started. I can now see you.");
             } catch (err) {
-                addAiMessage("⚠️ Error: Could not verify camera permission.");
+                addAiMessage("⚠️ Error: Camera permission denied.");
             }
         }
 
@@ -337,7 +374,6 @@
             }
         }
 
-        // 7. UI HELPERS
         function addAiMessage(text) {
             const div = document.createElement('div');
             div.className = "flex justify-start items-start gap-3";
