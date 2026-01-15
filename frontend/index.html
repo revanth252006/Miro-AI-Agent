@@ -400,7 +400,7 @@
         function addAiMessage(text) {
             const div = document.createElement('div');
             div.className = "flex justify-start items-start gap-3";
-            div.innerHTML = `<div class="w-8 h-8 rounded-full overflow-hidden shadow-lg mt-1 shrink-0"><img src="/MIRO.jpg" class="w-full h-full object-cover"/></div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g,'<b class="text-miro-accent">$1</b>').replace(/\n/g,'<br>')}</div>`;
+            iv.innerHTML = `<div class="w-8 h-8 rounded-full overflow-hidden shadow-lg mt-1 shrink-0"><img src="https://media.istockphoto.com/id/2244563708/photo/breakthrough-concept-3d-graphic-of-shiny-metallic-letter-m-punching-through-a-glass.jpg" class="w-full h-full object-cover" alt="Breakthrough M"/></div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g,'<b class="text-miro-accent">$1</b>').replace(/\n/g,'<br>')}</div>`;
 
 
             document.getElementById('chat-container').appendChild(div);
