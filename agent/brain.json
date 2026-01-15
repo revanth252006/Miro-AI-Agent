@@ -2,90 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "What's your name?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "My name is Miro. I am a helpful and friendly AI Assistant created by Revanth and his team."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Who is Revant?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Revanth is the person who created me along with his team."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "OK, what you are talking about in our previous conversation?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "In our previous conversation, we established that my name is Miro, and that I was created by Revanth and his team. I also offered to help you with anything you might need."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Can you speak in Telugu?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c24\u0c2a\u0c4d\u0c2a\u0c15\u0c41\u0c02\u0c21\u0c3e! \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c41?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Hello."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "I am Revanth Telen, Telugu."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c39\u0c3e\u0c2f\u0c4d \u0c30\u0c47\u0c35\u0c02\u0c24\u0c4d \u0c1f\u0c46\u0c32\u0c46\u0c28\u0c4d, \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c41?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Increase volume."
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         "Decrease volume."
@@ -179,6 +95,90 @@
       "role": "model",
       "parts": [
         "\u0c2f\u0c41 \u0c06\u0c30\u0c4d \u0c35\u0c46\u0c32\u0c4d\u0c15\u0c2e\u0c4d \u0c30\u0c47\u0c35\u0c02\u0c24\u0c4d, \u0c2e\u0c30\u0c47\u0c26\u0c48\u0c28\u0c3e \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3e?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "analyse it and give the important points"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Could you please specify what you would like me to analyze and give the important points for?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "for the uploaded pdf"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, here are some important points from the uploaded PDF:\n\n   Personal Information: Revanth Akula is a B.Tech student in Computer Science Engineering with a specialization in AIML (Artificial Intelligence and Machine Learning) at Malla Reddy University, expected to graduate in 2028. His contact information includes a phone number (+91-7670844796) and email address (a.revanth2006@gmail.com).\n\n   Education: He has a strong academic record, including 97.6% in Senior Secondary (TSBIE Board) and 9.8 CGPA in Secondary School (SSC Board).\n\n   Certifications: Revanth has completed or is expected to complete certifications in Full Stack Development, SQL, Cybersecurity, CSS, and Data Science.\n\n   Projects: He has worked on several projects, including a Sign Language Detection project using machine learning, an Amazon dashboard clone using HTML and CSS, and a personal portfolio website using Flask, HTML, CSS, JavaScript, and MySQL.\n\n   Technical Skills: His technical skills include programming languages (C/C++, Python), web development (HTML, CSS, JavaScript, Flask, Django), databases (MySQL, MongoDB), and knowledge of computer science subjects like Data Structures and Algorithms, OOPs concepts, and Operating Systems.\n\nLet me know if you would like me to elaborate on any of these points or provide more details."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey miro"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey! How can I help you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey, baro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0ca8\u0cae\u0cb8\u0ccd\u0c95\u0cbe\u0cb0! \u0ca8\u0cbe\u0ca8\u0cc1 \u0ca8\u0cbf\u0cae\u0c97\u0cc6 \u0cb9\u0cc7\u0c97\u0cc6 \u0cb8\u0cb9\u0cbe\u0caf \u0cae\u0cbe\u0ca1\u0cac\u0cb9\u0cc1\u0ca6\u0cc1? (Namaskara! Nanu nimage hege sahaya madabahudu?)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is the name of the pdf"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The name of the PDF is \"Revanth AkulaAIML.pdf\"."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "smmarise the pdf"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, here is a summary of the \"Revanth AkulaAIML.pdf\" document:\n\nRevanth Akula is a B.Tech Computer Science Engineering student specializing in AIML at Malla Reddy University, expected to graduate in 2028. He has a strong academic background with high scores in his secondary and senior secondary education. Revanth has pursued certifications in areas like Full Stack Development, SQL, Cybersecurity, CSS, and Data Science. His project experience includes sign language detection using machine learning, creating an Amazon dashboard clone, and developing a personal portfolio website. He possesses skills in programming languages such as C/C++ and Python, web development technologies (HTML, CSS, JavaScript, Flask, Django), and databases like MySQL and MongoDB. Additionally, he has knowledge in core computer science concepts like Data Structures and Algorithms, OOPs, and Operating Systems. Overall, the document highlights Revanth's qualifications and experiences relevant to his field of study and potential career paths."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "is this created by ai or created by himself"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Based on the content of the PDF, it seems highly likely that Revanth Akula created the document himself. It includes personal contact information, details about his education, specific projects he has worked on, and his own skills. These are the types of details that a person typically compiles themselves when creating a resume or personal profile. While AI could potentially generate a similar document, the specific details and personal touch suggest that it was created by Revanth."
       ]
     }
   ]
