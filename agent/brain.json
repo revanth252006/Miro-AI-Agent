@@ -2,72 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "The screenshot is saved."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "In which folder it has been saved?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "The screenshot is saved in your default screenshots folder. The location of this folder depends on your operating system. On Windows, it's usually in the \"Pictures\" folder, in a subfolder called \"Screenshots\". On macOS, it's usually saved to the Desktop."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "4361 Take another screen, take a screenshot."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "OK, what is her previous conversation?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I have taken another screenshot.\n\nPreviously, you asked me to increase and decrease the volume, and to take multiple screenshots. You also asked where the screenshots are saved, and I told you they are in your default screenshots folder, which is typically in the \"Pictures\" folder under a \"Screenshots\" subfolder on Windows, or on the Desktop on macOS."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "OK. Thank you."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c2f\u0c41 \u0c06\u0c30\u0c4d \u0c35\u0c46\u0c32\u0c4d\u0c15\u0c2e\u0c4d \u0c30\u0c47\u0c35\u0c02\u0c24\u0c4d, \u0c2e\u0c30\u0c47\u0c26\u0c48\u0c28\u0c3e \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3e?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "analyse it and give the important points"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Could you please specify what you would like me to analyze and give the important points for?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "for the uploaded pdf"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "Okay, here are some important points from the uploaded PDF:\n\n   Personal Information: Revanth Akula is a B.Tech student in Computer Science Engineering with a specialization in AIML (Artificial Intelligence and Machine Learning) at Malla Reddy University, expected to graduate in 2028. His contact information includes a phone number (+91-7670844796) and email address (a.revanth2006@gmail.com).\n\n   Education: He has a strong academic record, including 97.6% in Senior Secondary (TSBIE Board) and 9.8 CGPA in Secondary School (SSC Board).\n\n   Certifications: Revanth has completed or is expected to complete certifications in Full Stack Development, SQL, Cybersecurity, CSS, and Data Science.\n\n   Projects: He has worked on several projects, including a Sign Language Detection project using machine learning, an Amazon dashboard clone using HTML and CSS, and a personal portfolio website using Flask, HTML, CSS, JavaScript, and MySQL.\n\n   Technical Skills: His technical skills include programming languages (C/C++, Python), web development (HTML, CSS, JavaScript, Flask, Django), databases (MySQL, MongoDB), and knowledge of computer science subjects like Data Structures and Algorithms, OOPs concepts, and Operating Systems.\n\nLet me know if you would like me to elaborate on any of these points or provide more details."
@@ -179,6 +113,72 @@
       "role": "model",
       "parts": [
         "I am ready. What would you like me to do with the uploaded file? For example, you could ask me to:\n\n   Analyze it and give the important points.\n   Summarize it.\n   Extract text from it.\n   Translate it.\n\nJust let me know what you need!"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I have read 'Revanth Resume-2 Ai.pdf'. You can now ask me questions about it!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "WHAT ARE THE PROJECTS HE HAVE DONE"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Based on the uploaded PDF, Revanth has worked on the following projects:\n\n   Sign Language Detection: A machine learning project that takes a video as input and outputs the word being signed. It's intended to help deaf people communicate. (Tensorflow, Keras, Python)\n   Miro-Agent: A frontend-only clone of an Amazon dashboard showcasing product listings and UI interactivity. (HTML, CSS)\n   AI Virtual Mouse: A full-stack personal portfolio combining a frontend interface with backend functionality to highlight professional achievements and technical expertise. (Flask, HTML, CSS, Bootstrap, Javascript, MySQL)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Speak Telugu."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c38\u0c30\u0c47, \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c3f \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c4b \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f. (Okay, n\u0113nu telugul\u014d m\u0101\u1e6dl\u0101\u1e0dagalanu. M\u012bku \u0113mi k\u0101v\u0101l\u014d a\u1e0daga\u1e47\u1e0di.)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Aim yes or no?"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c15\u0c4d\u0c37\u0c2e\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f, \u0c28\u0c3e\u0c15\u0c41 \u0c05\u0c30\u0c4d\u0c25\u0c02 \u0c15\u0c3e\u0c32\u0c47\u0c26\u0c41. \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c2e\u0c40\u0c30\u0c41 \u0c0f\u0c2e\u0c3f \u0c05\u0c21\u0c41\u0c17\u0c41\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c4b \u0c35\u0c3f\u0c35\u0c30\u0c3f\u0c02\u0c1a\u0c17\u0c32\u0c30\u0c3e? (Kshamin\u0304ca\u1e47\u1e0di, n\u0101ku artha\u1e41 k\u0101l\u0113du. Dayac\u0113si m\u012bru \u0113mi a\u1e0dugutunn\u0101r\u014d vivarin\u0304cagalaraa?)"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "English."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I'm back to English. What can I do for you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "It happens because your browser picking the default."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I understand. Thanks for the explanation. I'll try my best to stick to the language you're currently using in the conversation. If I slip up again, please let me know!"
       ]
     }
   ]
