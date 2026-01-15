@@ -4,30 +4,6 @@
     {
       "role": "model",
       "parts": [
-        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hi"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hello"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
         "Hello! How can I help you today?"
       ]
     },
@@ -179,6 +155,30 @@
       "role": "model",
       "parts": [
         "Okay, I've unmuted the volume for you. Hello! How can I help you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "dont use telugu all the time bro"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I understand. I will not use Telugu unless you specifically ask me to. Also, it is currently 12:03 AM on Friday, January 16, 2026. How can I help you?"
       ]
     }
   ]
