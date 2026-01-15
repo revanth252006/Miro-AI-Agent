@@ -36,14 +36,14 @@ async def set_volume(level: str) -> str:
         if "up" in level or "increase" in level:
             for _ in range(5): 
                 pyautogui.press("volumeup")
-            return "🔊 Volume increased."
+            return " Volume increased."
         elif "down" in level or "decrease" in level:
             for _ in range(5): 
                 pyautogui.press("volumedown")
-            return "🔉 Volume decreased."
+            return " Volume decreased."
         elif "mute" in level or "silent" in level:
             pyautogui.press("volumemute")
-            return "🔇 System muted."
+            return " System muted."
         return "Volume unchanged."
 
     # Run in executor to prevent blocking the async loop
