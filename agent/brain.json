@@ -4,66 +4,6 @@
     {
       "role": "model",
       "parts": [
-        "\u0c39\u0c3e\u0c2f\u0c4d! \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c08 \u0c30\u0c4b\u0c1c\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c2a\u0c21\u0c17\u0c32\u0c28\u0c41?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "english"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "you change to telugu when i ask only"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Understood. I will only switch to Telugu when you specifically ask me to. I will remain in English until then. How can I help you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Camera."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I'm opening the camera for you."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Open camera."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I've opened the camera application for you."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Open Google."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
         "Okay, I've just opened Google for you."
       ]
     },
@@ -179,6 +119,66 @@
       "role": "model",
       "parts": [
         "Hello! What can I do for you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How may I assist you?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hello"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! What can I do for you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hello"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what happend"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm not sure what you're referring to. Is there something specific you're asking about? Please provide more context so I can help you better."
       ]
     }
   ]
