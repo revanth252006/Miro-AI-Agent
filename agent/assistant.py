@@ -10,6 +10,8 @@ import re
 import PyPDF2  # <--- NEW: For reading PDFs
 from PIL import Image
 from dotenv import load_dotenv
+from duckduckgo_search import DDGS # <--- NEW: For Web Search
+import pyautogui # <--- NEW: For Screen Sense
 
 # --- SETUP PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -57,6 +59,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- NEW: WEB SEARCH TOOL ---
+async def perform_search(query):
+    try:
+        results = DDGS().text(query, max_results=3)
+        if not results: return "No results found."
+        return "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+    except: return "Search failed."
+
+# --- NEW: SCREEN CAPTURE TOOL ---
+async def capture_screen():
+    try:
+        screenshot = pyautogui.screenshot().resize((1280, 720))
+        return screenshot
+    except: return None
 
 class VoiceAssistant:
     def __init__(self):
@@ -106,10 +123,13 @@ class VoiceAssistant:
         3. System Control: You can open apps, change volume, and take screenshots.
         4. Vision: Analyze images if provided.
         5. Voice: Reply in plain spoken text (No markdown, no *bold*).
+        6. ART: If user asks to generate/create an image, reply ONLY with: "IMAGE_GEN: <prompt>"
         {kb_context}
         """
         full_instruction = f"{PERSONALITIES[self.current_persona]}\n{base_instruction}"
-        return genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=full_instruction)
+        
+        # Enable Code Execution for Math/Logic
+        return genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=full_instruction, tools=[{"code_execution": {}}])
 
     def switch_personality(self, persona_key):
         """Switches the AI mood."""
@@ -227,9 +247,29 @@ class VoiceAssistant:
             if "vision" in clean_text or "camera" in clean_text: 
                 if SYSTEM_CALLBACK: SYSTEM_CALLBACK("vision"); return "Vision Camera On."
 
-        # --- 4. VISION & TOOLS ---
+        # --- 4. VISION & TOOLS (UPGRADED) ---
         try:
             tool_result = ""
+            
+            # A. Screen Sense Tool
+            if "screen" in clean_text and ("see" in clean_text or "what" in clean_text):
+                print("📸 Capturing Screen...")
+                screen = await capture_screen()
+                if screen:
+                    response = self.chat.send_message(["What is on my screen?", screen])
+                    clean_resp = self.clean_response(response.text)
+                    return clean_resp
+
+            # B. Web Search Tool
+            if "search" in clean_text or "google" in clean_text or "news" in clean_text or "price" in clean_text:
+                q = clean_text.replace("search", "").replace("google", "").strip()
+                print(f"🔍 Searching: {q}")
+                res = await perform_search(q)
+                response = self.chat.send_message(f"Search results for '{q}':\n{res}\nSummarize this for me.")
+                clean_resp = self.clean_response(response.text)
+                return clean_resp
+
+            # C. Vision & Chat
             if user_image:
                 print("📸 Processing Image...")
                 response = self.chat.send_message([user_text, user_image])
@@ -237,7 +277,7 @@ class VoiceAssistant:
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
-            # Tool Checks
+            # Tool Checks (Legacy)
             if "open" in clean_text and "search" in clean_text:
                 sites = ["youtube", "google", "amazon", "flipkart"]
                 site = next((s for s in sites if clean_text.find(s) != -1), None)
@@ -260,9 +300,17 @@ class VoiceAssistant:
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
             
-            # --- NORMAL CHAT ---
+            # --- NORMAL CHAT + IMAGE GEN HOOK ---
             response = self.chat.send_message(user_text)
             clean_resp = self.clean_response(response.text)
+            
+            # Check if AI wants to generate image
+            if "IMAGE_GEN:" in clean_resp:
+                prompt = clean_resp.split("IMAGE_GEN:")[1].strip()
+                # Use Pollinations AI (No Key Required)
+                img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}"
+                return f"Here is the image you asked for: <br> <img src='{img_url}' width='300' style='border-radius:10px; margin-top:10px;' />"
+
             self.memory.add_message("model", clean_resp)
             return clean_resp
 
