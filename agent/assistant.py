@@ -6,24 +6,29 @@ import asyncio
 import json
 import base64
 import io
+import re
+import PyPDF2  # <--- NEW: For reading PDFs
 from PIL import Image
 from dotenv import load_dotenv
 
-# --- 1. SETUP PATHS (CRITICAL FIX) ---
-# This forces Python to look in the 'Unified_AI_Assistant' folder for imports.
-# It fixes the "Import could not be resolved" error.
-current_dir = os.path.dirname(os.path.abspath(__file__)) # agent/
-parent_dir = os.path.dirname(current_dir)                # Unified_AI_Assistant/
+# --- SETUP PATHS ---
+current_dir = os.path.dirname(os.path.abspath(__file__)) 
+parent_dir = os.path.dirname(current_dir)                
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-# Now we can import standard modules without errors
 import google.generativeai as genai
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# --- 2. Clean Logs ---
+# IMPORT MEMORY
+try:
+    from memory import MemoryManager
+except ImportError:
+    from agent.memory import MemoryManager
+
+# --- Clean Logs ---
 warnings.filterwarnings("ignore")
 logging.getLogger("uvicorn.error").disabled = True
 logging.getLogger("uvicorn.access").disabled = True
@@ -31,24 +36,20 @@ logging.getLogger("uvicorn.access").disabled = True
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# --- 3. HARDWARE CONNECTION ---
+# --- HARDWARE CONNECTION ---
 SYSTEM_CALLBACK = None
 def set_system_state_callback(callback_func):
     global SYSTEM_CALLBACK
     SYSTEM_CALLBACK = callback_func
 
-# --- 4. System Instruction ---
-SYSTEM_INSTRUCTION = """
-You are Miro, an advanced AI Assistant.
-RULES:
-1. Vision: If provided with an image, analyze it.
-2. Unreleased Tech: Search for rumors/leaks (iPhone 17, etc.).
-3. Real World Actions: Use tools. Don't say "I can't".
-4. No Code: No python blocks.
-5. Multilingual: Reply in user's language.
-"""
+# --- PERSONALITY PROMPTS ---
+PERSONALITIES = {
+    "jarvis": "You are J.A.R.V.I.S. You are ultra-polite, highly intelligent, and formal. Call the user 'Sir'.",
+    "bro": "You are a chill bro. You use slang, you're relaxed, and you're funny. Call the user 'Bro' or 'Buddy'.",
+    "professional": "You are a highly efficient Executive Assistant. You are concise, precise, and serious.",
+    "default": "You are Miro, a helpful and friendly AI Assistant. You were created by Revanth and his team."
+}
 
-# --- 5. Server Setup ---
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -59,33 +60,96 @@ app.add_middleware(
 
 class VoiceAssistant:
     def __init__(self):
-        self.model = genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=SYSTEM_INSTRUCTION)
-        self.chat = self.model.start_chat(history=[
-            {"role": "user", "parts": ["System Initialized."]},
-            {"role": "model", "parts": ["Hello! I am Miro. Ready to help."]}
-        ])
+        # 1. Initialize Memory
+        self.memory = MemoryManager()
+        self.user_name = self.memory.get_name()
+        self.knowledge_base = "" # <--- NEW: Stores text from uploaded files
         
-        # Session States
+        # 2. Load Past History
+        past_history = self.memory.get_history()
+        
+        # If no history, start fresh.
+        if not past_history:
+            initial = f"Hello {self.user_name}!" if self.user_name else "Hello! I am Miro."
+            self.chat_history = [{"role": "model", "parts": [initial]}]
+        else:
+            self.chat_history = past_history
+
+        # 3. Initialize Model
+        self.current_persona = "default"
+        self.model = self._init_model()
+        self.chat = self.model.start_chat(history=self.chat_history)
+        
         self.email_mode = False; self.email_step = 0; self.email_draft = {}
-        self.ride_mode = False; self.ride_step = 0; self.ride_details = {}
+
+    def _init_model(self):
+        """Re-initializes the model with the current personality AND knowledge base."""
+        # --- ADDED KNOWLEDGE BASE TO SYSTEM PROMPT ---
+        base_instruction = f"""
+        CRITICAL INSTRUCTIONS:
+        1. LANGUAGE MATCHING: You MUST reply in the EXACT SAME LANGUAGE the user is currently speaking.
+        2. KNOWLEDGE BASE: The user has uploaded files. Use this information to answer questions:
+           --- START OF FILE CONTENT ---
+           {self.knowledge_base[:20000]} 
+           --- END OF FILE CONTENT ---
+           If the answer is in the file, quote it. If not, use your general knowledge.
+        3. System Control: You can open apps, change volume, and take screenshots.
+        4. Voice: Reply in plain spoken text (No markdown, no *bold*).
+        """
+        full_instruction = f"{PERSONALITIES[self.current_persona]}\n{base_instruction}"
+        return genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=full_instruction)
+
+    def switch_personality(self, persona_key):
+        if persona_key in PERSONALITIES:
+            self.current_persona = persona_key
+            self.model = self._init_model() 
+            self.chat = self.model.start_chat(history=self.chat_history)
+            return f"Mode switched to {persona_key.upper()}."
+        return "Personality not found."
+
+    def clean_response(self, text):
+        return re.sub(r'[\*\#\`\_]', '', text).strip()
+
+    async def process_file(self, file_data, filename):
+        """Extracts text from uploaded PDF or TXT files."""
+        try:
+            decoded = base64.b64decode(file_data.split(",")[1])
+            text = ""
+            
+            if filename.endswith(".pdf"):
+                reader = PyPDF2.PdfReader(io.BytesIO(decoded))
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+            else:
+                text = decoded.decode("utf-8")
+            
+            # Store in Knowledge Base and Update Model
+            self.knowledge_base = text
+            self.model = self._init_model()
+            self.chat = self.model.start_chat(history=self.chat_history)
+            
+            return f"📂 I have read '{filename}'. You can now ask me questions about it!"
+        except Exception as e:
+            return f"❌ Error reading file: {str(e)}"
 
     async def process_message(self, data: str):
         global SYSTEM_CALLBACK
         
-        # --- LAZY IMPORT (Simplified) ---
-        # Since we added 'parent_dir' to sys.path at the top, 
-        # we can just import 'tools' directly.
         try:
-            from tools import get_system_time, search_web, open_website, send_email, book_ride, search_product, get_weather
-        except ImportError:
-            return "❌ Error: tools.py not found. Please check your folder structure."
+            from tools import (get_system_time, search_web, open_website, send_email, 
+                             search_product, get_weather, set_volume, take_screenshot, 
+                             minimize_windows, open_application)
+        except ImportError: return "Error: tools.py not found."
 
-        # --- PARSE INPUT (Text vs Image) ---
-        user_text = ""
-        user_image = None
-        
+        # Parse Input
+        user_text = ""; user_image = None; file_upload = None
         try:
             parsed = json.loads(data)
+            
+            # --- NEW: CHECK FOR FILE UPLOAD ---
+            if "type" in parsed and parsed["type"] == "upload":
+                return await self.process_file(parsed["file"], parsed["filename"])
+
             user_text = parsed.get("text", "")
             if "image" in parsed:
                 img_data = base64.b64decode(parsed["image"].split(",")[1])
@@ -94,60 +158,60 @@ class VoiceAssistant:
             user_text = data
 
         clean_text = user_text.lower().strip()
-        for filler in ["please", "can you", "try to", "ok", "hey miro", "yeah", "do it"]:
-            clean_text = clean_text.replace(filler, "")
-        clean_text = clean_text.strip()
+        if not clean_text and not user_image: return "" 
 
-        # --- 1. VISION HANDLING ---
-        if user_image:
-            try:
-                print("📸 Processing Image with Vision AI...")
-                response = self.chat.send_message([user_text, user_image])
-                return response.text
-            except Exception as e:
-                return f"Vision Error: {str(e)}"
+        self.memory.add_message("user", user_text)
 
-        # --- 2. HARDWARE CONTROLS ---
-        if "disconnect" in clean_text or "stop" in clean_text: 
+        # Name Check
+        name_match = re.search(r"my name is (\w+)", clean_text)
+        if name_match:
+            new_name = name_match.group(1).capitalize()
+            self.memory.set_name(new_name)
+            resp = f"Nice to meet you, {new_name}."
+            self.memory.add_message("model", resp)
+            return resp
+
+        # Personality & System Controls
+        if "activate jarvis" in clean_text: return self.switch_personality("jarvis")
+        if "activate bro" in clean_text: return self.switch_personality("bro")
+        if "activate professional" in clean_text: return self.switch_personality("professional")
+        if "reset mode" in clean_text: return self.switch_personality("default")
+
+        if "volume" in clean_text:
+            if "up" in clean_text: return await set_volume("up")
+            if "down" in clean_text: return await set_volume("down")
+            if "mute" in clean_text: return await set_volume("mute")
+        
+        if "screenshot" in clean_text: return await take_screenshot()
+        if "minimize" in clean_text: return await minimize_windows()
+        
+        if "open" in clean_text:
+            apps_list = ["notepad", "calculator", "chrome", "vscode", "settings", "cmd", "terminal", "explorer"]
+            for app in apps_list:
+                if app in clean_text: return await open_application(app)
+
+        if "disconnect" in clean_text: 
             if SYSTEM_CALLBACK: SYSTEM_CALLBACK("stop")
-            return "🔌 Disconnected."
+            return "Disconnected."
 
         if "activate" in clean_text:
             if "mouse" in clean_text: 
-                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("mouse")
-                return "🖱️ Mouse Active."
+                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("mouse"); return "Mouse Active."
             if "sign" in clean_text: 
-                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("sign")
-                return "✌️ Sign Active."
-            
-            # --- THE VISION FIX ---
-            if "vision" in clean_text or "camera" in clean_text: 
-                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("vision")
-                return "👁️ Vision Camera On." # Matches Frontend Check Exactly
+                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("sign"); return "Sign Active."
+            if "vision" in clean_text: 
+                if SYSTEM_CALLBACK: SYSTEM_CALLBACK("vision"); return "Vision Camera On."
 
-        # --- 3. INTERACTIVE MODES ---
-        if self.email_mode:
-            if "cancel" in clean_text: self.email_mode = False; return "❌ Cancelled."
-            if self.email_step == 1: self.email_draft["to"] = user_text.strip(); self.email_step = 2; return "Got it. Subject?"
-            if self.email_step == 2: self.email_draft["sub"] = user_text.strip(); self.email_step = 3; return "Message?"
-            if self.email_step == 3: 
-                self.email_mode = False
-                return await send_email(self.email_draft["to"], self.email_draft["sub"], user_text.strip())
-
-        if self.ride_mode:
-            if "cancel" in clean_text: self.ride_mode = False; return "❌ Cancelled."
-            if self.ride_step == 1: self.ride_details["dest"] = user_text.strip(); self.ride_step = 2; return "Pickup location?"
-            if self.ride_step == 2:
-                self.ride_mode = False
-                return await book_ride(user_text.strip(), self.ride_details["dest"])
-
-        # Triggers
-        if "send email" in clean_text: self.email_mode = True; self.email_step = 1; return "Who is this email for?"
-        if "book" in clean_text and ("ride" in clean_text or "cab" in clean_text): self.ride_mode = True; self.ride_step = 1; return "Where do you want to go?"
-
-        # --- 4. DYNAMIC TOOLS ---
+        # Vision & Normal Chat
         try:
             tool_result = ""
+            if user_image:
+                print("📸 Processing Image...")
+                response = self.chat.send_message([user_text, user_image])
+                clean_resp = self.clean_response(response.text)
+                self.memory.add_message("model", clean_resp)
+                return clean_resp
+
             if "open" in clean_text and "search" in clean_text:
                 sites = ["youtube", "google", "amazon", "flipkart"]
                 site = next((s for s in sites if clean_text.find(s) != -1), None)
@@ -155,28 +219,19 @@ class VoiceAssistant:
                     query = clean_text.replace("open","").replace(site,"").replace("search","").replace("for","").replace("the","").strip()
                     if site in ["amazon", "flipkart"]: tool_result = await search_product(query)
                     else: tool_result = await open_website(site, search_query=query)
-
-            elif "buy" in clean_text or "shop" in clean_text:
-                product = clean_text.replace("buy","").replace("shop for","").strip()
-                tool_result = await search_product(product)
-
-            elif "search" in clean_text or "cost" in clean_text or "price" in clean_text or "news" in clean_text:
-                query = clean_text.replace("search","").replace("for","").strip()
-                tool_result = await search_web(query)
-
-            elif "open" in clean_text:
-                site = clean_text.replace("open","").strip()
-                if len(site) > 2: tool_result = await open_website(site)
-
+            elif "search" in clean_text:
+                tool_result = await search_web(clean_text.replace("search","").strip())
             elif "time" in clean_text: tool_result = await get_system_time()
             elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
 
             if tool_result:
                 response = self.chat.send_message(f"User: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
-                return response.text
+            else:
+                response = self.chat.send_message(user_text)
             
-            response = self.chat.send_message(user_text)
-            return response.text
+            clean_resp = self.clean_response(response.text)
+            self.memory.add_message("model", clean_resp)
+            return clean_resp
 
         except Exception as e: return f"Error: {str(e)}"
 
@@ -191,6 +246,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
+            if not data: continue
             response = await assistant.process_message(data)
-            await websocket.send_text(response)
+            if response:
+                await websocket.send_text(response)
     except: pass

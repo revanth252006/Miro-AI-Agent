@@ -21,10 +21,6 @@
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'wave': 'wave 1.2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        wave: { '0%, 100%': { height: '10px' }, '50%': { height: '30px' } }
                     }
                 }
             }
@@ -55,24 +51,19 @@
         }
 
         #vision-container { 
-            display: none; 
-            position: absolute; bottom: 100px; right: 20px; 
+            display: none; position: absolute; bottom: 100px; right: 20px; 
             width: 240px; height: 180px; 
             background: #000; border: 2px solid #00f3ff; 
-            border-radius: 12px; overflow: hidden; 
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            z-index: 40;
+            border-radius: 12px; overflow: hidden; z-index: 40;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
-        #vision-status { position: absolute; bottom: 8px; left: 8px; font-size: 10px; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; color: #00f3ff; font-weight: bold; }
     </style>
 </head>
 <body class="bg-miro-bg text-white h-screen flex overflow-hidden">
 
-    <div id="vision-container">
-        <video id="webcam" autoplay playsinline></video>
-        <div id="vision-status">● VISION ACTIVE</div>
-    </div>
+    <input type="file" id="file-upload" class="hidden" accept=".pdf,.txt">
+
+    <div id="vision-container"><video id="webcam" autoplay playsinline></video></div>
 
     <aside class="w-64 hidden md:flex flex-col border-r border-miro-glassBorder bg-black/40">
         <div class="p-6 flex items-center gap-3">
@@ -84,48 +75,38 @@
             <div id="history-log" class="space-y-1"></div>
         </div>
         <div class="p-4 border-t border-miro-glassBorder bg-black/20">
-            <div class="flex items-center justify-between text-xs text-gray-400">
-                <span class="flex items-center gap-2">
-                    <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
-                    <span id="connection-status">Offline</span>
-                </span>
-                <span>v3.5.0</span>
-            </div>
+            <span class="flex items-center gap-2 text-xs text-gray-400">
+                <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span id="connection-status">Offline</span>
+            </span>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col relative z-10">
         <header class="h-16 border-b border-miro-glassBorder flex items-center justify-between px-6 bg-miro-bg/80 backdrop-blur-md sticky top-0 z-20">
             <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-miro-accent/10 border border-miro-accent/20">
-                <i class="fa-solid fa-bolt text-miro-accent text-xs"></i>
-                <span class="text-xs font-medium text-miro-accent tracking-wide">AI ACTIVE</span>
+                <span class="text-xs font-medium text-miro-accent tracking-wide">WAKE WORD: "HEY MIRO"</span>
             </div>
+            <button id="lang-btn" onclick="toggleLanguage()" class="px-3 py-1 text-xs font-bold rounded-full bg-gray-800 border border-gray-600 hover:border-miro-accent transition">🇺🇸 English</button>
         </header>
 
         <div id="chat-view" class="flex-1 flex flex-col h-full relative">
             <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
                 <div class="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-80 mt-10">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple blur-xl opacity-20 absolute"></div>
-                    <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center text-3xl shadow-2xl animate-float">
-                        ✨
-                    </div>
                     <h2 class="text-3xl font-light">Hello, <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-miro-accent to-white" id="user-display-name">Revanth</span></h2>
                 </div>
             </div>
 
             <div class="p-4 md:p-6 pb-8 relative">
                 <div id="feature-picker" class="absolute bottom-24 left-6 z-30 glass-panel rounded-2xl p-4 w-72 shadow-2xl transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-none scale-95 border border-miro-glassBorder">
-                    <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Modes</div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload</span></button>
+                        <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload PDF</span></button>
                         <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
                         <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
                         <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
                     </div>
                     <div class="mt-2 pt-2 border-t border-gray-800">
-                        <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-power-off"></i> <span class="text-xs font-bold">Disconnect Tools</span>
-                        </button>
+                        <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition"><span class="text-xs font-bold">Disconnect Tools</span></button>
                     </div>
                 </div>
 
@@ -135,210 +116,131 @@
                     <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()">
                         <i class="fa-solid fa-microphone text-lg"></i>
                     </button>
-                    <button id="send-btn" class="w-10 h-10 rounded-xl bg-miro-accent text-black font-bold hover:shadow-[0_0_15px_rgba(0,243,255,0.4)] transition"><i class="fa-solid fa-paper-plane"></i></button>
+                    <button id="send-btn" class="w-10 h-10 rounded-xl bg-miro-accent text-black font-bold transition"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
 
         <div id="voice-overlay" class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden transition-opacity duration-500">
             <button onclick="toggleVoiceMode()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <div class="relative">
-                <div class="voice-orb"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i class="fa-solid fa-microphone text-4xl text-white drop-shadow-lg"></i>
-                </div>
-            </div>
-            <div class="mt-12 text-center space-y-4 px-4">
-                <h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2>
-                <p id="voice-transcript" class="text-gray-400 text-lg max-w-2xl h-16 transition-all duration-300">Go ahead, I'm listening.</p>
-            </div>
-            <div class="mt-8 flex gap-2 h-8 items-end" id="voice-wave">
-                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0s"></div>
-                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.1s"></div>
-                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.2s"></div>
-                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.3s"></div>
-                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.4s"></div>
-            </div>
+            <div class="relative"><div class="voice-orb"></div><div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-microphone text-4xl text-white"></i></div></div>
+            <div class="mt-12 text-center space-y-4 px-4"><h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2><p id="voice-transcript" class="text-gray-400 text-lg max-w-2xl h-16">Go ahead, I'm listening.</p></div>
         </div>
-
     </main>
 
     <script>
-        const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws';
+        // --- YOUR NGROK URL ---
+        const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws'; 
+
         let websocket = null;
         let ttsEnabled = false; 
         let isVoiceMode = false;
         let isAiSpeaking = false; 
-        let isProcessing = false;
-        let selectedVoice = null;
-        let voiceLoadTimer = null;
         let recognition = null;
-        
-        // Anti-Echo Variables
-        let lastSpokenText = "";
+        let currentLang = 'en-US'; 
         
         let visionActive = false;
         let stream = null;
         const video = document.getElementById("webcam");
         const visionContainer = document.getElementById("vision-container");
+        const fileInput = document.getElementById("file-upload");
 
-        function loadVoices() {
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) return;
-            selectedVoice = voices.find(v => v.name.includes("Google US English")) || 
-                            voices.find(v => v.name.includes("Zira")) || 
-                            voices.find(v => v.name.includes("Female"));
-            if (selectedVoice) clearInterval(voiceLoadTimer);
+        // --- FILE UPLOAD LOGIC ---
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64String = event.target.result;
+                const payload = JSON.stringify({ type: "upload", filename: file.name, file: base64String });
+                websocket.send(payload);
+                addUserMessage(`📂 Uploading ${file.name}...`);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function toggleLanguage() {
+            const btn = document.getElementById('lang-btn');
+            if (currentLang === 'en-US') {
+                currentLang = 'te-IN'; btn.innerText = "🇮🇳 Telugu";
+                if (recognition) recognition.lang = 'te-IN';
+            } else {
+                currentLang = 'en-US'; btn.innerText = "🇺🇸 English";
+                if (recognition) recognition.lang = 'en-US';
+            }
+            if(recognition) recognition.stop(); // Restart with new lang
         }
-        voiceLoadTimer = setInterval(loadVoices, 500);
-        window.speechSynthesis.onvoiceschanged = loadVoices;
 
-        // --- CONTINUOUS RECOGNITION (INTERRUPT ENABLED) ---
+        // --- VOICE & WAKE WORD LOGIC ---
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
-            recognition.continuous = true; // KEEP LISTENING
+            recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            recognition.lang = currentLang;
 
-            recognition.onstart = () => {
-                if(isVoiceMode && !isAiSpeaking) {
-                    document.getElementById('voice-status').innerText = "LISTENING...";
-                    document.getElementById('voice-wave').classList.remove('opacity-0');
-                }
-            };
+            recognition.onstart = () => { console.log("Mic Active"); };
 
             recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 
-                // --- INTERRUPTION LOGIC ---
-                // If AI is speaking and we hear something, STOP AI
-                if (isAiSpeaking && transcript.length > 0) {
-                    
-                    // Simple Echo Check: If input is very similar to what AI said, ignore it
-                    if (lastSpokenText.includes(transcript) || transcript.includes(lastSpokenText.substring(0, 10))) {
-                        console.log("Ignored Echo");
-                        return;
-                    }
-
-                    console.log("Interruption Detected!");
-                    window.speechSynthesis.cancel(); // Stop AI Speech
-                    isAiSpeaking = false;
+                // --- WAKE WORD DETECTION ---
+                if (!isVoiceMode && (transcript.includes("hey miro") || transcript.includes("hello miro"))) {
+                    toggleVoiceMode(); // Wake up!
+                    speak("Yes, Revanth?");
+                    return;
                 }
 
-                document.getElementById('voice-transcript').innerText = `"${transcript}"`;
-                
-                if (event.results[event.results.length - 1].isFinal) {
-                    handleVoiceCommand(transcript);
-                }
-            };
-
-            recognition.onend = () => {
-                // If Voice Mode is ON, ALWAYS restart listening (unless manually stopped)
                 if (isVoiceMode) {
-                    try { recognition.start(); } catch(e) {}
+                    if (isAiSpeaking && transcript.length > 0) { window.speechSynthesis.cancel(); isAiSpeaking = false; }
+                    document.getElementById('voice-transcript').innerText = `"${transcript}"`;
+                    if (event.results[event.results.length - 1].isFinal) {
+                        addUserMessage(transcript);
+                        sendMessage(transcript);
+                    }
                 }
             };
-        } else {
-            alert("Your browser does not support Voice Recognition.");
-        }
 
-        function handleVoiceCommand(text) {
-            // Prevent sending blank noise
-            if(!text || text.length < 2) return;
-
-            isProcessing = true;
-            document.getElementById('voice-status').innerText = "THINKING...";
-            
-            // Stop recognition briefly to process (avoid double send)
-            recognition.stop();
-            
-            addUserMessage(text);
-            sendMessage(text);
-        }
+            recognition.onend = () => { try { recognition.start(); } catch(e) {} }; // Always restart (Always Listening)
+            try { recognition.start(); } catch(e) {} // Auto-start on load
+        } 
 
         function toggleVoiceMode() {
             isVoiceMode = !isVoiceMode;
             const overlay = document.getElementById('voice-overlay');
-            const micBtn = document.getElementById('mic-btn');
-            const userName = document.getElementById('user-display-name').innerText;
-
             if (isVoiceMode) {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                audioCtx.resume();
                 overlay.classList.remove('hidden');
-                micBtn.classList.add('text-miro-accent', 'bg-miro-accent/10');
-                ttsEnabled = true; 
-                
-                // Start Listening immediately
-                try { recognition.start(); } catch(e){}
-
-                // Greet
-                const hour = new Date().getHours();
-                let greeting = `Good Evening, ${userName}!`;
-                if (hour < 12) greeting = `Good Morning, ${userName}!`;
-                else if (hour < 17) greeting = `Good Afternoon, ${userName}!`;
-                
-                speak(`${greeting} I am Miro Your Personal Assistant.`);
-
+                ttsEnabled = true;
+                speak("I am listening.");
             } else {
                 overlay.classList.add('hidden');
-                micBtn.classList.remove('text-miro-accent', 'bg-miro-accent/10');
-                ttsEnabled = false; 
-                isAiSpeaking = false;
-                isProcessing = false;
-                recognition.stop();
+                ttsEnabled = false;
                 window.speechSynthesis.cancel();
             }
         }
 
         function speak(text) {
             if (!ttsEnabled) return;
-            
-            // Cleanup text
             const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
-            lastSpokenText = cleanText; // Save for echo cancellation
-            
             isAiSpeaking = true;
-            // NOTE: We do NOT stop recognition here. We keep listening for interruption.
-            
-            window.speechSynthesis.cancel(); // Stop any previous speech
-
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            if (!selectedVoice) loadVoices();
-            if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 1.0;
-            utterance.rate = 1.0;
-
-            utterance.onend = () => { 
-                isAiSpeaking = false;
-                // Update UI back to Listening
-                if (isVoiceMode) {
-                    document.getElementById('voice-status').innerText = "LISTENING...";
-                }
-            };
-
+            const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
+            utterance.lang = hasTelugu ? 'te-IN' : 'en-US';
+            utterance.onend = () => { isAiSpeaking = false; };
             window.speechSynthesis.speak(utterance);
         }
 
         function connectWebSocket() {
             websocket = new WebSocket(wsUrl);
-            websocket.onopen = () => {
-                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
-                document.getElementById('connection-status').innerText = "Connected";
-            };
-            
+            websocket.onopen = () => { document.getElementById('connection-status').innerText = "Connected"; document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"; };
             websocket.onmessage = (event) => {
                 const text = event.data;
-                isProcessing = false;
-                
                 addAiMessage(text); 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro ...";
                 speak(text);
-
                 if (text.includes("Vision Camera On")) startVisionMode();
                 if (text.includes("Disconnected") || text.includes("Stopped")) stopVisionMode();
             };
-            
             websocket.onclose = () => setTimeout(connectWebSocket, 3000);
         }
 
@@ -346,29 +248,23 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-                visionContainer.style.display = "block"; 
-                visionActive = true;
-                addAiMessage("📷 Webcam Started. I can now see you.");
-            } catch (err) {
-                addAiMessage("⚠️ Error: Camera permission denied.");
-            }
+                visionContainer.style.display = "block"; visionActive = true;
+                addAiMessage("📷 Webcam Started.");
+            } catch (err) { addAiMessage("⚠️ Error: Camera permission denied."); }
         }
 
         function stopVisionMode() {
             if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; }
-            visionContainer.style.display = "none";
-            visionActive = false;
+            visionContainer.style.display = "none"; visionActive = false;
         }
 
         function sendMessage(text) {
             if (visionActive) {
                 const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext("2d").drawImage(video, 0, 0);
-                const imageData = canvas.toDataURL("image/jpeg");
-                const payload = JSON.stringify({ text: text, image: imageData });
-                websocket.send(payload);
+                canvas.width = 640; canvas.height = 480;
+                canvas.getContext("2d").drawImage(video, 0, 0, 640, 480);
+                const imageData = canvas.toDataURL("image/jpeg", 0.7);
+                websocket.send(JSON.stringify({ text: text, image: imageData }));
             } else {
                 websocket.send(text);
             }
@@ -379,7 +275,7 @@
             div.className = "flex justify-start items-start gap-3";
             div.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shadow-lg mt-1 shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-xs text-white"></i></div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g, '<b class="text-miro-accent">$1</b>').replace(/\n/g, '<br>')}</div>`;
             document.getElementById('chat-container').appendChild(div);
-            scrollToBottom();
+            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
         }
 
         function addUserMessage(text) {
@@ -387,38 +283,28 @@
             div.className = "flex justify-end";
             div.innerHTML = `<div class="msg-user max-w-[80%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm shadow-md">${text}</div>`;
             document.getElementById('chat-container').appendChild(div);
-            scrollToBottom();
+            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
         }
-
-        function scrollToBottom() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }
 
         const plusBtn = document.getElementById('plus-btn');
         const featurePicker = document.getElementById('feature-picker');
-        const icon = document.getElementById('plus-icon');
-        plusBtn.addEventListener('click', () => {
-            featurePicker.classList.toggle('opacity-0');
-            featurePicker.classList.toggle('pointer-events-none');
-            featurePicker.classList.toggle('translate-y-10');
-            icon.classList.toggle('rotate-45');
-        });
+        plusBtn.addEventListener('click', () => { featurePicker.classList.toggle('opacity-0'); featurePicker.classList.toggle('pointer-events-none'); featurePicker.classList.toggle('translate-y-10'); });
 
         window.triggerAction = (action) => {
             plusBtn.click();
+            if (action === "Upload") { fileInput.click(); return; }
             if(action === 'Disconnect') { websocket.send("Stop all"); return; }
             const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : 
                         action === 'Sign' ? "Activate Sign Language" : 
                         action === 'Camera' ? "Activate Vision AI" : `Use ${action}`;
-            addUserMessage(cmd);
-            websocket.send(cmd);
+            addUserMessage(cmd); websocket.send(cmd);
         };
 
         const userInput = document.getElementById('user-input');
         document.getElementById('send-btn').addEventListener('click', () => {
             const text = userInput.value.trim();
             if(!text) return;
-            addUserMessage(text);
-            sendMessage(text);
-            userInput.value = '';
+            addUserMessage(text); sendMessage(text); userInput.value = '';
         });
         userInput.addEventListener('keypress', (e) => { if(e.key==='Enter') document.getElementById('send-btn').click(); });
 
