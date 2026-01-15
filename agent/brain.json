@@ -2,42 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "Hey, Miro."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hey there! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Open Google."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I have opened Google for you. What would you like me to search for and summarize? Please provide me with the search query or topic you want me to summarize from Google."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Stop it."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "What is the latest conversation we had for?"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "The latest conversation we had was about me opening Google for you and my asking you what you wanted me to search for and summarize. You had just instructed me to open Google."
@@ -179,6 +143,42 @@
       "role": "model",
       "parts": [
         "Hey there! What can I do for you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey! What can I do for you?"
       ]
     }
   ]
