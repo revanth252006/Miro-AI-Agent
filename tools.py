@@ -62,7 +62,7 @@ async def take_screenshot() -> str:
 
     loop = asyncio.get_event_loop()
     filename = await loop.run_in_executor(None, _perform_screenshot)
-    return f"📸 Screenshot saved as {filename}"
+    return f" Screenshot saved as {filename} "
 
 async def minimize_windows() -> str:
     """
