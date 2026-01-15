@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
-        tailwind.config = { theme: { extend: { colors: { miro: { bg: '#050505', glass: 'rgba(255, 255, 255, 0.05)', accent: '#00f3ff', purple: '#bd00ff', surface: '#121212' } }, fontFamily: { sans: ['Space Grotesk', 'sans-serif'] }, animation: { 'pulse-slow': 'pulse 3s infinite', 'float': 'float 6s infinite' } } } }
+        tailwind.config = { theme: { extend: { colors: { miro: { bg: '#050505', glass: 'rgba(255, 255, 255, 0.05)', accent: '#00f3ff', purple: '#bd00ff', surface: '#121212' } }, fontFamily: { sans: ['Space Grotesk', 'sans-serif'] }, animation: { 'pulse-slow': 'pulse 3s infinite', 'float': 'float 6s infinite', 'wave': 'wave 1.2s ease-in-out infinite' } } } }
     </script>
     <style>
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #050505; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
@@ -20,20 +20,28 @@
         .msg-user { background: linear-gradient(135deg, #00f3ff22, #00f3ff05); border: 1px solid #00f3ff44; color: #e0f2fe; }
         .msg-ai { background: #1a1a1a; border: 1px solid #333; color: #d1d5db; }
         
-        /* History Item Styling */
+        .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%); border-radius: 50%; filter: blur(10px); animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+
+        /* Sidebar History Styling */
         .history-item { cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 4px; transition: background 0.2s; font-size: 13px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; align-items: center; }
         .history-item:hover { background: rgba(255,255,255,0.05); color: white; }
         .history-item .del-btn { opacity: 0; transition: opacity 0.2s; }
         .history-item:hover .del-btn { opacity: 1; }
 
-        #vision-container { display: none; position: absolute; bottom: 100px; right: 20px; width: 240px; height: 180px; background: #000; border: 2px solid #00f3ff; border-radius: 12px; overflow: hidden; z-index: 40; }
+        #vision-container { display: none; position: absolute; bottom: 100px; right: 20px; width: 240px; height: 180px; background: #000; border: 2px solid #00f3ff; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); z-index: 40; }
         video { width: 100%; height: 100%; object-fit: cover; }
+        #vision-status { position: absolute; bottom: 8px; left: 8px; font-size: 10px; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; color: #00f3ff; font-weight: bold; }
     </style>
 </head>
 <body class="bg-miro-bg text-white h-screen flex overflow-hidden">
 
     <input type="file" id="file-upload" class="hidden" accept=".pdf,.txt">
-    <div id="vision-container"><video id="webcam" autoplay playsinline></video><div class="absolute bottom-2 left-2 text-[10px] text-miro-accent">● VISION</div></div>
+
+    <div id="vision-container">
+        <video id="webcam" autoplay playsinline></video>
+        <div id="vision-status">● VISION ACTIVE</div>
+    </div>
 
     <aside class="w-64 hidden md:flex flex-col border-r border-miro-glassBorder bg-black/40">
         <div class="p-6 pb-2">
@@ -49,8 +57,7 @@
         
         <div class="flex-1 overflow-y-auto p-4 space-y-1">
             <div class="text-xs font-bold text-gray-600 uppercase mb-2 mt-2 px-2">Recent</div>
-            <div id="history-list">
-                </div>
+            <div id="history-list"></div>
         </div>
         
         <div class="p-4 border-t border-miro-glassBorder bg-black/20 text-xs text-gray-500 flex justify-between">
@@ -88,22 +95,31 @@
                 <div class="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-center gap-2">
                     <button id="plus-btn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-miro-accent/20 text-gray-400 transition"><i class="fa-solid fa-plus" id="plus-icon"></i></button>
                     <input type="text" id="user-input" placeholder="Type here..." class="flex-1 bg-transparent border-none outline-none text-white h-10 px-2">
-                    <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()"><i class="fa-solid fa-microphone text-lg"></i></button>
+                    <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
                     <button id="send-btn" class="w-10 h-10 rounded-xl bg-miro-accent text-black font-bold hover:shadow-[0_0_15px_rgba(0,243,255,0.4)] transition"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
         
-        <div id="voice-overlay" class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden">
+        <div id="voice-overlay" class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden transition-opacity duration-500">
             <button onclick="toggleVoiceMode()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <div class="relative"><div class="voice-orb"></div><div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-microphone text-4xl text-white"></i></div></div>
-            <div class="mt-12 text-center space-y-4 px-4"><h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2><p id="voice-transcript" class="text-gray-400 text-lg">Go ahead.</p></div>
+            <div class="relative"><div class="voice-orb"></div><div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-microphone text-4xl text-white drop-shadow-lg"></i></div></div>
+            <div class="mt-12 text-center space-y-4 px-4"><h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2><p id="voice-transcript" class="text-gray-400 text-lg max-w-2xl h-16 transition-all duration-300">Go ahead, I'm listening.</p></div>
+            <div class="mt-8 flex gap-2 h-8 items-end" id="voice-wave">
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0s"></div>
+                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.1s"></div>
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.2s"></div>
+                <div class="w-1 bg-miro-purple animate-wave" style="animation-delay: 0.3s"></div>
+                <div class="w-1 bg-miro-accent animate-wave" style="animation-delay: 0.4s"></div>
+            </div>
         </div>
     </main>
 
     <script>
         const wsUrl = 'wss://unelaborated-pseudobankrupt-landon.ngrok-free.dev/ws'; 
-        let websocket = null, ttsEnabled = false, isVoiceMode = false, isAiSpeaking = false, recognition = null, currentLang = 'en-US', visionActive = false, stream = null;
+        let websocket = null, ttsEnabled = false, isVoiceMode = false, isAiSpeaking = false, isProcessing = false, recognition = null, currentLang = 'en-US', visionActive = false, stream = null;
         const video = document.getElementById("webcam"), visionContainer = document.getElementById("vision-container"), fileInput = document.getElementById("file-upload");
 
         function connectWebSocket() {
@@ -117,17 +133,14 @@
             websocket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    // --- HANDLE COMMANDS ---
                     if (data.type === "history_list") {
                         renderHistory(data.data);
                     } else if (data.type === "chat_loaded") {
                         loadChatView(data.history, data.title);
                     } else {
-                        // Fallback if generic JSON
                         handleTextResponse(event.data);
                     }
                 } catch (e) {
-                    // Plain Text Response
                     handleTextResponse(event.data);
                 }
             };
@@ -141,7 +154,7 @@
             speak(text);
             if (text.includes("Vision Camera On")) startVisionMode();
             if (text.includes("Disconnected") || text.includes("Stopped")) stopVisionMode();
-            // Refresh history list to show new titles
+            // Refresh history to update titles
             websocket.send(JSON.stringify({ type: "get_history" }));
         }
 
@@ -154,7 +167,7 @@
                 div.className = "history-item group";
                 div.innerHTML = `
                     <span onclick="loadSession('${s.id}')" class="flex-1 truncate">${s.title}</span>
-                    <button onclick="deleteSession('${s.id}')" class="del-btn text-xs text-gray-500 hover:text-red-500 px-2"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteSession(event, '${s.id}')" class="del-btn text-xs text-gray-500 hover:text-red-500 px-2"><i class="fa-solid fa-trash"></i></button>
                 `;
                 list.appendChild(div);
             });
@@ -162,24 +175,24 @@
 
         function createNewChat() {
             document.getElementById('chat-container').innerHTML = '';
-            document.getElementById('chat-container').appendChild(document.getElementById('welcome-screen')); // Restore welcome
+            document.getElementById('chat-container').appendChild(document.getElementById('welcome-screen'));
             websocket.send(JSON.stringify({ type: "new_chat" }));
         }
 
         function loadSession(id) {
+            document.getElementById('chat-container').innerHTML = '';
             websocket.send(JSON.stringify({ type: "load_session", id: id }));
         }
 
-        function deleteSession(id) {
-            event.stopPropagation();
-            if(confirm("Delete chat?")) websocket.send(JSON.stringify({ type: "delete_session", id: id }));
+        function deleteSession(e, id) {
+            e.stopPropagation();
+            if(confirm("Delete this chat?")) websocket.send(JSON.stringify({ type: "delete_session", id: id }));
         }
 
         function loadChatView(history, title) {
             const container = document.getElementById('chat-container');
-            container.innerHTML = ""; // Clear
+            container.innerHTML = "";
             if (history.length === 0) {
-                 // New Chat - Show Welcome
                  container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-80 mt-10"><h2 class="text-3xl font-light">Chat: <span class="font-bold text-miro-accent">${title}</span></h2></div>`;
             } else {
                 history.forEach(msg => {
@@ -189,32 +202,135 @@
             }
         }
 
-        // --- EXISTING UTILS ---
+        // --- CORE FEATURES LOGIC (Restored from previous stable) ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                websocket.send(JSON.stringify({ type: "upload", filename: file.name, file: ev.target.result }));
+            reader.onload = (event) => {
+                websocket.send(JSON.stringify({ type: "upload", filename: file.name, file: event.target.result }));
                 addUserMessage(`📂 Uploading ${file.name}...`);
             };
             reader.readAsDataURL(file);
         });
 
-        function addAiMessage(text) { const d = document.createElement('div'); d.className = "flex justify-start items-start gap-3"; d.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shrink-0 text-white text-xs">AI</div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g, '<b class="text-miro-accent">$1</b>').replace(/\n/g, '<br>')}</div>`; document.getElementById('chat-container').appendChild(d); document.getElementById('chat-container').scrollTop = 99999; }
-        function addUserMessage(text) { const d = document.createElement('div'); d.className = "flex justify-end"; d.innerHTML = `<div class="msg-user max-w-[80%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm shadow-md">${text}</div>`; document.getElementById('chat-container').appendChild(d); document.getElementById('chat-container').scrollTop = 99999; }
+        function toggleLanguage() {
+            currentLang = currentLang === 'en-US' ? 'te-IN' : 'en-US';
+            document.getElementById('lang-btn').innerText = currentLang === 'en-US' ? "🇺🇸 English" : "🇮🇳 Telugu";
+            if (recognition) {
+                recognition.stop();
+                recognition.lang = currentLang;
+            }
+        }
 
-        document.getElementById('plus-btn').addEventListener('click', () => { document.getElementById('feature-picker').classList.toggle('opacity-0'); document.getElementById('feature-picker').classList.toggle('pointer-events-none'); document.getElementById('feature-picker').classList.toggle('translate-y-10'); document.getElementById('plus-icon').classList.toggle('rotate-45'); });
-        window.triggerAction = (a) => { document.getElementById('plus-btn').click(); if(a==="Upload"){fileInput.click();return;} if(a==="Disconnect"){websocket.send("Stop all");return;} const c = a==="Mouse"?"Activate Virtual Mouse":a==="Sign"?"Activate Sign Language":a==="Camera"?"Activate Vision AI":`Use ${a}`; addUserMessage(c); websocket.send(c); };
-        
-        document.getElementById('send-btn').addEventListener('click', () => { const t = document.getElementById('user-input').value.trim(); if(t){ addUserMessage(t); websocket.send(t); document.getElementById('user-input').value=''; } });
+        function speak(text) {
+            if (!ttsEnabled) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/[\*\#\`\_]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = currentLang;
+            isAiSpeaking = true;
+            utterance.onend = () => { 
+                isAiSpeaking = false; 
+                if (isVoiceMode) document.getElementById('voice-status').innerText = `LISTENING ...`;
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = currentLang;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                const lowerTranscript = transcript.toLowerCase();
+
+                // Wake word
+                if (!isVoiceMode && (lowerTranscript.includes("hey miro") || lowerTranscript.includes("hello miro"))) {
+                    toggleVoiceMode();
+                    speak("Yes Revanth?");
+                    return;
+                }
+
+                if (isVoiceMode) {
+                    if (isAiSpeaking && transcript.length > 0) { window.speechSynthesis.cancel(); isAiSpeaking = false; }
+                    document.getElementById('voice-transcript').innerText = `"${transcript}"`;
+                    if (event.results[event.results.length - 1].isFinal) {
+                        addUserMessage(transcript);
+                        sendMessage(transcript);
+                    }
+                }
+            };
+            recognition.onend = () => { recognition.lang = currentLang; try { recognition.start(); } catch(e) {} };
+            try { recognition.start(); } catch(e) {}
+        }
+
+        function toggleVoiceMode() {
+            isVoiceMode = !isVoiceMode;
+            const overlay = document.getElementById('voice-overlay');
+            if (isVoiceMode) {
+                overlay.classList.remove('hidden');
+                ttsEnabled = true;
+                speak("I am listening.");
+            } else {
+                overlay.classList.add('hidden');
+                ttsEnabled = false;
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function sendMessage(text) {
+            if (visionActive) {
+                const canvas = document.createElement("canvas");
+                canvas.width = 640; canvas.height = 480;
+                canvas.getContext("2d").drawImage(video, 0, 0, 640, 480);
+                websocket.send(JSON.stringify({ text: text, image: canvas.toDataURL("image/jpeg", 0.7) }));
+            } else {
+                websocket.send(text);
+            }
+        }
+
+        function addAiMessage(text) { 
+            const d = document.createElement('div'); 
+            d.className = "flex justify-start items-start gap-3"; 
+            d.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shrink-0 text-white text-xs">AI</div><div class="msg-ai max-w-[80%] px-5 py-3 rounded-2xl rounded-tl-sm text-sm shadow-md leading-relaxed">${text.replace(/\*\*(.*?)\*\*/g, '<b class="text-miro-accent">$1</b>').replace(/\n/g, '<br>')}</div>`; 
+            document.getElementById('chat-container').appendChild(d); 
+            document.getElementById('chat-container').scrollTop = 99999; 
+        }
+
+        function addUserMessage(text) { 
+            const d = document.createElement('div'); 
+            d.className = "flex justify-end"; 
+            d.innerHTML = `<div class="msg-user max-w-[80%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm shadow-md">${text}</div>`; 
+            document.getElementById('chat-container').appendChild(d); 
+            document.getElementById('chat-container').scrollTop = 99999; 
+        }
+
+        document.getElementById('plus-btn').addEventListener('click', () => {
+            document.getElementById('feature-picker').classList.toggle('opacity-0');
+            document.getElementById('feature-picker').classList.toggle('pointer-events-none');
+            document.getElementById('feature-picker').classList.toggle('translate-y-10');
+            document.getElementById('plus-icon').classList.toggle('rotate-45');
+        });
+
+        window.triggerAction = (action) => {
+            document.getElementById('plus-btn').click();
+            if (action === "Upload") { fileInput.click(); return; }
+            if (action === "Disconnect") { websocket.send("Stop all"); return; }
+            const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : action === 'Sign' ? "Activate Sign Language" : action === 'Camera' ? "Activate Vision AI" : `Use ${action}`;
+            addUserMessage(cmd);
+            websocket.send(cmd);
+        };
+
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const t = document.getElementById('user-input').value.trim();
+            if(t){ addUserMessage(t); sendMessage(t); document.getElementById('user-input').value=''; }
+        });
+
         document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key==='Enter') document.getElementById('send-btn').click(); });
 
-        // --- VOICE ---
-        function toggleVoiceMode() { isVoiceMode = !isVoiceMode; const o = document.getElementById('voice-overlay'); if(isVoiceMode){ o.classList.remove('hidden'); ttsEnabled=true; try{recognition.start();}catch(e){} speak("I'm listening."); } else { o.classList.add('hidden'); ttsEnabled=false; window.speechSynthesis.cancel(); } }
-        function speak(t) { if(!ttsEnabled)return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[*#]/g,'')); u.lang = currentLang; window.speechSynthesis.speak(u); }
-        if('webkitSpeechRecognition' in window) { recognition = new webkitSpeechRecognition(); recognition.continuous=true; recognition.lang=currentLang; recognition.onresult=(e)=>{ const t=e.results[e.results.length-1][0].transcript.trim(); if(isVoiceMode){ document.getElementById('voice-transcript').innerText=t; if(e.results[e.results.length-1].isFinal){ addUserMessage(t); websocket.send(t); } } }; recognition.onend=()=>{try{recognition.start()}catch(e){}}; try{recognition.start()}catch(e){} }
-
-        function toggleLanguage() { currentLang = currentLang==='en-US'?'te-IN':'en-US'; document.getElementById('lang-btn').innerText = currentLang==='en-US'?"🇺🇸 English":"🇮🇳 Telugu"; if(recognition){recognition.stop(); recognition.lang=currentLang;} }
         async function startVisionMode() { try{ stream=await navigator.mediaDevices.getUserMedia({video:true}); video.srcObject=stream; visionContainer.style.display='block'; visionActive=true; }catch(e){} }
         function stopVisionMode() { if(stream)stream.getTracks().forEach(t=>t.stop()); visionContainer.style.display='none'; visionActive=false; }
 
