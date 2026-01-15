@@ -1,16 +1,5 @@
-# --- Security (Never Upload These) ---
-.env
-*credentials*.json
-*client_secret*.json
-web_credentials.json
-user_token.json
-token.json
-
-# --- Python Junk ---
-__pycache__/
 venv/
-*.pyc
-
-# --- Large Files ---
-*.h5
-long_term_memory.json
+__pycache__/
+.env
+.DS_Store
+sign_detection/Model/keras_model.h5
