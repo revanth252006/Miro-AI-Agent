@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,7 +92,7 @@
                     <span id="connection-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
                     <span id="connection-status">Offline</span>
                 </span>
-                <span>v5.0.0</span>
+                <span>v4.0.0</span>
             </div>
         </div>
     </aside>
@@ -126,8 +127,8 @@
                         <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload PDF</span></button>
                         
                         <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
-                        <button onclick="triggerAction('screen')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-desktop text-xl text-purple-400"></i><span class="text-xs">See Screen</span></button>
-                        <button onclick="triggerAction('search')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-globe text-xl text-green-400"></i><span class="text-xs">Web Search</span></button>
+                        <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
+                        <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
                     </div>
                     <div class="mt-2 pt-2 border-t border-gray-800">
                         <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition">
@@ -138,7 +139,7 @@
 
                 <div class="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-center gap-2">
                     <button id="plus-btn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-miro-accent/20 text-gray-400 transition"><i class="fa-solid fa-plus" id="plus-icon"></i></button>
-                    <input type="text" id="user-input" placeholder="Ask Miro or say 'Generate image of...'" class="flex-1 bg-transparent border-none outline-none text-white h-10 px-2">
+                    <input type="text" id="user-input" placeholder="Type here..." class="flex-1 bg-transparent border-none outline-none text-white h-10 px-2">
                     <button id="mic-btn" class="w-10 h-10 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition" onclick="toggleVoiceMode()">
                         <i class="fa-solid fa-microphone text-lg"></i>
                     </button>
@@ -240,7 +241,7 @@
             recognition.onstart = () => {
                 if(isVoiceMode && !isAiSpeaking) {
                     const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = `LISTENING ...`;
                     document.getElementById('voice-wave').classList.remove('opacity-0');
                 }
             };
@@ -316,9 +317,6 @@
         function speak(text) {
             if (!ttsEnabled) return;
             
-            // IGNORE IMAGES from reading out loud
-            if (text.includes("<img")) text = "Here is the image you asked for.";
-
             const cleanText = text.replace(/[\*\#\`\_]/g, '').replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
             isAiSpeaking = true;
             window.speechSynthesis.cancel();
@@ -340,7 +338,7 @@
                 isAiSpeaking = false;
                 if (isVoiceMode) {
                     const langText = currentLang === 'en-US' ? "ENG" : "TEL";
-                    document.getElementById('voice-status').innerText = `LISTENING (${langText})...`;
+                    document.getElementById('voice-status').innerText = `LISTENING ...`;
                 }
             };
 
@@ -358,7 +356,7 @@
                 const text = event.data;
                 isProcessing = false;
                 addAiMessage(text); 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "AI SPEAKING...";
+                if(isVoiceMode) document.getElementById('voice-status').innerText = "Miro...";
                 speak(text);
 
                 if (text.includes("Vision Camera On")) startVisionMode();
@@ -430,13 +428,6 @@
             plusBtn.click();
             if (action === "Upload") { fileInput.click(); return; } // <--- TRIGGER HIDDEN INPUT
             if(action === 'Disconnect') { websocket.send("Stop all"); return; }
-            if (action === 'search') { 
-                let q = prompt("What do you want to search?");
-                if(q) { websocket.send("search for " + q); addUserMessage("Searching for " + q); }
-                return;
-            }
-            if (action === 'screen') { websocket.send("what is on my screen"); addUserMessage("Analyzing Screen..."); return; }
-
             const cmd = action === 'Mouse' ? "Activate Virtual Mouse" : 
                         action === 'Sign' ? "Activate Sign Language" : 
                         action === 'Camera' ? "Activate Vision AI" : `Use ${action}`;
