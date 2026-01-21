@@ -1,0 +1,39 @@
+{
+  "id": "f776f71f",
+  "title": "hey",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:32 AM, Date: Wednesday, January 21, 2026 | USER: None] hey"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:32 AM, Date: Wednesday, January 21, 2026 | USER: None] who created you"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I was created by Revanth and his team, including Manoj Kumar, Amith Kumar, and Jaideep. Revanth is my boss.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-21 11:32:30.087393"
+}
