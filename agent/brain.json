@@ -2,24 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "give the ajva code for same calclulaor"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Of course! It's a great exercise to see how the same logic is implemented in a different language like Java.\n\nHello! Miro here again. Let's translate that calculator into Java.\n\nJava is a statically-typed language, so the code is a bit more structured and verbose than Python, but the core logic remains the same. We'll use the `Scanner` class to handle user input.\n\n### Simple Command-Line Calculator in Java\n\nThis calculator performs the same functions as the Python version:\n1.  Takes two numbers and an operator (+, -, \\*, /).\n2.  Handles errors like non-numeric input and division by zero.\n3.  Loops continuously until the user types \"quit\".\n\n```java\nimport java.util.Scanner; // Import the Scanner class to read user input\n\npublic class Calculator {\n\n    public static void main(String[] args) {\n        // Create a single Scanner object to be used throughout the program\n        Scanner scanner = new Scanner(System.in);\n\n        System.out.println(\"--- Welcome to Miro's Simple Java Calculator ---\");\n        System.out.println(\"Enter 'quit' at any time to exit the program.\");\n        System.out.println(\"----------------------------------------------\");\n\n        // An infinite loop to keep the calculator running\n        while (true) {\n            try {\n                // 1. Get the first number from the user\n                System.out.print(\"Enter the first number: \");\n                String num1Input = scanner.nextLine();\n                if (num1Input.equalsIgnoreCase(\"quit\")) {\n                    break; // Exit the loop if user types 'quit'\n                }\n\n                // 2. Get the operation from the user\n                System.out.print(\"Enter an operator (+, -, *, /): \");\n                String operator = scanner.nextLine();\n                if (operator.equalsIgnoreCase(\"quit\")) {\n                    break;\n                }\n\n                // 3. Get the second number from the user\n                System.out.print(\"Enter the second number: \");\n                String num2Input = scanner.nextLine();\n                if (num2Input.equalsIgnoreCase(\"quit\")) {\n                    break;\n                }\n\n                // Convert string inputs to numbers (double for decimal support)\n                double num1 = Double.parseDouble(num1Input);\n                double num2 = Double.parseDouble(num2Input);\n                double result = 0;\n\n                // A flag to track if we should print the result\n                boolean validOperation = true;\n\n                // 4. Perform the calculation based on the operator\n                switch (operator) {\n                    case \"+\":\n                        result = num1 + num2;\n                        break;\n                    case \"-\":\n                        result = num1 - num2;\n                        break;\n                    case \"*\":\n                        result = num1 * num2;\n                        break;\n                    case \"/\":\n                        // Handle division by zero error\n                        if (num2 == 0) {\n                            System.out.println(\"Error: Cannot divide by zero.\");\n                            validOperation = false;\n                        } else {\n                            result = num1 / num2;\n                        }\n                        break;\n                    default:\n                        // Handle invalid operator\n                        System.out.println(\"Error: Invalid operator. Please use +, -, *, or /.\");\n                        validOperation = false;\n                        break;\n                }\n\n                // Print the result only if the operation was valid\n                if (validOperation) {\n                    System.out.println(\"Result: \" + num1 + \" \" + operator + \" \" + num2 + \" = \" + result);\n                }\n\n            } catch (NumberFormatException e) {\n                // Handle cases where the input is not a valid number\n                System.out.println(\"Error: Invalid input. Please enter a valid number.\");\n            } catch (Exception e) {\n                // Catch any other unexpected errors\n                System.out.println(\"An unexpected error occurred: \" + e.getMessage());\n            }\n\n            System.out.println(\"--------------------\"); // Separator for the next calculation\n        }\n\n        System.out.println(\"Thank you for using the calculator. Goodbye!\");\n        scanner.close(); // Close the scanner to prevent resource leaks\n    }\n}\n```\n\n### Key Differences from the Python Version\n\n*   **Imports:** In Java, you must explicitly `import` classes from libraries you want to use, like `java.util.Scanner`.\n*   **Static Typing:** You must declare the type of every variable (e.g., `double num1`, `String operator`).\n*   **Main Method:** All executable Java code must be inside a `public static void main(String[] args)` method within a class.\n*   **User Input:** We use an instance of the `Scanner` class and its `nextLine()` method to read user input.\n*   **String Comparison:** Use the `.equals()` or `.equalsIgnoreCase()` methods to compare strings, not `==`.\n*   **Type Conversion:** We use `Double.parseDouble()` to convert a `String` to a `double`. This can throw a `NumberFormatException`, which we handle in a `catch` block.\n*   **`switch` Statement:** A `switch` statement is often used in Java as a clean alternative to a long `if-else if-else` chain for checking a variable against multiple constant values.\n*   **Resource Management:** It's good practice to `.close()` resources like the `Scanner` when you are finished with them to free up system resources.\n\n### How to Run the Code\n\n1.  Copy the code above.\n2.  Paste it into a file and save it with the exact same name as the class: `Calculator.java`.\n3.  Open a terminal or command prompt.\n4.  Navigate to the directory where you saved the file.\n5.  **Compile** the code using the Java Development Kit (JDK):\n    ```sh\n    javac Calculator.java\n    ```\n    This will create a `Calculator.class` file.\n6.  **Run** the compiled program:\n    ```sh\n    java Calculator\n    ```\n\nYou will then see the prompts and can interact with the calculator just like the Python version"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "WHO CREATED YOU"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "I was created by Revanth and his team. Team Members are : Revanth , Manoj , Amit, Jaideep."
@@ -179,6 +161,24 @@
       "role": "model",
       "parts": [
         "I was created by Revanth and his team, including Manoj Kumar, Amith Kumar, and Jaideep. Revanth is my boss."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "who created you"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I was created by Revanth and his team, including Manoj Kumar, Amith Kumar, and Jaideep. Revanth is my boss."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "open google"
       ]
     }
   ],
