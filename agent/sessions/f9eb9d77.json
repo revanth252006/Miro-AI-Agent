@@ -1,0 +1,23 @@
+{
+  "id": "f9eb9d77",
+  "title": "Stop all",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 09:43 PM, Date: Saturday, January 17, 2026 | USER: None] Stop all"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Understood. I am now stopping all processes and will await further instructions.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 21:43:21.350468"
+}

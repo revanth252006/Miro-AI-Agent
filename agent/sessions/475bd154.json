@@ -1,0 +1,23 @@
+{
+  "id": "475bd154",
+  "title": "Hey, Miro.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Hey, Miro."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-16 19:33:12.834750"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "a77bde3f",
+  "title": "set the default voice of femal",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 02:40 PM, Date: Saturday, January 17, 2026 | USER: None] set the default voice of female."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "OK. I'll use a female voice from now on.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 14:40:46.947170"
+}

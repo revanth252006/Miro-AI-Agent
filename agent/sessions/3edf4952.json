@@ -1,0 +1,23 @@
+{
+  "id": "3edf4952",
+  "title": "speak only with female voice.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 02:39 PM, Date: Saturday, January 17, 2026 | USER: None] speak only with female voice."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Understood! I will now use a female voice for my responses. How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 14:39:38.188306"
+}

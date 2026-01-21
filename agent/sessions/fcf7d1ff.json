@@ -1,0 +1,23 @@
+{
+  "id": "fcf7d1ff",
+  "title": "Write a Python script to scrap",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 02:38 AM, Date: Saturday, January 17, 2026 | USER: None] Write a Python script to scrape a website using BeautifulSoup give only code"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "```python\n#\n# A Python script to scrape quotes from 'http://quotes.toscrape.com'\n# and save them into a CSV file.\n#\n# This script requires the 'requests' and 'beautifulsoup4' libraries.\n# You can install them using pip:\n# pip install requests\n# pip install beautifulsoup4\n#\n\nimport requests\nfrom bs4 import BeautifulSoup\nimport csv\nimport time\n\ndef scrape_website(url):\n    \"\"\"\n    Scrapes a target URL for quotes, authors, and tags,\n    and saves the data to a CSV file.\n    \"\"\"\n    print(f\"Attempting to scrape: {url}\")\n\n    # Set a User-Agent to mimic a web browser\n    headers = {\n        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'\n    }\n\n    try:\n        # Send an HTTP GET request to the URL\n        response = requests.get(url, headers=headers, timeout=10)\n        \n        # Raise an exception if the request was unsuccessful (e.g., 404, 500)\n        response.raise_for_status()\n        \n    except requests.exceptions.RequestException as e:\n        print(f\"Error: Could not retrieve the webpage. {e}\")\n        return\n\n    # Parse the HTML content of the page using BeautifulSoup\n    soup = BeautifulSoup(response.content, 'html.parser')\n\n    # Prepare the CSV file for writing\n    filename = 'scraped_quotes.csv'\n    try:\n        with open(filename, 'w', newline='', encoding='utf-8') as csvfile:\n            # Define the CSV column headers\n            fieldnames = ['text', 'author', 'tags']\n            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)\n            \n            # Write the header row to the CSV\n            writer.writeheader()\n\n            # Find all the quote containers on the page\n            # Each quote is within a <div class=\"quote\"> tag\n            quotes = soup.find_all('div', class_='quote')\n            \n            if not quotes:\n                print(\"No quotes found on the page. The website structure might have changed.\")\n                return\n\n            # Loop through each quote container to extract data\n            for quote in quotes:\n                # Extract the quote text\n                # The text is in a <span class=\"text\"> tag\n                text = quote.find('span', class_='text').get_text(strip=True)\n\n                # Extract the author's name\n                # The author is in a <small class=\"author\"> tag\n                author = quote.find('small', class_='author').get_text(strip=True)\n\n                # Extract the tags\n                # Tags are within a <div class=\"tags\"> containing multiple <a class=\"tag\">\n                tag_elements = quote.find_all('a', class_='tag')\n                tags = [tag.get_text(strip=True) for tag in tag_elements]\n                tags_str = ', '.join(tags)\n\n                # Write the extracted data as a new row in the CSV file\n                writer.writerow({\n                    'text': text,\n                    'author': author,\n                    'tags': tags_str\n                })\n        \n        print(f\"Success! Scraped {len(quotes)} quotes and saved them to '{filename}'\")\n\n    except IOError as e:\n        print(f\"Error: Could not write to file '{filename}'. {e}\")\n\n\n# --- Main execution block ---\nif __name__ == \"__main__\":\n    # The URL of the website we want to scrape\n    target_url = 'http://quotes.toscrape.com/'\n    \n    # Run the scraping function\n    scrape_website(target_url)\n```"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 02:38:50.584613"
+}

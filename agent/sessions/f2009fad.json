@@ -1,0 +1,39 @@
+{
+  "id": "f2009fad",
+  "title": "Good evening Revanth. I am Mir",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Good evening Revanth. I am Miro."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good evening! How can I help you tonight?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Hey, Miro."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! What can I do for you?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-16 19:36:18.484520"
+}

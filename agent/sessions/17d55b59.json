@@ -1,0 +1,23 @@
+{
+  "id": "17d55b59",
+  "title": "HI",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:53 PM, Date: Saturday, January 17, 2026 | USER: None] HI"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 23:53:59.839133"
+}

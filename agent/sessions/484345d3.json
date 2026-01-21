@@ -1,0 +1,39 @@
+{
+  "id": "484345d3",
+  "title": "Go to the property.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 10:21 PM, Date: Saturday, January 17, 2026 | USER: None] Go to the property."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Okay, I'm on my way.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 10:22 PM, Date: Saturday, January 17, 2026 | USER: None] Hello, are you there?"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Yes, I'm here!\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 22:22:59.585630"
+}

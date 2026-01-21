@@ -1,0 +1,39 @@
+{
+  "id": "9e0f0f4d",
+  "title": "Hey, Miro.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 01:27 PM, Date: Saturday, January 17, 2026 | USER: None] Hey, Miro."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 01:27 PM, Date: Saturday, January 17, 2026 | USER: None] What are you doing?"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Just hanging out, ready to assist you with anything you need! Is there something specific you'd like to chat about or need help with?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 13:27:14.461327"
+}

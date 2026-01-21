@@ -1,0 +1,135 @@
+{
+  "id": "115be7f7",
+  "title": "hello",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hello"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello!\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is your name"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My name is Miro.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who created you"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I was created by Revanth and his team.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "when you are compared to google gemini what you cannot do"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Compared to Google Gemini, I cannot access real-time information from the internet or process information from a wide range of modalities like video and audio. My knowledge is also limited to the data I was trained on, and I don't have the continuous learning capabilities of Gemini.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "give me the infomation about the what u can do"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I can provide summaries, answer questions based on provided text, and follow instructions. I can also translate languages, generate different creative text formats, and respond to your requests in an informative way. Plus, I can open applications, change the volume, and take screenshots on this device.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "summaries it"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Could you please specify what you would like me to summarize?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "summarise the pdf"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Okay, I will summarize the PDF.\n\nAkula Vijay is an Electrical Engineering student skilled in problem-solving, communication, and teamwork. He has experience with C, Java, SQL, HTML, and CSS. He is currently pursuing his Bachelor of Technology degree and has completed virtual internships in Microchip Embedded Systems. He has worked on a fingerprint recognition project using MATLAB. He also holds certifications in Type Writing and Web Development.\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "build a dashboad like amzon using html and css and javascripts giv ethe  code"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am sorry, I am unable to generate code.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-16 19:55:08.343623"
+}

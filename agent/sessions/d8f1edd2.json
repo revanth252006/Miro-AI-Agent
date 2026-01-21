@@ -1,0 +1,23 @@
+{
+  "id": "d8f1edd2",
+  "title": "Hello, Mira.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 01:52 AM, Date: Saturday, January 17, 2026 | USER: None] Hello, Mira."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello! I'm Miro, and I'm happy to assist you. How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 01:52:36.908210"
+}

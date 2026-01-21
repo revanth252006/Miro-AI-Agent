@@ -1,0 +1,23 @@
+{
+  "id": "463c4308",
+  "title": "What's the time right now?",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Time is The current time is 07:34 PM and the date is Friday, January 16, 2026.. Summarize."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "It's 7:34 PM on Friday, January 16, 2026.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-16 19:34:37.034593"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "69c9ea82",
+  "title": "hey, miro.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 02:45 PM, Date: Saturday, January 17, 2026 | USER: None] hey, miro."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 14:45:27.804379"
+}

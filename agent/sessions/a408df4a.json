@@ -1,0 +1,23 @@
+{
+  "id": "a408df4a",
+  "title": "hair mirror.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 02:52 PM, Date: Saturday, January 17, 2026 | USER: None] hair mirror."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I can help you find a hair salon or product, but I'm not quite sure what you mean by \"hair mirror.\" Can you give me a little more context?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 14:52:52.725963"
+}

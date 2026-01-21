@@ -1,0 +1,23 @@
+{
+  "id": "fbf31999",
+  "title": "12345678",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 10:28 PM, Date: Saturday, January 17, 2026 | USER: None] 12345678"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello! How can I assist you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 22:28:51.675179"
+}

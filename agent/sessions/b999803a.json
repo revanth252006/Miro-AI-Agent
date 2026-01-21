@@ -1,0 +1,23 @@
+{
+  "id": "b999803a",
+  "title": "hello",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hello"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-16 19:26:13.981833"
+}

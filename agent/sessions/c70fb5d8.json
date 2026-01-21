@@ -1,0 +1,39 @@
+{
+  "id": "c70fb5d8",
+  "title": "Hey, Middle.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 01:20 PM, Date: Saturday, January 17, 2026 | USER: None] Hey, Middle."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 01:20 PM, Date: Saturday, January 17, 2026 | USER: None] What are you doing?"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Just hanging out and ready to assist you with anything you need! How about you? Anything exciting happening?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-17 13:20:26.112107"
+}
