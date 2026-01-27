@@ -308,15 +308,11 @@ class VoiceAssistant:
 
     def clean_response(self, text):
         """
-        Cleans text for voice output, BUT preserves code blocks.
-        This fixes the indentation/syntax destruction issue.
+        Returns text AS IS. 
+        We do NOT strip Markdown characters here anymore.
+        The Frontend will handle cleaning text for the Voice Engine.
         """
-        # If code block exists, DO NOT strip characters. Return raw text.
-        if "```" in text or "def " in text or "import " in text or "class " in text:
-            return text
-        
-        # Otherwise, safe to strip special chars for voice
-        return re.sub(r'[\*\#\`\_]', '', text).strip()
+        return text
 
     def select_brain(self, text, has_image=False, has_file=False):
         """Decides which brain handles the request."""

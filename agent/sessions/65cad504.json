@@ -1,0 +1,23 @@
+{
+  "id": "65cad504",
+  "title": "hello",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:36 AM, Date: Tuesday, January 27, 2026 | USER: None] hello"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-27 11:36:14.719717"
+}
