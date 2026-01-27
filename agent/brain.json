@@ -2,54 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        "Of course. I have analyzed the PDF file \"Revanth Resume.pdf\".\n\nHere is a concise summary of the resume for Revanth Akula.\n\n### **Summary of Revanth Akula's Resume**\n\nRevanth Akula is a first-year **B.Tech student (2024-2028)** at Malla Reddy University, specializing in **Computer Science with a focus on AI & Machine Learning (AIML)**. He demonstrates a strong academic foundation and a proactive approach to skill development through various planned projects and certifications.\n\n**Key Highlights:**\n\n*   **Academic Profile:**\n    *   **B.Tech (AIML):** Currently pursuing with a CGPA of 8.8.\n    *   **Senior Secondary (TSBIE):** Excellent score of 97.6%.\n    *   **Secondary (SSC):** Strong GPA of 9.8.\n\n*   **Technical Skills:**\n    *   **Programming Languages:** C/C++, Python.\n    *   **Web Development:** HTML, CSS, JavaScript, Flask, and familiarity with Django.\n    *   **Databases:** MySQL and familiarity with MongoDB.\n    *   **CS Fundamentals:** Strong understanding of Data Structures, Algorithms, OOPs, and Operating Systems.\n\n*   **Projects (Planned for mid-2025):**\n    *   **Sign Language Detection (Machine Learning):** An ML model to interpret sign language from video input using Python, TensorFlow, and Keras.\n    *   **Amazon Dashboard Clone (Frontend):** A frontend-only project showcasing UI/UX skills using HTML and CSS.\n    *   **Personal Portfolio (Full-Stack):** A dynamic portfolio site using Flask, MySQL, HTML, CSS, and JavaScript.\n\n*   **Certifications (In-progress/Planned for 2024-2025):**\n    *   He is pursuing certifications in **Full Stack Development**, **SQL**, **Cybersecurity**, **CSS**, and **Data Science** from various platforms like OneRoadMap, HackerRank, HP, and Forage.\n\n**Overall Impression:**\n\nRevanth is an ambitious and forward-planning student. His resume showcases a clear roadmap for skill acquisition in high-demand areas like Machine Learning and Full-Stack Development. While his projects and certifications are scheduled for the future, they highlight his dedication and clear career focus early in his academic journey."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Activate Camera"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "As Miro Agent, I must clarify that I am a text-based AI and do not have the ability to access or control your device's hardware, including your camera.\n\nThis is a fundamental safety and privacy feature. My purpose is to process information and respond to your queries through text, not to interact with your physical environment.\n\nIf you have an image or a document you would like me to analyze, you can upload it, and I will do my best to assist you with the information it contains."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "SUMMARISE THIS PDF"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Of course.\n\nPlease upload the PDF you would like me to summarize. The system indicates that no new file was attached to your last message.\n\nThe last document you provided was **\"Revanth Resume.pdf\"**, which I have already summarized for you.\n\nIf you would like me to summarize that same resume again, perhaps with a different focus, please let me know. Otherwise, please upload the new file.\n\nI am ready to assist as soon as you provide the document."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hey there! How can I help you today?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "activate the virtual mouse "
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         "disconnect"
@@ -179,6 +131,54 @@
       "role": "model",
       "parts": [
         "I was created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep.\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey miro"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! How can I help you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hi! What can I do for you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what are you doing right now"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Right now, I'm here to assist you! I'm ready to answer your questions, help you brainstorm, or provide information about Miro and its features. Just let me know what you need.\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "What are you doing right now?"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm currently running and waiting for your commands. I'm ready to answer questions, provide information, or assist you with tasks related to Miro. Basically, I'm here to help you make the most of your Miro experience!\n"
       ]
     }
   ],
