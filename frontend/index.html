@@ -3,339 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRO | AI Agent</title>
+    <title>MIRO | Gemini UI</title>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.292.0/dist/umd/lucide-react.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 
     <script>
-        tailwind.config = { theme: { extend: { colors: { miro: { bg: '#050505', glass: 'rgba(255, 255, 255, 0.05)', accent: '#00f3ff', purple: '#bd00ff' } }, fontFamily: { sans: ['Space Grotesk', 'sans-serif'] }, animation: { 'float': 'float 6s ease-in-out infinite' }, keyframes: { float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } } } } } }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Google Sans', 'Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        gemini: {
+                            bg: '#131314',
+                            surface: '#1e1f20',
+                            surfaceHover: '#2d2e31',
+                            blue: '#a8c7fa',
+                            accent: '#00f3ff',
+                            purple: '#bd00ff'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
         mermaid.initialize({ startOnLoad: false, theme: 'dark' });
     </script>
 
     <style>
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #050505; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .glass-panel { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .msg-user { background: linear-gradient(135deg, #00f3ff22, #00f3ff05); border: 1px solid #00f3ff44; color: #e0f2fe; border-bottom-right-radius: 2px; }
-        .msg-ai { background: #1a1a1a; border: 1px solid #333; color: #d1d5db; border-bottom-left-radius: 2px; max-width: 90%; }
-        .mermaid { background: #111; padding: 15px; border-radius: 8px; margin: 10px 0; text-align: center; border: 1px solid #333; }
-        pre { background: #0d0d0d !important; border-radius: 8px; border: 1px solid #333; margin: 10px 0; padding: 12px; overflow-x: auto; }
-        code { font-family: 'Fira Code', monospace; font-size: 0.9em; }
-        .typing-dot { width: 6px; height: 6px; background-color: #00f3ff; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; } .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
-        #voice-overlay { transition: opacity 0.3s ease; }
-        .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%); border-radius: 50%; filter: blur(10px); animation: pulse-glow 2s infinite; }
-        @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-        #vision-container { display: none; position: absolute; bottom: 130px; right: 20px; width: 240px; height: 180px; background: #000; border: 2px solid #00f3ff; border-radius: 12px; overflow: hidden; z-index: 40; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        body { background-color: #131314; color: #e3e3e3; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .glass-panel { background: rgba(30, 31, 32, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Markdown Styles */
+        .markdown-body pre { background: #0d0d0d !important; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
+        .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #e0f2fe; }
+        .markdown-body p { margin-bottom: 0.8rem; line-height: 1.6; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 600; color: #fff; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        
+        .voice-orb { width: 150px; height: 150px; background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%); border-radius: 50%; filter: blur(15px); animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
     </style>
 </head>
-<body class="bg-miro-bg text-white h-screen flex overflow-hidden">
+<body>
+    <div id="root"></div>
 
-    <input type="file" id="file-upload" class="hidden" accept=".pdf,.txt">
-    <div id="vision-container"><video id="webcam" autoplay playsinline></video><div class="absolute bottom-2 left-2 bg-black/80 text-miro-accent text-[10px] font-bold px-2 py-1 rounded">● VISION ACTIVE</div></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useLayoutEffect } = React;
+        const { motion, AnimatePresence } = window.Motion;
+        const { 
+            Menu, Plus, MessageSquare, History, Settings, Moon, Sun, 
+            Send, Mic, Image: ImageIcon, Sparkles, MoreVertical, 
+            ChevronDown, X, Upload, Eye, MousePointer2, Power, FileText
+        } = window.LucideReact;
 
-    <aside class="w-64 hidden md:flex flex-col border-r border-miro-glassBorder bg-black/40">
-        <div class="p-6 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-miro-accent to-miro-purple animate-pulse-slow"></div>
-            <h1 class="text-2xl font-bold tracking-widest">MIRO</h1>
-        </div>
-        <div class="flex-1 overflow-y-auto p-4"><div class="text-xs font-semibold text-gray-500 uppercase mb-2">Status</div><div class="text-xs text-gray-400 p-2 bg-white/5 rounded border border-white/5">System: <span class="text-green-400">Online</span><br>Engine: <span class="text-miro-accent">MIRO PRO </span></div></div>
-    </aside>
+        // --- GLOBAL CONFIG ---
+        const WS_URL = 'ws://localhost:8000/ws';
 
-    <main class="flex-1 flex flex-col relative z-10 h-full">
-        <header class="h-16 flex items-center justify-between px-6 bg-miro-bg/80 backdrop-blur-md sticky top-0 z-20">
+        // --- COMPONENTS ---
 
-            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-miro-accent/10 border border-miro-accent/20"><i class="fa-solid fa-bolt text-miro-accent text-xs"></i><span class="text-xs font-medium text-miro-accent tracking-wide">MIRO</span></div>
-            <!-- <button id="lang-btn" onclick="toggleLanguage()" class="px-3 py-1 text-xs font-bold rounded-full bg-gray-800 border border-gray-600 hover:border-miro-accent transition">🇺🇸 English</button> -->
-        </header>
+        // 1. Markdown/Mermaid Renderer
+        const MessageContent = ({ content }) => {
+            const containerRef = useRef(null);
 
-        <div id="chat-wrapper" class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth relative">
-            <div id="chat-container" class="max-w-4xl mx-auto space-y-6 pb-4">
-                <div class="flex flex-col items-center justify-center h-48 text-center space-y-4 opacity-80 mt-10">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center text-3xl shadow-2xl animate-float">✨</div>
-                    <h2 class="text-3xl font-light">Hello, <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-miro-accent to-white" id="user-display-name">Revanth</span></h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-4 md:p-6 bg-miro-bg/90 backdrop-blur-lg ">
-            <div id="feature-picker" class="absolute bottom-24 left-6 z-30 glass-panel rounded-2xl p-4 w-72 shadow-2xl transition-all duration-300 translate-y-10 opacity-0 pointer-events-none scale-95 border border-miro-glassBorder">
-                <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-2">Tools</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="triggerAction('Upload')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-cloud-arrow-up text-xl text-blue-400"></i><span class="text-xs">Upload PDF</span></button>
-                    <button onclick="triggerAction('Camera')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-eye text-xl text-miro-accent"></i><span class="text-xs">Vision</span></button>
-                    <button onclick="triggerAction('Sign')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-hands-asl-interpreting text-xl text-purple-400"></i><span class="text-xs">Sign</span></button>
-                    <button onclick="triggerAction('Mouse')" class="glass-button p-3 rounded-xl flex flex-col items-center gap-2 group"><i class="fa-solid fa-arrow-pointer text-xl text-green-400"></i><span class="text-xs">Mouse</span></button>
-                </div>
-                <div class="mt-2 pt-2 border-t border-gray-800">
-                    <button onclick="triggerAction('Disconnect')" class="w-full p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center gap-2 transition"><i class="fa-solid fa-power-off"></i> <span class="text-xs font-bold">Disconnect</span></button>
-                </div>
-            </div>
-
-            <div class="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-end gap-2 shadow-lg">
-                <button id="plus-btn" class="w-10 h-10 mb-1 rounded-xl bg-white/5 hover:bg-miro-accent/20 text-gray-400 transition flex items-center justify-center shrink-0"><i class="fa-solid fa-plus" id="plus-icon"></i></button>
-                <textarea id="user-input" rows="1" placeholder="Message Miro..." class="flex-1 bg-transparent border-none outline-none text-white px-2 py-3 resize-none max-h-32 overflow-y-auto leading-relaxed placeholder-gray-500"></textarea>
-                <button id="mic-btn" class="w-10 h-10 mb-1 rounded-xl hover:bg-white/10 text-gray-400 hover:text-miro-accent transition flex items-center justify-center shrink-0" onclick="toggleVoiceMode()"><i class="fa-solid fa-microphone text-lg"></i></button>
-                <button id="send-btn" class="w-10 h-10 mb-1 rounded-xl bg-miro-accent text-black font-bold hover:shadow-[0_0_15px_rgba(0,243,255,0.4)] transition flex items-center justify-center shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-
-        <div id="voice-overlay" class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden">
-            <button onclick="toggleVoiceMode()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <div class="relative"><div class="voice-orb"></div><div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-microphone text-4xl text-white drop-shadow-lg"></i></div></div>
-            <div class="mt-12 text-center space-y-4 px-4"><h2 id="voice-status" class="text-2xl font-light tracking-widest text-white">LISTENING...</h2><p id="voice-transcript" class="text-gray-400 text-lg max-w-2xl h-16 transition-all duration-300">Go ahead, I'm listening.</p></div>
-        </div>
-    </main>
-
-    <script>
-        const wsUrl = 'ws://localhost:8000/ws'; 
-        let websocket = null, ttsEnabled = false, isVoiceMode = false, isAiSpeaking = false;
-        let currentLang = 'en-US', recognition = null, visionActive = false, stream = null;
-        let selectedVoice = null, silenceTimer = null;
-
-        const userInput = document.getElementById("user-input");
-        const chatContainer = document.getElementById("chat-container");
-        const chatWrapper = document.getElementById("chat-wrapper");
-        const video = document.getElementById("webcam");
-        const visionContainer = document.getElementById("vision-container");
-
-        // --- 1. VOICE ENGINE: FORCE ZIRA ---
-        function loadVoices() {
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) return;
-            selectedVoice = voices.find(v => v.name.includes("Zira")) || 
-                            voices.find(v => v.name.includes("Google US English")) || 
-                            voices[0];
-        }
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-        loadVoices(); 
-
-        function speak(text) {
-            if (!ttsEnabled) return;
-            const cleanText = text.replace(/[*#`_]/g, '').replace(/<[^>]*>/g, '').replace(/```[\s\S]*?```/g, "Code block generated.");
-            
-            isAiSpeaking = true;
-            window.speechSynthesis.cancel(); 
-            
-            // REMOVED: recognition.abort(); -> We keep the mic ON to allow interruption.
-
-            const u = new SpeechSynthesisUtterance(cleanText);
-            const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
-            if (hasTelugu) u.lang = 'te-IN';
-            else if (selectedVoice) { u.voice = selectedVoice; u.lang = 'en-US'; }
-
-            u.onend = () => { 
-                isAiSpeaking = false; 
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "LISTENING...";
-            };
-            window.speechSynthesis.speak(u);
-        }
-
-        // --- 2. FULL DUPLEX RECOGNITION (BARGE-IN ENABLED) ---
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = true; // CRITICAL: NEVER STOP LISTENING
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-
-            recognition.onstart = () => {
-                if(isVoiceMode) document.getElementById('voice-status').innerText = "LISTENING...";
-            };
-
-            recognition.onresult = (e) => {
-                const result = e.results[e.results.length-1];
-                const t = result[0].transcript.trim();
-                const lower = t.toLowerCase();
-
-                // 1. BARGE-IN / INTERRUPTION LOGIC
-                // If AI is talking and we hear new text, stop the AI immediately.
-                if (isAiSpeaking && t.length > 1) {
-                    window.speechSynthesis.cancel();
-                    isAiSpeaking = false;
-                    console.log("User interrupted AI.");
-                }
-
-                // 2. Wake Word
-                if(!isVoiceMode && (lower.includes("hey miro") || lower.includes("hello miro") || lower.includes("middle"))) {
-                    toggleVoiceMode(); return;
-                }
-
-                if(isVoiceMode) {
-                    document.getElementById('voice-transcript').innerText = `"${t}"`;
-                    
-                    // 3. SILENCE DETECTION & SENDING
-                    clearTimeout(silenceTimer);
-                    
-                    if(result.isFinal) {
-                        handleVoiceCommand(t);
-                    } else {
-                        // Wait 1.0s for silence, then send
-                        silenceTimer = setTimeout(() => {
-                            if(t.length > 1) {
-                                recognition.abort(); // Reset buffer
-                                handleVoiceCommand(t);
+            useEffect(() => {
+                if (!containerRef.current) return;
+                
+                // 1. Separate Mermaid blocks from Markdown
+                if (content.includes("```mermaid")) {
+                    const mermaidMatch = content.match(/```mermaid\n([\s\S]*?)```/);
+                    if (mermaidMatch) {
+                        const code = mermaidMatch[1];
+                        const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                        
+                        // Render Markdown part (excluding mermaid for now to simple split)
+                        // For simplicity in this demo, we replace the block with a div
+                        const parts = content.split(/```mermaid\n[\s\S]*?```/);
+                        let html = "";
+                        parts.forEach((part, index) => {
+                            html += marked.parse(part);
+                            if (index < parts.length - 1) {
+                                html += `<div class="mermaid text-center my-4" id="${id}">${code}</div>`;
                             }
-                        }, 1000); 
+                        });
+                        containerRef.current.innerHTML = html;
+                        
+                        // Init Mermaid
+                        try { mermaid.init(undefined, document.getElementById(id)); } catch (e) { console.error("Mermaid Error", e); }
+                    } else {
+                         containerRef.current.innerHTML = marked.parse(content);
                     }
+                } else {
+                    containerRef.current.innerHTML = marked.parse(content);
                 }
-            };
 
-            // Auto-restart loop
-            recognition.onend = () => {
-                if(isVoiceMode) try { recognition.start(); } catch(e){}
-            };
-        }
+                // 2. Syntax Highlight
+                if (window.Prism) {
+                    window.Prism.highlightAllUnder(containerRef.current);
+                }
+            }, [content]);
 
-        function handleVoiceCommand(text) {
-            if(!text || text.length < 2) return;
-            document.getElementById('voice-status').innerText = "MIRO...";
-            addUserMessage(text); 
-            sendMessage(text);
-        }
-
-        function toggleVoiceMode() {
-            isVoiceMode = !isVoiceMode;
-            document.getElementById('voice-overlay').classList.toggle('hidden');
-            if(isVoiceMode) { 
-                const h = new Date().getHours();
-                const g = h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening";
-                const n = document.getElementById('user-display-name').innerText;
-                ttsEnabled=true; 
-                speak(`${g}, ${n}. I am Miro.`); 
-                try { recognition.start(); } catch(e){}
-            } else { 
-                ttsEnabled=false; isAiSpeaking=false; 
-                window.speechSynthesis.cancel(); 
-                try { recognition.stop(); } catch(e){} 
-            }
-        }
-
-        // --- 3. FORMATTING ---
-        function formatAndDisplayAiMessage(rawText) {
-            removeLoadingIndicator();
-            const div = document.createElement('div');
-            div.className = "flex justify-start items-start gap-3 w-full";
-            div.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shadow-lg mt-1 shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-xs text-white"></i></div><div class="msg-ai px-5 py-3 rounded-2xl text-sm shadow-md leading-relaxed overflow-hidden w-full max-w-[85%]"></div>`;
-            chatContainer.appendChild(div);
-            const contentDiv = div.querySelector('.msg-ai');
-            
-            if (rawText.includes("```mermaid")) {
-                const code = rawText.match(/```mermaid\n([\s\S]*?)```/)[1];
-                const id = 'mermaid-' + Date.now();
-                contentDiv.innerHTML = `<div class="mermaid" id="${id}">${code}</div>`;
-                try { mermaid.init(undefined, document.getElementById(id)); } catch(e){}
-            } else {
-                contentDiv.innerHTML = marked.parse(rawText);
-            }
-            Prism.highlightAllUnder(contentDiv);
-            scrollToBottom();
-            if(isVoiceMode) speak(rawText);
-        }
-
-        // --- 4. NETWORK ---
-        function connectWebSocket() {
-            websocket = new WebSocket(wsUrl);
-            websocket.onmessage = (event) => {
-                formatAndDisplayAiMessage(event.data);
-                if (event.data.includes("Vision Camera On")) startVisionMode();
-                if (event.data.includes("Disconnected")) stopVisionMode();
-            };
-            websocket.onclose = () => setTimeout(connectWebSocket, 3000);
-        }
-
-        function sendMessage(text) {
-            if (visionActive) {
-                const canvas = document.createElement("canvas");
-                canvas.width = 640; canvas.height = 480;
-                canvas.getContext("2d").drawImage(video, 0, 0, 640, 480);
-                websocket.send(JSON.stringify({ text: text, image: canvas.toDataURL("image/jpeg", 0.7) }));
-            } else { websocket.send(text); }
-        }
-
-        // --- 5. UTILS ---
-        async function startVisionMode() { try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); video.srcObject = stream; visionContainer.style.display = "block"; visionActive = true; } catch(e){} }
-        function stopVisionMode() { if(stream) stream.getTracks().forEach(t=>t.stop()); visionContainer.style.display = "none"; visionActive = false; }
-        function scrollToBottom() { chatWrapper.scrollTo({ top: chatWrapper.scrollHeight, behavior: 'smooth' }); }
-        
-        function addUserMessage(text) {
-            const div = document.createElement('div');
-            div.className = "flex justify-end fade-in";
-            div.innerHTML = `<div class="msg-user max-w-[85%] px-5 py-3 rounded-2xl text-sm shadow-md" style="white-space: pre-wrap;">${text}</div>`;
-            chatContainer.appendChild(div); scrollToBottom(); showLoadingIndicator();
-        }
-
-        let loadingId = null;
-        function showLoadingIndicator() { if(loadingId) return; loadingId='load-'+Date.now(); const d=document.createElement('div'); d.id=loadingId; d.className="flex justify-start items-center gap-3"; d.innerHTML=`<div class="w-8 h-8 rounded-full bg-gradient-to-br from-miro-accent to-miro-purple flex items-center justify-center shadow-lg mt-1 shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-xs text-white"></i></div><div class="msg-ai px-4 py-3 rounded-2xl text-sm shadow-md flex items-center gap-1 h-10"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`; chatContainer.appendChild(d); scrollToBottom(); }
-        function removeLoadingIndicator() { if(loadingId) { document.getElementById(loadingId)?.remove(); loadingId=null; } }
-
-        const plusBtn = document.getElementById('plus-btn');
-        const featurePicker = document.getElementById('feature-picker');
-        plusBtn.addEventListener('click', () => { featurePicker.classList.toggle('opacity-0'); featurePicker.classList.toggle('pointer-events-none'); featurePicker.classList.toggle('translate-y-10'); document.getElementById('plus-icon').classList.toggle('rotate-45'); });
-
-        window.triggerAction = (action) => {
-            plusBtn.click();
-            if (action === "Upload") { document.getElementById('file-upload').click(); return; } 
-            if(action === 'Disconnect') { websocket.send("disconnect"); return; } 
-            addUserMessage(`Activate ${action}`); websocket.send(`Activate ${action}`);
+            return <div ref={containerRef} className="markdown-body text-[15px] font-light text-gray-100" />;
         };
 
-        // --- 6. INPUT HANDLER FIX (SHIFT+ENTER) ---
-        // Input Handlers
-        userInput.addEventListener('input', function() { 
-            this.style.height='auto'; 
-            this.style.height=(this.scrollHeight)+'px'; 
-        });
+        // 2. Main App
+        const App = () => {
+            // State
+            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [messages, setMessages] = useState([]);
+            const [inputValue, setInputValue] = useState("");
+            const [isGenerating, setIsGenerating] = useState(false);
+            const [isVoiceMode, setVoiceMode] = useState(false);
+            const [visionActive, setVisionActive] = useState(false);
+            const [voiceStatus, setVoiceStatus] = useState("Listening...");
+            const [liveTranscript, setLiveTranscript] = useState("");
 
-        userInput.addEventListener('keydown', (e) => { 
-            // If Enter is pressed WITHOUT Shift
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Stop the new line from happening
-                const text = userInput.value.trim();
-                if(text) {
-                    document.getElementById('send-btn').click(); // Send message
-                }
-            }
-            // If Shift+Enter is pressed, the default browser behavior (new line) happens automatically.
-        });
-        
-        userInput.addEventListener('keydown', (e) => { 
-            // Check for Enter key specifically
-            if (e.key === 'Enter') {
-                if (e.shiftKey) {
-                    // Allow Shift+Enter to create a new line (default behavior)
-                    return; 
-                } else {
-                    // Prevent default "new line" behavior
-                    e.preventDefault(); 
+            // Refs
+            const ws = useRef(null);
+            const recognition = useRef(null);
+            const videoRef = useRef(null);
+            const fileInputRef = useRef(null);
+            const messagesEndRef = useRef(null);
+            const silenceTimer = useRef(null);
+            const streamRef = useRef(null);
+
+            // --- 1. WebSocket Setup ---
+            const connectWebSocket = () => {
+                ws.current = new WebSocket(WS_URL);
+                
+                ws.current.onopen = () => console.log("MIRO: Connected to Neural Backend");
+                
+                ws.current.onmessage = (event) => {
+                    const data = event.data;
                     
-                    // Trigger send button
-                    document.getElementById('send-btn').click();
+                    // Handle Control Messages
+                    if (data.includes("Vision Camera On")) {
+                        setVisionActive(true);
+                        startWebcam();
+                        return;
+                    }
+                    if (data.includes("Disconnected")) {
+                        setVisionActive(false);
+                        stopWebcam();
+                        return;
+                    }
+
+                    // Handle Text Message
+                    setIsGenerating(false);
+                    const newMsg = { id: Date.now(), role: 'assistant', content: data };
+                    setMessages(prev => [...prev, newMsg]);
+                    
+                    if (isVoiceMode) speak(data);
+                };
+
+                ws.current.onclose = () => {
+                    console.log("MIRO: Disconnected. Reconnecting...");
+                    setTimeout(connectWebSocket, 3000);
+                };
+            };
+
+            useEffect(() => {
+                connectWebSocket();
+                loadVoices();
+                return () => {
+                    if (ws.current) ws.current.close();
+                    stopWebcam();
+                };
+            }, []);
+
+            // Scroll to bottom
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [messages, isGenerating]);
+
+
+            // --- 2. Voice & TTS Engine ---
+            const loadVoices = () => {
+                window.speechSynthesis.getVoices();
+            };
+
+            const speak = (text) => {
+                window.speechSynthesis.cancel();
+                // Strip markdown for speech
+                const cleanText = text.replace(/[*#`_]/g, '').replace(/<[^>]*>/g, '').replace(/```[\s\S]*?```/g, "Code block generated.");
+                
+                const u = new SpeechSynthesisUtterance(cleanText);
+                const voices = window.speechSynthesis.getVoices();
+                // Try to find Zira or a good English voice
+                const voice = voices.find(v => v.name.includes("Zira")) || voices.find(v => v.name.includes("Google US English")) || voices[0];
+                if (voice) u.voice = voice;
+                
+                u.onend = () => {
+                   if(isVoiceMode) setVoiceStatus("Listening...");
+                };
+                window.speechSynthesis.speak(u);
+            };
+
+            const toggleVoiceMode = () => {
+                if (isVoiceMode) {
+                    setVoiceMode(false);
+                    window.speechSynthesis.cancel();
+                    try { recognition.current?.stop(); } catch(e){}
+                } else {
+                    setVoiceMode(true);
+                    setVoiceStatus("Listening...");
+                    speak("Good day, Revanth. I am Miro.");
+                    try { recognition.current?.start(); } catch(e){}
                 }
-            }
-        });
+            };
 
-        document.getElementById('send-btn').addEventListener('click', () => {
-            const text = userInput.value.trim(); 
-            if(!text) return;
-            addUserMessage(text); 
-            sendMessage(text); 
-            userInput.value = ''; 
-            userInput.style.height = 'auto';
-        });
+            useEffect(() => {
+                if ('webkitSpeechRecognition' in window) {
+                    const r = new webkitSpeechRecognition();
+                    r.continuous = true;
+                    r.interimResults = true;
+                    r.lang = 'en-US';
 
-        document.getElementById("file-upload").addEventListener('change', (e) => { const f = e.target.files[0]; if(!f)return; const r = new FileReader(); r.onload = (ev) => { websocket.send(JSON.stringify({ type: "upload", filename: f.name, file: ev.target.result })); addUserMessage(`📂 Uploading ${f.name}...`); }; r.readAsDataURL(f); });
+                    r.onstart = () => setVoiceStatus("Listening...");
+                    
+                    r.onresult = (e) => {
+                        const result = e.results[e.results.length - 1];
+                        const t = result[0].transcript.trim();
+                        const lower = t.toLowerCase();
 
-        connectWebSocket();
+                        // Barge-in
+                        if (window.speechSynthesis.speaking && t.length > 2) {
+                            window.speechSynthesis.cancel();
+                        }
+
+                        // Wake Word (when not in voice mode)
+                        if (!isVoiceMode && (lower.includes("hey miro") || lower.includes("hello miro"))) {
+                            toggleVoiceMode();
+                            return;
+                        }
+
+                        if (isVoiceMode) {
+                            setLiveTranscript(t);
+                            clearTimeout(silenceTimer.current);
+
+                            if (result.isFinal) {
+                                handleVoiceCommand(t);
+                            } else {
+                                // Silence detection for rapid commands
+                                silenceTimer.current = setTimeout(() => {
+                                    if (t.length > 1) {
+                                        r.abort();
+                                        handleVoiceCommand(t);
+                                        setTimeout(() => { try{r.start();}catch(e){} }, 50);
+                                    }
+                                }, 1200);
+                            }
+                        }
+                    };
+
+                    r.onend = () => {
+                        if (isVoiceMode) try { r.start(); } catch (e) {}
+                    };
+
+                    recognition.current = r;
+                }
+            }, [isVoiceMode]);
+
+            const handleVoiceCommand = (text) => {
+                setLiveTranscript("");
+                setVoiceStatus("Processing...");
+                handleSend(text);
+            };
+
+
+            // --- 3. Vision Engine ---
+            const startWebcam = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    streamRef.current = stream;
+                    if (videoRef.current) videoRef.current.srcObject = stream;
+                    setVisionActive(true);
+                } catch (e) {
+                    console.error("Camera Error:", e);
+                }
+            };
+
+            const stopWebcam = () => {
+                if (streamRef.current) {
+                    streamRef.current.getTracks().forEach(t => t.stop());
+                }
+                setVisionActive(false);
+            };
+
+            // --- 4. Messaging Logic ---
+            const handleSend = (textOverride) => {
+                const text = typeof textOverride === 'string' ? textOverride : inputValue;
+                if (!text.trim()) return;
+
+                // Optimistic Update
+                setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }]);
+                setInputValue("");
+                setIsGenerating(true);
+
+                // Send to Backend
+                if (visionActive && videoRef.current) {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = 640; canvas.height = 480;
+                    canvas.getContext("2d").drawImage(videoRef.current, 0, 0, 640, 480);
+                    const imageBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                    ws.current.send(JSON.stringify({ text: text, image: imageBase64 }));
+                } else {
+                    ws.current.send(text);
+                }
+            };
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const payload = JSON.stringify({ type: "upload", filename: file.name, file: ev.target.result });
+                    ws.current.send(payload);
+                    setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📂 Uploaded: ${file.name}` }]);
+                };
+                reader.readAsDataURL(file);
+            };
+
+            const triggerAction = (action) => {
+                 if (action === "Upload") fileInputRef.current.click();
+                 else if (action === "Disconnect") ws.current.send("disconnect");
+                 else {
+                     ws.current.send(`Activate ${action}`);
+                     setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `Activate ${action}` }]);
+                 }
+            };
+
+            // --- RENDER ---
+            return (
+                <div className="flex h-screen w-full bg-gemini-bg text-gray-200 overflow-hidden font-sans selection:bg-gemini-accent selection:text-black">
+                    
+                    {/* Hidden File Input */}
+                    <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept=".pdf,.txt" />
+
+                    {/* Left Sidebar */}
+                    <motion.aside 
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
+                        className="hidden md:flex flex-col h-full bg-gemini-surface border-r border-white/5 shrink-0"
+                    >
+                        <div className="p-4 w-[280px]">
+                            <div className="flex items-center gap-2 mb-8 px-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gemini-accent to-gemini-purple animate-pulse-slow"></div>
+                                <span className="font-medium tracking-widest text-lg">MIRO</span>
+                            </div>
+
+                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-gemini-surfaceHover rounded-full text-sm font-medium hover:text-white transition-colors mb-4 w-fit">
+                                <Plus size={18} /> <span className="text-gray-300">New Chat</span>
+                            </button>
+
+                            <div className="text-xs font-bold text-gray-500 uppercase px-2 mb-2">Tools</div>
+                            <div className="space-y-1">
+                                <button onClick={() => triggerAction('Camera')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><Eye size={16} /> Vision</button>
+                                <button onClick={() => triggerAction('Sign')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><Power size={16} /> Sign Language</button>
+                                <button onClick={() => triggerAction('Mouse')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><MousePointer2 size={16} /> AI Mouse</button>
+                            </div>
+                        </div>
+                    </motion.aside>
+
+                    {/* Main Content */}
+                    <main className="flex-1 flex flex-col relative h-full min-w-0">
+                        
+                        {/* Header */}
+                        <header className="absolute top-0 w-full z-10 flex items-center justify-between px-6 py-4">
+                            <div className="flex items-center gap-2">
+                                {!sidebarOpen && (
+                                    <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded-full text-gray-400">
+                                        <Menu size={20} />
+                                    </button>
+                                )}
+                                <div className="text-lg font-medium text-gray-400 flex items-center gap-1 cursor-pointer">
+                                    Gemini <ChevronDown size={14} className="opacity-50"/>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className={`text-xs px-2 py-1 rounded border ${visionActive ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-green-500/20 border-green-500 text-green-400'}`}>
+                                    {visionActive ? "● VISION ACTIVE" : "● SYSTEM ONLINE"}
+                                </div>
+                                <img src="[https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth](https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth)" className="w-8 h-8 rounded-full border border-gray-600" />
+                            </div>
+                        </header>
+
+                        {/* Chat Area */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4 pt-20 pb-40">
+                            <div className="max-w-3xl mx-auto space-y-8">
+                                {messages.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center mt-20 text-center opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]">
+                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center text-3xl shadow-2xl mb-6">✨</div>
+                                        <h1 className="text-4xl md:text-5xl font-medium bg-gradient-to-r from-gemini-accent via-white to-gemini-purple bg-clip-text text-transparent pb-2">Hello, Revanth</h1>
+                                        <p className="text-xl text-gray-500">How can I help you today?</p>
+                                    </div>
+                                )}
+
+                                {messages.map((msg) => (
+                                    <motion.div 
+                                        key={msg.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                                    >
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'assistant' ? '' : 'bg-transparent'}`}>
+                                            {msg.role === 'assistant' ? <Sparkles size={20} className="text-gemini-accent" /> : <div className="font-bold text-xs">YOU</div>}
+                                        </div>
+                                        <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-gemini-surface px-5 py-3 rounded-[20px] rounded-tr-sm text-gray-200' : ''}`}>
+                                            <MessageContent content={msg.content} />
+                                        </div>
+                                    </motion.div>
+                                ))}
+                                
+                                {isGenerating && (
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 flex items-center justify-center mt-1"><Sparkles size={20} className="text-gemini-accent animate-spin" /></div>
+                                        <div className="flex gap-1 items-center h-8">
+                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
+                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-gemini-bg via-gemini-bg to-transparent pb-6 pt-10 px-4">
+                            <div className="max-w-3xl mx-auto relative">
+                                <div className="bg-gemini-surface border border-white/10 rounded-[28px] relative transition-all focus-within:ring-1 focus-within:ring-white/20">
+                                    <div className="absolute left-3 top-3 flex gap-1">
+                                        <button onClick={() => triggerAction('Upload')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"><Upload size={20} /></button>
+                                        <button onClick={() => triggerAction('Camera')} className={`p-2 hover:bg-white/10 rounded-full transition-colors ${visionActive ? 'text-gemini-accent' : 'text-gray-400'}`}><Eye size={20} /></button>
+                                    </div>
+
+                                    <textarea
+                                        value={inputValue}
+                                        onChange={(e) => setInputValue(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                                        placeholder="Enter a prompt here"
+                                        className="w-full bg-transparent border-0 focus:ring-0 resize-none py-4 pl-28 pr-14 min-h-[60px] max-h-[200px] text-gray-200 placeholder:text-gray-500"
+                                        rows={1}
+                                    />
+
+                                    <div className="absolute right-3 bottom-2.5">
+                                        {inputValue.trim() ? (
+                                            <button onClick={() => handleSend()} className="p-2 bg-white text-black rounded-full hover:scale-105 transition-transform"><Send size={18} /></button>
+                                        ) : (
+                                            <button onClick={toggleVoiceMode} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><Mic size={22} /></button>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-center mt-3 text-gray-500">Miro may display inaccurate info, including about people, so double-check its responses.</p>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* --- OVERLAYS --- */}
+
+                    {/* 1. Vision Camera PIP */}
+                    <AnimatePresence>
+                        {visionActive && (
+                            <motion.div 
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                className="absolute bottom-32 right-6 w-64 h-48 bg-black border-2 border-gemini-accent rounded-xl overflow-hidden shadow-2xl z-40"
+                                drag
+                                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                            >
+                                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                <div className="absolute bottom-2 left-2 bg-black/80 text-gemini-accent text-[10px] font-bold px-2 py-1 rounded">● VISION</div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* 2. Voice Mode Overlay */}
+                    <AnimatePresence>
+                        {isVoiceMode && (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center"
+                            >
+                                <button onClick={toggleVoiceMode} className="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition"><X size={24} /></button>
+                                
+                                <div className="relative mb-12">
+                                    <div className="voice-orb"></div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Mic size={48} className="text-white drop-shadow-lg" />
+                                    </div>
+                                </div>
+
+                                <h2 className="text-2xl font-light tracking-widest text-white mb-4 uppercase">{voiceStatus}</h2>
+                                <p className="text-gray-400 text-lg max-w-2xl text-center px-4 h-8 transition-all">{liveTranscript || "Go ahead, I'm listening."}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
