@@ -6,7 +6,7 @@
     <title>Miro | Gemini UI</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -14,100 +14,55 @@
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // Simple React wrapper for Lucide icons
+        // Lucide Icon Wrapper
         const Icon = ({ name, size = 24, className = "" }) => {
             const lucide = window.lucide;
             if (!lucide) return null;
-            
-            // Create a ref to hold the SVG element
-            const ref = React.useRef(null);
-            
             React.useEffect(() => {
-                if (ref.current) {
-                    const iconName = name.toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2'); // Convert camelCase to kebab-case
-                    const svg = lucide.icons[name]; // Access icon by name
-                    if (svg) {
-                         // Lucide plain JS returns an SVG string or element creation logic. 
-                         // For simplicity in this CDN setup, we use the createIcons API on a specific element
-                         // But since we are in React, let's just use dangerouslySetInnerHTML with the SVG string if available
-                         // OR better: Just use lucide.createElement logic manually or render the SVG paths if we had them.
-                         // EASIEST FIX for CDN: Use the `data-lucide` attribute and call createIcons
-                         lucide.createIcons({
-                            name: name,
-                            attrs: {
-                                class: `lucide lucide-${iconName} ${className}`,
-                                width: size,
-                                height: size
-                            },
-                            nameAttr: 'data-lucide'
-                         });
-                    }
+                if(lucide.createIcons) {
+                    lucide.createIcons({
+                        name: name,
+                        attrs: { class: `lucide lucide-${name} ${className}`, width: size, height: size },
+                        nameAttr: 'data-lucide'
+                    });
                 }
             });
-
-            // Fallback: Using the i tag which lucide.createIcons looks for
             return React.createElement('i', { 
                 'data-lucide': name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase(),
                 className: className,
                 style: { width: size, height: size, display: 'inline-block' }
             });
         };
-        
-        // Polling to ensure icons render after React updates
-        setInterval(() => {
-            if(window.lucide) window.lucide.createIcons();
-        }, 500);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Google Sans', 'Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                    },
+                    fontFamily: { sans: ['Google Sans', 'Inter', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
                     colors: {
-                        // Exact Gemini Dark Colors
-                        bg: '#131314',        // Main background (very dark grey)
-                        surface: '#1e1f20',   // Sidebar & Input background
-                        surfaceHover: '#2d2e31', 
-                        accent: '#a8c7fa',    // Google Blue (Light)
-                        textMain: '#e3e3e3',
-                        textSec: '#c4c7c5'
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        bg: '#131314', surface: '#1e1f20', surfaceHover: '#2d2e31', 
+                        accent: '#a8c7fa', textMain: '#e3e3e3', textSec: '#c4c7c5'
                     }
                 }
             }
         }
-        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
     </script>
 
     <style>
         body { background-color: #131314; color: #e3e3e3; }
-        
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 20px; }
-        
-        /* Markdown Styling */
-        .markdown-body pre { background: #0d0d0d !important; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
+        .markdown-body pre { background: #0d0d0d; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
         .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #a8c7fa; }
-        .markdown-body p { margin-bottom: 0.8rem; line-height: 1.6; }
-        
-        /* Voice Orb */
         .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, #4285f4 0%, #a8c7fa 60%, transparent 80%); border-radius: 50%; filter: blur(20px); animation: pulse-glow 2s infinite; }
         @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
     </style>
@@ -119,32 +74,31 @@
         const { useState, useEffect, useRef } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- MOCK SUGGESTIONS FOR EMPTY STATE ---
+        // --- MOCK DATA ---
         const SUGGESTIONS = [
-            { icon: "Compass", text: "Brainstorm team bonding activities for our work retreat" },
-            { icon: "Code", text: "Write a Python script to automate daily reports" },
-            { icon: "PenTool", text: "Draft a response to a difficult client email" },
-            { icon: "Lightbulb", text: "Give me 5 creative ideas for a product launch" },
+            { icon: "Compass", text: "Brainstorm team bonding activities" },
+            { icon: "Code", text: "Write a Python script to automate reports" },
+            { icon: "PenTool", text: "Draft a response to a client email" },
+            { icon: "Lightbulb", text: "Give me 5 creative ideas for a launch" },
         ];
 
         // --- COMPONENTS ---
 
         // 1. Markdown Renderer
         const MessageContent = ({ content }) => {
-            const containerRef = useRef(null);
+            const ref = useRef(null);
             useEffect(() => {
-                if (!containerRef.current) return;
-                // Simple markdown render
-                containerRef.current.innerHTML = marked.parse(content);
-                // Highlight code
-                if (window.Prism) window.Prism.highlightAllUnder(containerRef.current);
+                if (ref.current) {
+                    ref.current.innerHTML = marked.parse(content);
+                    if (window.Prism) window.Prism.highlightAllUnder(ref.current);
+                }
             }, [content]);
-            return <div ref={containerRef} className="markdown-body text-[15px] font-normal text-[#e3e3e3] leading-7" />;
+            return <div ref={ref} className="markdown-body text-[15px] font-normal leading-7" />;
         };
 
         // 2. Main App
         const App = () => {
-            // State
+            // UI State
             const [sidebarOpen, setSidebarOpen] = useState(true);
             const [messages, setMessages] = useState([]);
             const [inputValue, setInputValue] = useState("");
@@ -152,15 +106,21 @@
             const [isVoiceMode, setVoiceMode] = useState(false);
             const [visionActive, setVisionActive] = useState(false);
             const [wsStatus, setWsStatus] = useState("Connecting...");
+            const [liveTranscript, setLiveTranscript] = useState("");
 
-            // Refs
+            // Refs for Logic (Critical for Voice)
             const ws = useRef(null);
             const videoRef = useRef(null);
             const fileInputRef = useRef(null);
             const messagesEndRef = useRef(null);
             const recognition = useRef(null);
+            const isVoiceModeRef = useRef(false); // Tracks voice mode for event listeners
+            const silenceTimer = useRef(null);
 
-            // --- WEBSOCKET CONNECTION ---
+            // Update ref when state changes
+            useEffect(() => { isVoiceModeRef.current = isVoiceMode; }, [isVoiceMode]);
+
+            // --- 1. WEBSOCKET SETUP ---
             useEffect(() => {
                 const connect = () => {
                     ws.current = new WebSocket('ws://localhost:8000/ws');
@@ -172,41 +132,129 @@
                         if (data.includes("Disconnected")) { setVisionActive(false); stopWebcam(); return; }
                         
                         setIsGenerating(false);
-                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: data }]);
-                        if (isVoiceMode) speak(data);
+                        const newMsg = { id: Date.now(), role: 'assistant', content: data };
+                        setMessages(prev => [...prev, newMsg]);
+                        
+                        // Speak if in voice mode
+                        if (isVoiceModeRef.current) speak(data);
                     };
                 };
                 connect();
                 return () => { if(ws.current) ws.current.close(); stopWebcam(); }
-            }, [isVoiceMode]);
+            }, []);
 
-            // Scroll to bottom
             useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isGenerating]);
 
-            // --- VOICE & VISION UTILS ---
+            // --- 2. VOICE ENGINE (FIXED) ---
+            useEffect(() => {
+                // Initialize Speech Recognition ONCE
+                if ('webkitSpeechRecognition' in window) {
+                    const r = new webkitSpeechRecognition();
+                    r.continuous = true;
+                    r.interimResults = true;
+                    r.lang = 'en-US';
+
+                    r.onstart = () => console.log("Mic Started");
+                    
+                    r.onresult = (e) => {
+                        const result = e.results[e.results.length - 1];
+                        const text = result[0].transcript.trim();
+                        const lower = text.toLowerCase();
+
+                        // 1. Barge-In (Stop AI speaking)
+                        if (window.speechSynthesis.speaking && text.length > 2) {
+                            window.speechSynthesis.cancel();
+                        }
+
+                        // 2. Wake Word (Hey Miro) - Works globally
+                        if (!isVoiceModeRef.current && (lower.includes("hey miro") || lower.includes("hello miro"))) {
+                            toggleVoiceMode(true);
+                            return;
+                        }
+
+                        // 3. Handle Command if in Voice Mode
+                        if (isVoiceModeRef.current) {
+                            setLiveTranscript(text);
+                            clearTimeout(silenceTimer.current);
+
+                            if (result.isFinal) {
+                                handleVoiceCommand(text);
+                            } else {
+                                // Smart Silence Detection (1.2s pause = send)
+                                silenceTimer.current = setTimeout(() => {
+                                    if (text.length > 1) {
+                                        r.abort(); // Flush buffer
+                                        handleVoiceCommand(text);
+                                        // Restart immediately handled by onend
+                                    }
+                                }, 1200);
+                            }
+                        }
+                    };
+
+                    r.onend = () => {
+                        // Auto-restart if in voice mode or just keeping wake-word active
+                        // For this demo, we always restart to listen for wake words or commands
+                        try { r.start(); } catch(e) {}
+                    };
+
+                    try { r.start(); } catch(e) {}
+                    recognition.current = r;
+                }
+            }, []); // Empty dependency array = runs once on mount
+
+            const handleVoiceCommand = (text) => {
+                setLiveTranscript("");
+                handleSend(text);
+            };
+
+            const toggleVoiceMode = (status) => {
+                const newState = status !== undefined ? status : !isVoiceMode;
+                setVoiceMode(newState);
+                
+                if (newState) {
+                    speak("I'm listening.");
+                } else {
+                    window.speechSynthesis.cancel();
+                    setLiveTranscript("");
+                }
+            };
+
+            const speak = (text) => {
+                if (!('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/[*#`_]/g, ''); // Clean markdown
+                const u = new SpeechSynthesisUtterance(cleanText);
+                
+                // Load Voices
+                let voices = window.speechSynthesis.getVoices();
+                if (voices.length === 0) {
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        voices = window.speechSynthesis.getVoices();
+                        u.voice = voices.find(v => v.name.includes("Google US English")) || voices[0];
+                        window.speechSynthesis.speak(u);
+                    };
+                } else {
+                    u.voice = voices.find(v => v.name.includes("Google US English")) || voices[0];
+                    window.speechSynthesis.speak(u);
+                }
+            };
+
+            // --- 3. VISION & TOOLS ---
             const startWebcam = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     if (videoRef.current) videoRef.current.srcObject = stream;
                     setVisionActive(true);
-                } catch(e) { console.error("Cam error", e); }
+                } catch(e) { console.error(e); }
             };
-
             const stopWebcam = () => {
                 const stream = videoRef.current?.srcObject;
                 if (stream) stream.getTracks().forEach(t => t.stop());
                 setVisionActive(false);
             };
 
-            const speak = (text) => {
-                if (!('speechSynthesis' in window)) return;
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(text.replace(/[*#`]/g, ''));
-                const voices = window.speechSynthesis.getVoices();
-                u.voice = voices.find(v => v.name.includes("Google US English")) || voices[0];
-                window.speechSynthesis.speak(u);
-            };
-
+            // --- 4. MESSAGING ---
             const handleSend = (text = inputValue) => {
                 if (!text.trim()) return;
                 setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }]);
@@ -225,14 +273,17 @@
                 } else {
                     setTimeout(() => {
                         setIsGenerating(false);
-                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: "Miro Backend is offline. Please check the server." }]);
+                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: "Miro Backend Offline." }]);
                     }, 1000);
                 }
             };
 
             const triggerTool = (tool) => {
                 if(tool === "Upload") fileInputRef.current.click();
-                else if(tool === "Camera") { setVisionActive(prev => !prev); if(!visionActive) startWebcam(); else stopWebcam(); }
+                else if(tool === "Camera") { 
+                    if(!visionActive) { setVisionActive(true); startWebcam(); } 
+                    else { setVisionActive(false); stopWebcam(); } 
+                }
                 else handleSend(`Activate ${tool}`);
             };
 
@@ -240,160 +291,98 @@
             return (
                 <div className="flex h-screen w-full bg-bg text-textMain overflow-hidden font-sans selection:bg-accent selection:text-bg">
                     
-                    {/* HIDDEN INPUTS */}
+                    {/* Hidden Inputs */}
                     <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => handleSend(`Uploaded: ${e.target.files[0]?.name}`)} />
 
-                    {/* SIDEBAR (Gemini Style) */}
+                    {/* Sidebar */}
                     <motion.aside 
-                        initial={false}
-                        animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
-                        className="hidden md:flex flex-col h-full bg-surface shrink-0 overflow-hidden transition-all duration-300"
+                        initial={false} animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
+                        className="hidden md:flex flex-col h-full bg-surface shrink-0 overflow-hidden"
                     >
                         <div className="p-4 w-[280px] flex flex-col h-full">
-                            <div className="flex items-center gap-3 mb-6 pl-2">
-                                <button onClick={() => setSidebarOpen(false)} className="hover:bg-surfaceHover p-2 rounded-full text-textSec"><Icon name="Menu" /></button>
-                            </div>
-
-                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-surfaceHover rounded-full text-sm font-medium hover:bg-[#3c3d40] transition-colors mb-6 w-fit text-textSec">
+                            <button onClick={() => setSidebarOpen(false)} className="hover:bg-surfaceHover p-2 rounded-full text-textSec w-fit mb-6"><Icon name="Menu" /></button>
+                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-surfaceHover rounded-full text-sm hover:bg-[#3c3d40] transition-colors mb-6 w-fit text-textSec">
                                 <Icon name="Plus" size={18} /> <span className="text-[#e3e3e3]">New chat</span>
                             </button>
-
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 <div className="text-xs font-medium text-textSec mb-2 px-4 mt-2">Recent</div>
                                 <div className="space-y-1">
-                                    {["React Project Help", "Python Script Debug", "Weekend Plans"].map((t, i) => (
-                                        <button key={i} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-textMain hover:bg-surfaceHover rounded-full transition-colors truncate">
-                                            <Icon name="MessageSquare" size={16} className="shrink-0" />
-                                            <span className="truncate">{t}</span>
-                                        </button>
-                                    ))}
+                                    <button className="flex items-center gap-3 w-full px-4 py-2 text-sm text-textMain hover:bg-surfaceHover rounded-full transition-colors"><Icon name="MessageSquare" size={16} /> Python Script</button>
                                 </div>
-                            </div>
-                            
-                            <div className="mt-auto pt-4 space-y-1">
-                                <button onClick={() => triggerTool('Camera')} className={`flex items-center gap-3 w-full px-4 py-2 text-sm rounded-full transition-colors ${visionActive ? 'bg-red-500/20 text-red-300' : 'hover:bg-surfaceHover text-textMain'}`}>
-                                    <Icon name="Eye" size={18} /> Vision {visionActive ? "On" : "Off"}
-                                </button>
-                                <button className="flex items-center gap-3 w-full px-4 py-2 text-sm text-textMain hover:bg-surfaceHover rounded-full transition-colors">
-                                    <Icon name="Settings" size={18} /> Settings
-                                </button>
                             </div>
                         </div>
                     </motion.aside>
 
-                    {/* MAIN CONTENT */}
+                    {/* Main Content */}
                     <main className="flex-1 flex flex-col relative h-full min-w-0">
-                        
-                        {/* HEADER */}
+                        {/* Header */}
                         <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg/95 backdrop-blur-md">
                             <div className="flex items-center gap-2">
-                                {!sidebarOpen && (
-                                    <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-surfaceHover rounded-full text-textSec mr-2">
-                                        <Icon name="Menu" size={20} />
-                                    </button>
-                                )}
-                                <div className="flex items-center gap-1 text-xl text-textMain font-normal cursor-pointer hover:bg-surfaceHover px-2 py-1 rounded-lg transition-colors">
-                                    Gemini <Icon name="ChevronDown" size={16} className="opacity-50 mt-1"/>
-                                </div>
+                                {!sidebarOpen && <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-surfaceHover rounded-full text-textSec"><Icon name="Menu" size={20} /></button>}
+                                <div className="flex items-center gap-1 text-xl text-textMain hover:bg-surfaceHover px-2 py-1 rounded-lg cursor-pointer">Gemini <Icon name="ChevronDown" size={16} className="opacity-50 mt-1"/></div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${wsStatus === 'Online' ? 'border-green-800 text-green-400 bg-green-900/20' : 'border-red-800 text-red-400'}`}>{wsStatus.toUpperCase()}</span>
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth" className="w-8 h-8 rounded-full border border-gray-700 hover:border-accent cursor-pointer transition-colors" />
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth" className="w-8 h-8 rounded-full border border-gray-700" />
                             </div>
                         </header>
 
-                        {/* CHAT AREA */}
+                        {/* Chat */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4">
                             <div className="max-w-[850px] mx-auto pb-40 pt-4">
                                 {messages.length === 0 ? (
-                                    // EMPTY STATE (Hello Screen)
                                     <div className="flex flex-col items-start mt-12 animate-[fadeIn_0.5s_ease-out]">
                                         <h1 className="text-5xl md:text-6xl font-medium mb-2 bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] bg-clip-text text-transparent pb-1">Hello, Revanth</h1>
-                                        <h2 className="text-5xl md:text-6xl font-medium text-[#444746] dark:text-[#444746] mb-12">How can I help today?</h2>
-                                        
+                                        <h2 className="text-5xl md:text-6xl font-medium text-[#444746] mb-12">How can I help today?</h2>
                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
                                             {SUGGESTIONS.map((s, i) => (
-                                                <button key={i} onClick={() => setInputValue(s.text)} className="bg-surface hover:bg-surfaceHover p-4 rounded-xl text-left h-48 flex flex-col justify-between transition-colors group relative overflow-hidden">
-                                                    <span className="text-[15px] text-textMain font-medium z-10">{s.text}</span>
-                                                    <div className="self-end p-2 bg-black/20 rounded-full group-hover:bg-black/40 transition-colors z-10">
-                                                        <Icon name={s.icon} size={20} className={i%2===0 ? "text-accent" : "text-[#d96570]"} />
-                                                    </div>
+                                                <button key={i} onClick={() => setInputValue(s.text)} className="bg-surface hover:bg-surfaceHover p-4 rounded-xl text-left h-48 flex flex-col justify-between transition-colors relative">
+                                                    <span className="text-[15px] text-textMain font-medium">{s.text}</span>
+                                                    <div className="self-end p-2 bg-black/20 rounded-full"><Icon name={s.icon} size={20} className={i%2===0?"text-accent":"text-[#d96570]"} /></div>
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
                                 ) : (
-                                    // MESSAGE LIST
                                     <div className="space-y-6">
                                         {messages.map((msg) => (
                                             <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'assistant' ? '' : 'hidden'}`}>
-                                                    {msg.role === 'assistant' && <Icon name="Sparkles" size={20} className="text-accent" />}
-                                                </div>
-                                                <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-surface px-5 py-3 rounded-[20px] rounded-tr-sm text-textMain' : ''}`}>
+                                                <div className={`w-8 h-8 mt-1 flex items-center justify-center rounded-full ${msg.role === 'assistant'?'':'hidden'}`}>{msg.role === 'assistant' && <Icon name="Sparkles" size={20} className="text-accent"/>}</div>
+                                                <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-surface px-5 py-3 rounded-[20px] rounded-tr-sm' : ''}`}>
                                                     <MessageContent content={msg.content} />
                                                 </div>
                                             </div>
                                         ))}
-                                        {isGenerating && (
-                                            <div className="flex gap-4">
-                                                <div className="w-8 h-8 mt-1"><Icon name="Sparkles" size={20} className="text-accent animate-pulse" /></div>
-                                                <div className="text-textSec text-sm mt-2">Thinking...</div>
-                                            </div>
-                                        )}
+                                        {isGenerating && <div className="flex gap-4"><div className="w-8 h-8 mt-1"><Icon name="Sparkles" size={20} className="text-accent animate-pulse"/></div><div className="text-textSec text-sm mt-2">Thinking...</div></div>}
                                         <div ref={messagesEndRef} />
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* INPUT COMPOSER (Sticky Bottom) */}
+                        {/* Composer */}
                         <div className="absolute bottom-0 w-full bg-bg pb-6 pt-2 px-4">
                             <div className="max-w-[850px] mx-auto">
                                 <div className={`relative bg-surface rounded-[28px] transition-colors ${isGenerating ? 'opacity-60' : 'hover:bg-surfaceHover'} focus-within:bg-surfaceHover`}>
-                                    
-                                    {/* Left Icons */}
                                     <div className="absolute left-3 top-[14px] flex gap-1">
-                                        <button onClick={() => triggerTool('Upload')} className="p-2 rounded-full hover:bg-[#3c3d40] text-textSec transition-colors">
-                                            <Icon name="PlusCircle" size={22} />
-                                        </button>
-                                        <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] transition-colors ${visionActive ? 'text-red-400' : 'text-textSec'}`}>
-                                            <Icon name="Image" size={22} />
-                                        </button>
+                                        <button onClick={() => triggerTool('Upload')} className="p-2 rounded-full hover:bg-[#3c3d40] text-textSec"><Icon name="PlusCircle" size={22} /></button>
+                                        <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] ${visionActive?'text-red-400':'text-textSec'}`}><Icon name="Image" size={22} /></button>
                                     </div>
-
-                                    {/* Textarea */}
-                                    <textarea
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                                        placeholder="Enter a prompt here"
-                                        className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec"
-                                        rows={1}
-                                    />
-
-                                    {/* Right Icons (Mic/Send) */}
+                                    <textarea value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} placeholder="Enter a prompt here" className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec" rows={1} />
                                     <div className="absolute right-3 top-[10px] flex items-center gap-1">
                                         {inputValue.trim() ? (
-                                            <button onClick={() => handleSend()} className="p-2 bg-textMain text-bg rounded-full hover:scale-105 transition-transform">
-                                                <Icon name="Send" size={18} />
-                                            </button>
+                                            <button onClick={() => handleSend()} className="p-2 bg-textMain text-bg rounded-full hover:scale-105 transition-transform"><Icon name="Send" size={18} /></button>
                                         ) : (
-                                            <button onClick={() => setVoiceMode(true)} className="p-3 rounded-full hover:bg-[#3c3d40] text-textSec transition-colors">
-                                                <Icon name="Mic" size={22} />
-                                            </button>
+                                            <button onClick={() => toggleVoiceMode()} className="p-3 rounded-full hover:bg-[#3c3d40] text-textSec"><Icon name="Mic" size={22} /></button>
                                         )}
                                     </div>
                                 </div>
                                 <p className="text-[11px] text-center mt-2 text-textSec">Gemini may display inaccurate info, including about people, so double-check its responses.</p>
                             </div>
                         </div>
-
                     </main>
 
-                    {/* OVERLAYS */}
-                    
-                    {/* Vision PIP */}
+                    {/* Overlays */}
                     <AnimatePresence>
                         {visionActive && (
                             <motion.div initial={{scale:0}} animate={{scale:1}} exit={{scale:0}} className="absolute bottom-32 right-8 w-64 h-48 bg-black border border-accent rounded-xl overflow-hidden shadow-2xl z-50">
@@ -402,18 +391,16 @@
                             </motion.div>
                         )}
                     </AnimatePresence>
-
-                    {/* Voice Mode Fullscreen */}
                     <AnimatePresence>
                         {isVoiceMode && (
                             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 z-[100] bg-bg/95 backdrop-blur-xl flex flex-col items-center justify-center">
-                                <button onClick={() => setVoiceMode(false)} className="absolute top-8 right-8 p-4 bg-surface hover:bg-surfaceHover rounded-full text-textMain transition-colors"><Icon name="X" size={24} /></button>
+                                <button onClick={() => toggleVoiceMode(false)} className="absolute top-8 right-8 p-4 bg-surface hover:bg-surfaceHover rounded-full text-textMain"><Icon name="X" size={24} /></button>
                                 <div className="voice-orb mb-12" />
                                 <h2 className="text-2xl font-light text-textMain tracking-widest uppercase mb-4">Listening...</h2>
+                                <p className="text-textSec text-lg h-8">{liveTranscript}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
-
                 </div>
             );
         };

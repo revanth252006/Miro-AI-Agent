@@ -2,30 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "disconnect"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hello"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what are the features u dont have compared to google gemini"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "As a Miro Agent, I'm designed to assist users specifically within the Miro environment. Compared to Google Gemini, which is a general-purpose AI model, here are some features I currently don't have:\n\n*   **Broad Knowledge Domain:** Gemini has a much wider knowledge base across numerous topics. My expertise is primarily focused on Miro-related functionalities, collaboration, and productivity.\n\n*   **Real-time Information Access:** Gemini can access and process real-time information from the internet. My knowledge is based on the data I was trained on, and I don't have the ability to browse the web for current events.\n\n*   **Multi-modal Input:** Gemini can process various types of input, including images and audio. I primarily work with text-based input within the Miro context.\n\n*   **Natural Language Understanding and Generation:** While I can understand and generate human-like text, Gemini is more advanced in handling nuanced language, complex reasoning, and creative writing tasks.\n\n*   **Integration with other Google Services:** Gemini seamlessly integrates with other Google services like Gmail, Docs, and Calendar. My integration is primarily within the Miro platform.\n\nIn short, Gemini is a more versatile and general-purpose AI, while I am specifically tailored to enhance user experience within Miro."
@@ -179,6 +155,30 @@
       "role": "model",
       "parts": [
         "Of course.\n\nPlease upload the PDF you would like me to summarize. The system indicates that no new file was attached to your last message.\n\nThe last document you provided was **\"Revanth Resume.pdf\"**, which I have already summarized for you.\n\nIf you would like me to summarize that same resume again, perhaps with a different focus, please let me know. Otherwise, please upload the new file.\n\nI am ready to assist as soon as you provide the document."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! How can I help you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate the virtual mouse "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "disconnect"
       ]
     }
   ],

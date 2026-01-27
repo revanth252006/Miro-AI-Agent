@@ -1,0 +1,23 @@
+{
+  "id": "bd69dea6",
+  "title": "hey ",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 12:20 PM, Date: Tuesday, January 27, 2026 | USER: None] hey "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-27 12:20:26.308618"
+}
