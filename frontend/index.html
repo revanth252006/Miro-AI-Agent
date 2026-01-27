@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRO | Gemini UI</title>
+    <title>MIRO AGENT</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="https://unpkg.com/lucide-react@0.292.0/dist/umd/lucide-react.js"></script>
     
+    <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+    
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
@@ -81,13 +84,19 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useLayoutEffect } = React;
         const { motion, AnimatePresence } = window.Motion;
-        const { 
-            Menu, Plus, MessageSquare, History, Settings, Moon, Sun, 
-            Send, Mic, Image: ImageIcon, Sparkles, MoreVertical, 
-            ChevronDown, X, Upload, Eye, MousePointer2, Power, FileText
-        } = window.LucideReact;
+        
+        // --- FIX: Robust Icon Loading ---
+        // Checks both common global names for the Lucide library
+        const Icons = window.lucideReact || window.LucideReact || window.lucide;
+        
+        // Fallback if icons fail to load entirely
+        const SafeIcon = ({ name, ...props }) => {
+            if (!Icons || !Icons[name]) return <span className="text-xs">{name}</span>;
+            const IconComponent = Icons[name];
+            return <IconComponent {...props} />;
+        };
 
-        // --- GLOBAL CONFIG ---
+        // GLOBAL CONFIG
         const WS_URL = 'ws://localhost:8000/ws';
 
         // --- COMPONENTS ---
@@ -99,35 +108,34 @@
             useEffect(() => {
                 if (!containerRef.current) return;
                 
-                // 1. Separate Mermaid blocks from Markdown
                 if (content.includes("```mermaid")) {
-                    const mermaidMatch = content.match(/```mermaid\n([\s\S]*?)```/);
-                    if (mermaidMatch) {
-                        const code = mermaidMatch[1];
-                        const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                        
-                        // Render Markdown part (excluding mermaid for now to simple split)
-                        // For simplicity in this demo, we replace the block with a div
-                        const parts = content.split(/```mermaid\n[\s\S]*?```/);
-                        let html = "";
-                        parts.forEach((part, index) => {
+                    // Simple split for mermaid diagrams
+                    const parts = content.split(/```mermaid\n([\s\S]*?)```/g);
+                    let html = "";
+                    
+                    // The split results in [text, code, text, code...]
+                    parts.forEach((part, index) => {
+                        if (index % 2 === 1) { // This is the code part
+                             const id = `mermaid-${Date.now()}-${index}`;
+                             html += `<div class="mermaid text-center my-4" id="${id}">${part}</div>`;
+                             // We'll init mermaid after render
+                        } else {
                             html += marked.parse(part);
-                            if (index < parts.length - 1) {
-                                html += `<div class="mermaid text-center my-4" id="${id}">${code}</div>`;
-                            }
-                        });
-                        containerRef.current.innerHTML = html;
-                        
-                        // Init Mermaid
-                        try { mermaid.init(undefined, document.getElementById(id)); } catch (e) { console.error("Mermaid Error", e); }
-                    } else {
-                         containerRef.current.innerHTML = marked.parse(content);
-                    }
+                        }
+                    });
+                    
+                    containerRef.current.innerHTML = html;
+                    
+                    // Initialize new mermaid diagrams
+                    setTimeout(() => {
+                        try { mermaid.init(undefined, document.querySelectorAll('.mermaid')); } catch(e) {}
+                    }, 100);
+
                 } else {
                     containerRef.current.innerHTML = marked.parse(content);
                 }
 
-                // 2. Syntax Highlight
+                // Syntax Highlight
                 if (window.Prism) {
                     window.Prism.highlightAllUnder(containerRef.current);
                 }
@@ -159,37 +167,41 @@
 
             // --- 1. WebSocket Setup ---
             const connectWebSocket = () => {
-                ws.current = new WebSocket(WS_URL);
-                
-                ws.current.onopen = () => console.log("MIRO: Connected to Neural Backend");
-                
-                ws.current.onmessage = (event) => {
-                    const data = event.data;
+                try {
+                    ws.current = new WebSocket(WS_URL);
                     
-                    // Handle Control Messages
-                    if (data.includes("Vision Camera On")) {
-                        setVisionActive(true);
-                        startWebcam();
-                        return;
-                    }
-                    if (data.includes("Disconnected")) {
-                        setVisionActive(false);
-                        stopWebcam();
-                        return;
-                    }
-
-                    // Handle Text Message
-                    setIsGenerating(false);
-                    const newMsg = { id: Date.now(), role: 'assistant', content: data };
-                    setMessages(prev => [...prev, newMsg]);
+                    ws.current.onopen = () => console.log("MIRO: Connected to Neural Backend");
                     
-                    if (isVoiceMode) speak(data);
-                };
+                    ws.current.onmessage = (event) => {
+                        const data = event.data;
+                        
+                        // Handle Control Messages
+                        if (data.includes("Vision Camera On")) {
+                            setVisionActive(true);
+                            startWebcam();
+                            return;
+                        }
+                        if (data.includes("Disconnected")) {
+                            setVisionActive(false);
+                            stopWebcam();
+                            return;
+                        }
 
-                ws.current.onclose = () => {
-                    console.log("MIRO: Disconnected. Reconnecting...");
-                    setTimeout(connectWebSocket, 3000);
-                };
+                        // Handle Text Message
+                        setIsGenerating(false);
+                        const newMsg = { id: Date.now(), role: 'assistant', content: data };
+                        setMessages(prev => [...prev, newMsg]);
+                        
+                        if (isVoiceMode) speak(data);
+                    };
+
+                    ws.current.onclose = () => {
+                        console.log("MIRO: Disconnected. Reconnecting...");
+                        setTimeout(connectWebSocket, 3000);
+                    };
+                } catch (err) {
+                    console.error("WebSocket connection failed", err);
+                }
             };
 
             useEffect(() => {
@@ -209,10 +221,14 @@
 
             // --- 2. Voice & TTS Engine ---
             const loadVoices = () => {
-                window.speechSynthesis.getVoices();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.getVoices();
+                }
             };
 
             const speak = (text) => {
+                if (!('speechSynthesis' in window)) return;
+                
                 window.speechSynthesis.cancel();
                 // Strip markdown for speech
                 const cleanText = text.replace(/[*#`_]/g, '').replace(/<[^>]*>/g, '').replace(/```[\s\S]*?```/g, "Code block generated.");
@@ -310,6 +326,7 @@
                     setVisionActive(true);
                 } catch (e) {
                     console.error("Camera Error:", e);
+                    setMessages(prev => [...prev, {id: Date.now(), role: 'assistant', content: "Error accessing camera. Please check permissions."}]);
                 }
             };
 
@@ -331,14 +348,22 @@
                 setIsGenerating(true);
 
                 // Send to Backend
-                if (visionActive && videoRef.current) {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = 640; canvas.height = 480;
-                    canvas.getContext("2d").drawImage(videoRef.current, 0, 0, 640, 480);
-                    const imageBase64 = canvas.toDataURL("image/jpeg", 0.7);
-                    ws.current.send(JSON.stringify({ text: text, image: imageBase64 }));
+                if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                    if (visionActive && videoRef.current) {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 640; canvas.height = 480;
+                        canvas.getContext("2d").drawImage(videoRef.current, 0, 0, 640, 480);
+                        const imageBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                        ws.current.send(JSON.stringify({ text: text, image: imageBase64 }));
+                    } else {
+                        ws.current.send(text);
+                    }
                 } else {
-                    ws.current.send(text);
+                    // Fallback simulation if WS is dead
+                    setTimeout(() => {
+                        setIsGenerating(false);
+                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: "MIRO Backend Disconnected. Please ensure the Python server is running on port 8000." }]);
+                    }, 1000);
                 }
             };
 
@@ -348,7 +373,7 @@
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     const payload = JSON.stringify({ type: "upload", filename: file.name, file: ev.target.result });
-                    ws.current.send(payload);
+                    if(ws.current) ws.current.send(payload);
                     setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📂 Uploaded: ${file.name}` }]);
                 };
                 reader.readAsDataURL(file);
@@ -356,9 +381,9 @@
 
             const triggerAction = (action) => {
                  if (action === "Upload") fileInputRef.current.click();
-                 else if (action === "Disconnect") ws.current.send("disconnect");
+                 else if (action === "Disconnect") { if(ws.current) ws.current.send("disconnect"); }
                  else {
-                     ws.current.send(`Activate ${action}`);
+                     if(ws.current) ws.current.send(`Activate ${action}`);
                      setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `Activate ${action}` }]);
                  }
             };
@@ -383,14 +408,14 @@
                             </div>
 
                             <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-gemini-surfaceHover rounded-full text-sm font-medium hover:text-white transition-colors mb-4 w-fit">
-                                <Plus size={18} /> <span className="text-gray-300">New Chat</span>
+                                <SafeIcon name="Plus" size={18} /> <span className="text-gray-300">New Chat</span>
                             </button>
 
                             <div className="text-xs font-bold text-gray-500 uppercase px-2 mb-2">Tools</div>
                             <div className="space-y-1">
-                                <button onClick={() => triggerAction('Camera')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><Eye size={16} /> Vision</button>
-                                <button onClick={() => triggerAction('Sign')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><Power size={16} /> Sign Language</button>
-                                <button onClick={() => triggerAction('Mouse')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><MousePointer2 size={16} /> AI Mouse</button>
+                                <button onClick={() => triggerAction('Camera')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="Eye" size={16} /> Vision</button>
+                                <button onClick={() => triggerAction('Sign')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="Power" size={16} /> Sign Language</button>
+                                <button onClick={() => triggerAction('Mouse')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="MousePointer2" size={16} /> AI Mouse</button>
                             </div>
                         </div>
                     </motion.aside>
@@ -403,18 +428,18 @@
                             <div className="flex items-center gap-2">
                                 {!sidebarOpen && (
                                     <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded-full text-gray-400">
-                                        <Menu size={20} />
+                                        <SafeIcon name="Menu" size={20} />
                                     </button>
                                 )}
                                 <div className="text-lg font-medium text-gray-400 flex items-center gap-1 cursor-pointer">
-                                    Gemini <ChevronDown size={14} className="opacity-50"/>
+                                    Gemini <SafeIcon name="ChevronDown" size={14} className="opacity-50"/>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className={`text-xs px-2 py-1 rounded border ${visionActive ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-green-500/20 border-green-500 text-green-400'}`}>
                                     {visionActive ? "● VISION ACTIVE" : "● SYSTEM ONLINE"}
                                 </div>
-                                <img src="[https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth](https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth)" className="w-8 h-8 rounded-full border border-gray-600" />
+                                <img src="[https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth](https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth)" className="w-8 h-8 rounded-full border border-gray-600" alt="User" />
                             </div>
                         </header>
 
@@ -437,7 +462,7 @@
                                         className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                                     >
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'assistant' ? '' : 'bg-transparent'}`}>
-                                            {msg.role === 'assistant' ? <Sparkles size={20} className="text-gemini-accent" /> : <div className="font-bold text-xs">YOU</div>}
+                                            {msg.role === 'assistant' ? <SafeIcon name="Sparkles" size={20} className="text-gemini-accent" /> : <div className="font-bold text-xs">YOU</div>}
                                         </div>
                                         <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-gemini-surface px-5 py-3 rounded-[20px] rounded-tr-sm text-gray-200' : ''}`}>
                                             <MessageContent content={msg.content} />
@@ -447,7 +472,7 @@
                                 
                                 {isGenerating && (
                                     <div className="flex gap-4">
-                                        <div className="w-8 h-8 flex items-center justify-center mt-1"><Sparkles size={20} className="text-gemini-accent animate-spin" /></div>
+                                        <div className="w-8 h-8 flex items-center justify-center mt-1"><SafeIcon name="Sparkles" size={20} className="text-gemini-accent animate-spin" /></div>
                                         <div className="flex gap-1 items-center h-8">
                                             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
                                             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
@@ -464,8 +489,8 @@
                             <div className="max-w-3xl mx-auto relative">
                                 <div className="bg-gemini-surface border border-white/10 rounded-[28px] relative transition-all focus-within:ring-1 focus-within:ring-white/20">
                                     <div className="absolute left-3 top-3 flex gap-1">
-                                        <button onClick={() => triggerAction('Upload')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"><Upload size={20} /></button>
-                                        <button onClick={() => triggerAction('Camera')} className={`p-2 hover:bg-white/10 rounded-full transition-colors ${visionActive ? 'text-gemini-accent' : 'text-gray-400'}`}><Eye size={20} /></button>
+                                        <button onClick={() => triggerAction('Upload')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"><SafeIcon name="Upload" size={20} /></button>
+                                        <button onClick={() => triggerAction('Camera')} className={`p-2 hover:bg-white/10 rounded-full transition-colors ${visionActive ? 'text-gemini-accent' : 'text-gray-400'}`}><SafeIcon name="Eye" size={20} /></button>
                                     </div>
 
                                     <textarea
@@ -479,9 +504,9 @@
 
                                     <div className="absolute right-3 bottom-2.5">
                                         {inputValue.trim() ? (
-                                            <button onClick={() => handleSend()} className="p-2 bg-white text-black rounded-full hover:scale-105 transition-transform"><Send size={18} /></button>
+                                            <button onClick={() => handleSend()} className="p-2 bg-white text-black rounded-full hover:scale-105 transition-transform"><SafeIcon name="Send" size={18} /></button>
                                         ) : (
-                                            <button onClick={toggleVoiceMode} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><Mic size={22} /></button>
+                                            <button onClick={toggleVoiceMode} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><SafeIcon name="Mic" size={22} /></button>
                                         )}
                                     </div>
                                 </div>
@@ -518,12 +543,12 @@
                                 exit={{ opacity: 0 }}
                                 className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center"
                             >
-                                <button onClick={toggleVoiceMode} className="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition"><X size={24} /></button>
+                                <button onClick={toggleVoiceMode} className="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition"><SafeIcon name="X" size={24} /></button>
                                 
                                 <div className="relative mb-12">
                                     <div className="voice-orb"></div>
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <Mic size={48} className="text-white drop-shadow-lg" />
+                                        <SafeIcon name="Mic" size={48} className="text-white drop-shadow-lg" />
                                     </div>
                                 </div>
 
