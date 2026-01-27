@@ -4,18 +4,6 @@
     {
       "role": "model",
       "parts": [
-        "Hey! What can I do for you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "I have some queries."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
         "Okay, I'm ready! What are your queries? Ask away!"
       ]
     },
@@ -179,6 +167,18 @@
       "role": "model",
       "parts": [
         "Of course. Sending a wedding invitation to a friend should be warm, personal, and exciting.\n\nHere are a few templates you can adapt, ranging from casual and modern to slightly more formal. Choose the one that best fits your relationship with your friend.\n\n---\n\n### **Template 1: Casual & Heartfelt**\n\nThis is perfect for a close friend you talk to regularly.\n\n**Subject:** I'm Getting Married! You're Invited!\n\n**Hi [Friend's Name],**\n\nI have some of the most exciting news of my life to share with you \u2013 I'm marrying the love of my life, **[Partner's Name]**, and we\u2019re officially tying the knot!\n\nYou\u2019ve been such an important part of my journey, and I honestly can\u2019t imagine celebrating this huge day without you there. We would be so happy if you would join us to witness our marriage and celebrate with us.\n\nHere are the details:\n*   **Date:** Saturday, [Date of Wedding], [Year]\n*   **Ceremony:** [Time of Ceremony] at [Name of Ceremony Venue], [Address]\n*   **Reception:** [Time of Reception] at [Name of Reception Venue], [Address]\n\nYou can find more information about the day, travel, and our gift registry on our wedding website: **[Link to your wedding website]**\n\nPlease let us know if you can make it by RSVPing on the website by **[RSVP Date]**.\n\nCan't wait to celebrate with you!\n\nLots of love,\n**[Your Name]**\n\n---\n\n### **Template 2: Modern & Simple**\n\nThis is great for a clean, straightforward invitation, especially if most details are on your wedding website.\n\n**Subject:** We're Getting Married! | [Your Name] & [Partner's Name]\n\n**Hey [Friend's Name],**\n\nThe big day is set! **[Partner's Name]** and I are so excited to announce that we are getting married, and we would love for you to be there with us.\n\nJoin us for our wedding celebration on:\n**[Day of the Week], [Date of Wedding]**\nat\n**[Venue Name], [City, State]**\n\nThe ceremony will begin at **[Time]**, with dinner, drinks, and dancing to follow.\n\nFor all the details, including directions, accommodations, and to RSVP, please visit our wedding website:\n**[Link to your wedding website]**\n\nKindly RSVP by **[RSVP Date]** so we can get a final headcount.\n\nWe are so excited to start our next chapter and hope you can be there to celebrate with us!\n\nBest,\n**[Your Name] & [Partner's Name]**\n\n---\n\n### **Template 3: Slightly More Formal / Classic**\n\nThis version is a bit more traditional but still maintains a warm, friendly tone.\n\n**Subject:** An Invitation to Our Wedding\n\n**Dear [Friend's Name],**\n\nWith the greatest joy, **[Partner's Name]** and I invite you to share in our celebration of marriage as we exchange our wedding vows.\n\nYour friendship has meant so much to me over the years, and we would be honored by your presence as we begin our new life together.\n\nThe ceremony and reception will be held at:\n**[Venue Name]**\n**[Venue Address]**\non\n**[Day of the Week], the [Day] of [Month], [Year]**\nat\n**[Time] in the evening/afternoon**\n\nPlease visit our wedding website for further details and to RSVP by **[RSVP Date]**: **[Link to your wedding website]**\n\nWe look forward to celebrating this special moment with you.\n\nWith love and excitement,\n**[Your Name] & [Partner's Name]**\n\n---\n\n#### **Tips Before You Send:**\n\n1.  **Personalize It:** Add a short sentence about a shared memory or why their presence is specifically important to you. For example, \"I'll never forget our college days dreaming about this, and I need you there!\"\n2.  **Fill in All Blanks:** Double-check that you've replaced all the `[bracketed]` information with your specific details.\n3.  **Test Your Links:** Make sure the link to your wedding website works correctly.\n4.  **Proofread:** Give it one last read-through to catch any typos."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "who are you"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am a next-generation Powerfull Miro Agent created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep. I'm here to assist you with Miro-related tasks and information."
       ]
     }
   ],

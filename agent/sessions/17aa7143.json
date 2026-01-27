@@ -1,0 +1,23 @@
+{
+  "id": "17aa7143",
+  "title": "who are you",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:04 AM, Date: Tuesday, January 27, 2026 | USER: None] who are you"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am a next-generation Powerfull Miro Agent created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep. I'm here to assist you with Miro-related tasks and information.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-27 11:04:30.371935"
+}
