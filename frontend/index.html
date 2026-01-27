@@ -126,14 +126,18 @@
             
             isAiSpeaking = true;
             window.speechSynthesis.cancel(); 
-            // NOTE: We do NOT stop recognition. The mic stays ON.
+            
+            // REMOVED: recognition.abort(); -> We keep the mic ON to allow interruption.
 
             const u = new SpeechSynthesisUtterance(cleanText);
             const hasTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
             if (hasTelugu) u.lang = 'te-IN';
             else if (selectedVoice) { u.voice = selectedVoice; u.lang = 'en-US'; }
 
-            u.onend = () => { isAiSpeaking = false; if(isVoiceMode) document.getElementById('voice-status').innerText = "LISTENING..."; };
+            u.onend = () => { 
+                isAiSpeaking = false; 
+                if(isVoiceMode) document.getElementById('voice-status').innerText = "LISTENING...";
+            };
             window.speechSynthesis.speak(u);
         }
 
@@ -153,35 +157,33 @@
                 const t = result[0].transcript.trim();
                 const lower = t.toLowerCase();
 
-                // 1. BARGE-IN LOGIC (Interrupt AI)
-                if (isAiSpeaking && t.length > 2) {
-                    window.speechSynthesis.cancel(); // Shut up the AI immediately
+                // 1. BARGE-IN / INTERRUPTION LOGIC
+                // If AI is talking and we hear new text, stop the AI immediately.
+                if (isAiSpeaking && t.length > 1) {
+                    window.speechSynthesis.cancel();
                     isAiSpeaking = false;
-                    console.log("Interruption detected!");
+                    console.log("User interrupted AI.");
                 }
 
                 // 2. Wake Word
-                if(!isVoiceMode && (lower.includes("hey miro") || lower.includes("hello miro"))) {
+                if(!isVoiceMode && (lower.includes("hey miro") || lower.includes("hello miro") || lower.includes("middle"))) {
                     toggleVoiceMode(); return;
                 }
 
                 if(isVoiceMode) {
                     document.getElementById('voice-transcript').innerText = `"${t}"`;
                     
-                    // 3. SEND LOGIC
+                    // 3. SILENCE DETECTION & SENDING
                     clearTimeout(silenceTimer);
                     
                     if(result.isFinal) {
                         handleVoiceCommand(t);
                     } else {
-                        // If user pauses for 1s, we assume they are done.
-                        // We use a shorter timer to make it feel snappier.
+                        // Wait 1.0s for silence, then send
                         silenceTimer = setTimeout(() => {
                             if(t.length > 1) {
-                                // Important: We manually abort to flush the buffer, then restart immediately
-                                recognition.abort(); 
+                                recognition.abort(); // Reset buffer
                                 handleVoiceCommand(t);
-                                setTimeout(() => { try{recognition.start();}catch(e){} }, 50);
                             }
                         }, 1000); 
                     }
@@ -291,14 +293,26 @@
         userInput.addEventListener('input', function() { this.style.height='auto'; this.style.height=(this.scrollHeight)+'px'; });
         
         // FIXED LOGIC FOR ENTER KEY
+        // --- 6. INPUT HANDLER FIX (SHIFT+ENTER) ---
+        userInput.addEventListener('input', function() { 
+            this.style.height='auto'; 
+            this.style.height=(this.scrollHeight)+'px'; 
+        });
+        
         userInput.addEventListener('keydown', (e) => { 
-            if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); // Stop new line
-                const text = userInput.value.trim();
-                if(text) {
+            // Check for Enter key specifically
+            if (e.key === 'Enter') {
+                if (e.shiftKey) {
+                    // Allow Shift+Enter to create a new line (default behavior)
+                    return; 
+                } else {
+                    // Prevent default "new line" behavior
+                    e.preventDefault(); 
+                    
+                    // Trigger send button
                     document.getElementById('send-btn').click();
                 }
-            } 
+            }
         });
 
         document.getElementById('send-btn').addEventListener('click', () => {
