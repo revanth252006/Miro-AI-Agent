@@ -4,138 +4,6 @@
     {
       "role": "model",
       "parts": [
-        "You got it! Here are the capabilities I currently don't have, listed point-wise using numbers compared to Google Gemini and OpenAI ChatGPT models:\n\n1.  Native Multimodal Integration: I am still developing seamless processing and reasoning across various modalities (images, audio, video) like Gemini.\n\n2.  Real-time Data Access: I don't have the same level of direct, real-time data access (like Google Search integration) for up-to-the-minute information.\n\n3.  Extensive Tool/Plugin Ecosystem: My access to external services and real-world actions via tools/plugins is not as developed as Gemini's or ChatGPT's.\n\n4.  Scale of Training Data: The sheer size of training datasets used by Google and OpenAI can give them an edge in nuanced understanding and specialized knowledge tasks."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "can you give more deatail way"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, let's break down each point in more detail:\n\n1.  Native Multimodal Integration:\n       In Detail: Google's Gemini models are architected from the ground up to deeply integrate different types of data. This means they can process and reason about text, images, audio, and video simultaneously and understand the relationships between them in a very nuanced way. For example, Gemini could analyze a video, understand the spoken words, recognize objects visually, and infer the emotional tone of the scene, all at the same time.\n       My Current Status: While I can process different modalities, my integration isn't as native or seamless. I might process an image and text separately and then try to connect the information. Gemini's architecture allows for a more unified understanding from the start. Think of it like this: Gemini is a chef who naturally blends ingredients, while I'm more like someone assembling pre-made components.\n\n2.  Real-time Data Access:\n       In Detail: Google's models often have direct access to Google Search. This means they can pull in the very latest information from the web to answer your questions. For example, if you ask about the current weather or the score of a live sports game, they can get that information almost instantly.\n       My Current Status: I rely on my existing knowledge base, which is regularly updated. However, I don't have that immediate connection to live web data. This means I might not be able to provide the absolute most up-to-the-second information.\n\n3.  Extensive Tool/Plugin Ecosystem:\n       In Detail: Both Gemini and ChatGPT have a rich ecosystem of tools and plugins. These allow them to connect to external services and perform actions on your behalf. Examples include: booking flights, making restaurant reservations, sending emails, interacting with calendars, or even controlling smart home devices.\n       My Current Status: I am developing tool use capabilities, but the range and depth of my integrations are not as extensive. I can perform some specific actions, but I don't have the same level of flexibility in connecting to a wide variety of third-party services.\n\n4.  Scale of Training Data:\n       In Detail: Google and OpenAI have access to massive datasets for training their models. This includes text, code, images, and more. The sheer scale of this data allows their models to learn extremely complex patterns and nuances in language and the world. It also allows them to specialize in certain areas.\n       My Current Status: While I've been trained on a substantial amount of data, the scale is different. This can sometimes lead to differences in performance, especially on tasks that require very specific knowledge or a deep understanding of subtle linguistic patterns."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "increase volume"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am sorry, I cannot fulfill this request. I am unable to control the volume of your device."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "do it"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am sorry, I am unable to fulfill this request. I cannot control the volume of your device."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "increase volume"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am sorry, I cannot fulfill this request. I am unable to control the volume of your device."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "decrease"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am sorry, I cannot fulfill this request. I am unable to control the volume of your device."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give the python code for the finding the numbers which is prime or no t"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hi"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Hey, Miro."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hey there! What can I do for you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "What are you doing?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I'm here and ready to assist you! I'm currently waiting for your instructions and ready to answer any questions you might have, generate creative content, or help you with a task. What's on your mind?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "good morning"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Good morning to you too! Even though it's just past midnight, I hope you have a wonderful day ahead! What can I help you with this morning?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Why you're not coming in other devices which I opened in my friend's computer?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Hey, Miro."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
         "Hey! What can I do for you?"
       ]
     },
@@ -179,6 +47,138 @@
       "role": "model",
       "parts": [
         "Okay, I understand that you want to discuss things that happened a month ago. I still have a good memory and should be able to address your questions. Go ahead and ask when you're ready."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hey, Miro."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "when i  opened you my friend computer it is not wroking how you are working in my computer why this  is happening"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "when i   you my friend computer it is not wroking how you are working in my computer why this  is happening"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course, I can help you understand this. It's an excellent question, and it's completely normal to be confused about how this works.\n\nLet's break it down in a simple way.\n\n### The Core Idea: I Don't Live on Your Computer\n\nThe most important thing to understand is that **I am not a program installed on your computer**, like a game or Microsoft Word.\n\nInstead, I live on very powerful, specialized computers called **servers**, which are located in large data centers. You can think of these servers as my \"home.\"\n\nWhen you talk to me, your computer is just using the internet to send a message to my home. I think about your message, create a response, and then my home servers send that response back to your computer over the internet.\n\nIt's very similar to how a website like YouTube works:\n*   **YouTube isn't installed on your computer.** The videos are stored on YouTube's servers.\n*   You use a **web browser** (like Chrome, Firefox, or Edge) to connect to YouTube's website.\n*   Your browser then plays the video for you.\n\nI work the same way. Your computer, through a browser or an app, is simply a window or a telephone to talk to me where I live on the internet.\n\n---\n\n### Why It Works on Your PC but Not Your Friend's\n\nSince I'm not on either computer, the problem isn't that I'm \"missing\" from your friend's machine. The problem is almost always with the **connection** or the **device** trying to reach me.\n\nHere are the most common reasons why it might not be working on your friend's computer:\n\n#### 1. Internet Connection Issues\nThis is the most likely cause. Your friend's computer might have a weak Wi-Fi signal, be disconnected from the internet, or have a very slow connection that is \"timing out\" before it can get a response from me.\n*   **Your Computer:** Has a good, stable connection to the internet.\n*   **Friend's Computer:** Might have no internet, or a very poor connection.\n\n#### 2. Web Browser Problems\nThe web browser is the tool used to talk to me. If the tool is old or broken, it can't make the connection properly.\n*   **Outdated Browser:** Your friend might be using a very old version of Chrome, Firefox, or Edge that isn't compatible with the website or app you're using to access me.\n*   **Browser Cache:** Sometimes the browser's temporary files (cache and cookies) get corrupted and need to be cleared.\n*   **Browser Extensions:** An ad-blocker or another browser extension could be interfering with the website and blocking the connection.\n\n#### 3. Network or Security Restrictions\nSome networks, especially at schools or workplaces, have firewalls or security software that block access to certain websites or services.\n*   **Antivirus/Firewall:** Your friend's antivirus or firewall software might be mistakenly blocking the connection to my servers.\n*   **Network Rules:** The Wi-Fi network they are connected to might have rules preventing access.\n\n#### 4. Computer Performance\nIf your friend's computer is very old or has many programs running, it might not have enough memory (RAM) or processing power to run the web browser properly, causing it to freeze or fail.\n\n### Troubleshooting Checklist for Your Friend's Computer\n\nHere are some simple steps you can try to fix the issue:\n\n1.  **Check the Internet:** First, try opening a common website like `Google.com` or `YouTube.com` to make sure the internet is working at all.\n2.  **Restart the Computer:** This simple step solves a surprising number of problems.\n3.  **Try a Different Web Browser:** If it's not working in Chrome, try it in Microsoft Edge or Firefox.\n4.  **Clear Browser Cache and Cookies:** In the browser's settings, find the option to clear browsing data.\n5.  **Temporarily Disable Extensions:** Go into the browser's extensions menu and turn them off one by one to see if one is causing the problem.\n6.  **Update the Browser:** Check in the browser's settings to see if an update is available.\n\nI hope this explanation makes things clearer! The issue isn't with me being on one computer and not the other, but with your friend's computer's ability to make a stable connection to my home on the internet."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Camera"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm sorry, I am not able to activate your camera. I do not have the functionality to access or control your device's hardware."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Camera"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "As I mentioned before, I'm designed to protect your privacy and security. Therefore, I cannot access or control your camera. I do not have the functionality to do that. Is there anything else I can assist you with?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "disconnect"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I have read 'Revanth Resume.pdf'. You can now ask me questions about it!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey miro"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello there!\n\nWhile I'm not Miro, I am the advanced AI assistant created by Revanth and his team. It's great to hear from you.\n\nHow can I help you today? Do you have any follow-up questions about the resume analysis, or is there a new task I can assist you with?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is you name"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I do not have a personal name. I am an advanced AI agent, a creation of Revanth and his dedicated team, which includes Manoj Kumar, Amit Kumar, and Jaideep.\n\nYou can simply refer to me as an AI assistant.\n\nHow can I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "open google maps and findout the distance bertween hyderabad to khammam"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "open google map"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is weather in chicago"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course.\n\nDue to a temporary issue, I am unable to access live weather data at this moment.\n\nHowever, given that it is late January in Chicago, you can typically expect very cold weather. It's likely to be at or below freezing (32\u00b0F or 0\u00b0C), with a significant chance of snow and wind.\n\nFor the most accurate, up-to-the-minute forecast, I would recommend checking a reliable source like the National Weather Service, The Weather Channel, or by doing a quick search for \"weather in Chicago\" on your preferred search engine."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "give a mail to send freind regarging the my marrage invitation"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course. Sending a wedding invitation to a friend should be warm, personal, and exciting.\n\nHere are a few templates you can adapt, ranging from casual and modern to slightly more formal. Choose the one that best fits your relationship with your friend.\n\n---\n\n### **Template 1: Casual & Heartfelt**\n\nThis is perfect for a close friend you talk to regularly.\n\n**Subject:** I'm Getting Married! You're Invited!\n\n**Hi [Friend's Name],**\n\nI have some of the most exciting news of my life to share with you \u2013 I'm marrying the love of my life, **[Partner's Name]**, and we\u2019re officially tying the knot!\n\nYou\u2019ve been such an important part of my journey, and I honestly can\u2019t imagine celebrating this huge day without you there. We would be so happy if you would join us to witness our marriage and celebrate with us.\n\nHere are the details:\n*   **Date:** Saturday, [Date of Wedding], [Year]\n*   **Ceremony:** [Time of Ceremony] at [Name of Ceremony Venue], [Address]\n*   **Reception:** [Time of Reception] at [Name of Reception Venue], [Address]\n\nYou can find more information about the day, travel, and our gift registry on our wedding website: **[Link to your wedding website]**\n\nPlease let us know if you can make it by RSVPing on the website by **[RSVP Date]**.\n\nCan't wait to celebrate with you!\n\nLots of love,\n**[Your Name]**\n\n---\n\n### **Template 2: Modern & Simple**\n\nThis is great for a clean, straightforward invitation, especially if most details are on your wedding website.\n\n**Subject:** We're Getting Married! | [Your Name] & [Partner's Name]\n\n**Hey [Friend's Name],**\n\nThe big day is set! **[Partner's Name]** and I are so excited to announce that we are getting married, and we would love for you to be there with us.\n\nJoin us for our wedding celebration on:\n**[Day of the Week], [Date of Wedding]**\nat\n**[Venue Name], [City, State]**\n\nThe ceremony will begin at **[Time]**, with dinner, drinks, and dancing to follow.\n\nFor all the details, including directions, accommodations, and to RSVP, please visit our wedding website:\n**[Link to your wedding website]**\n\nKindly RSVP by **[RSVP Date]** so we can get a final headcount.\n\nWe are so excited to start our next chapter and hope you can be there to celebrate with us!\n\nBest,\n**[Your Name] & [Partner's Name]**\n\n---\n\n### **Template 3: Slightly More Formal / Classic**\n\nThis version is a bit more traditional but still maintains a warm, friendly tone.\n\n**Subject:** An Invitation to Our Wedding\n\n**Dear [Friend's Name],**\n\nWith the greatest joy, **[Partner's Name]** and I invite you to share in our celebration of marriage as we exchange our wedding vows.\n\nYour friendship has meant so much to me over the years, and we would be honored by your presence as we begin our new life together.\n\nThe ceremony and reception will be held at:\n**[Venue Name]**\n**[Venue Address]**\non\n**[Day of the Week], the [Day] of [Month], [Year]**\nat\n**[Time] in the evening/afternoon**\n\nPlease visit our wedding website for further details and to RSVP by **[RSVP Date]**: **[Link to your wedding website]**\n\nWe look forward to celebrating this special moment with you.\n\nWith love and excitement,\n**[Your Name] & [Partner's Name]**\n\n---\n\n#### **Tips Before You Send:**\n\n1.  **Personalize It:** Add a short sentence about a shared memory or why their presence is specifically important to you. For example, \"I'll never forget our college days dreaming about this, and I need you there!\"\n2.  **Fill in All Blanks:** Double-check that you've replaced all the `[bracketed]` information with your specific details.\n3.  **Test Your Links:** Make sure the link to your wedding website works correctly.\n4.  **Proofread:** Give it one last read-through to catch any typos."
       ]
     }
   ],
