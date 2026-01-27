@@ -3,26 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRO AGENT</title>
+    <title>Miro | Gemini UI</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
-    
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Simple React wrapper for Lucide icons
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const lucide = window.lucide;
+            if (!lucide) return null;
+            
+            // Create a ref to hold the SVG element
+            const ref = React.useRef(null);
+            
+            React.useEffect(() => {
+                if (ref.current) {
+                    const iconName = name.toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2'); // Convert camelCase to kebab-case
+                    const svg = lucide.icons[name]; // Access icon by name
+                    if (svg) {
+                         // Lucide plain JS returns an SVG string or element creation logic. 
+                         // For simplicity in this CDN setup, we use the createIcons API on a specific element
+                         // But since we are in React, let's just use dangerouslySetInnerHTML with the SVG string if available
+                         // OR better: Just use lucide.createElement logic manually or render the SVG paths if we had them.
+                         // EASIEST FIX for CDN: Use the `data-lucide` attribute and call createIcons
+                         lucide.createIcons({
+                            name: name,
+                            attrs: {
+                                class: `lucide lucide-${iconName} ${className}`,
+                                width: size,
+                                height: size
+                            },
+                            nameAttr: 'data-lucide'
+                         });
+                    }
+                }
+            });
+
+            // Fallback: Using the i tag which lucide.createIcons looks for
+            return React.createElement('i', { 
+                'data-lucide': name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase(),
+                className: className,
+                style: { width: size, height: size, display: 'inline-block' }
+            });
+        };
+        
+        // Polling to ensure icons render after React updates
+        setInterval(() => {
+            if(window.lucide) window.lucide.createIcons();
+        }, 500);
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 
     <script>
@@ -35,24 +77,16 @@
                         mono: ['Fira Code', 'monospace'],
                     },
                     colors: {
-                        gemini: {
-                            bg: '#131314',
-                            surface: '#1e1f20',
-                            surfaceHover: '#2d2e31',
-                            blue: '#a8c7fa',
-                            accent: '#00f3ff',
-                            purple: '#bd00ff'
-                        }
+                        // Exact Gemini Dark Colors
+                        bg: '#131314',        // Main background (very dark grey)
+                        surface: '#1e1f20',   // Sidebar & Input background
+                        surfaceHover: '#2d2e31', 
+                        accent: '#a8c7fa',    // Google Blue (Light)
+                        textMain: '#e3e3e3',
+                        textSec: '#c4c7c5'
                     },
                     animation: {
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite'
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
                     }
                 }
             }
@@ -62,19 +96,19 @@
 
     <style>
         body { background-color: #131314; color: #e3e3e3; }
+        
+        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .glass-panel { background: rgba(30, 31, 32, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 20px; }
         
-        /* Markdown Styles */
+        /* Markdown Styling */
         .markdown-body pre { background: #0d0d0d !important; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
-        .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #e0f2fe; }
+        .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #a8c7fa; }
         .markdown-body p { margin-bottom: 0.8rem; line-height: 1.6; }
-        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 600; color: #fff; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
         
-        .voice-orb { width: 150px; height: 150px; background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%); border-radius: 50%; filter: blur(15px); animation: pulse-glow 2s infinite; }
+        /* Voice Orb */
+        .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, #4285f4 0%, #a8c7fa 60%, transparent 80%); border-radius: 50%; filter: blur(20px); animation: pulse-glow 2s infinite; }
         @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
     </style>
 </head>
@@ -82,66 +116,30 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useLayoutEffect } = React;
+        const { useState, useEffect, useRef } = React;
         const { motion, AnimatePresence } = window.Motion;
-        
-        // --- FIX: Robust Icon Loading ---
-        // Checks both common global names for the Lucide library
-        const Icons = window.lucideReact || window.LucideReact || window.lucide;
-        
-        // Fallback if icons fail to load entirely
-        const SafeIcon = ({ name, ...props }) => {
-            if (!Icons || !Icons[name]) return <span className="text-xs">{name}</span>;
-            const IconComponent = Icons[name];
-            return <IconComponent {...props} />;
-        };
 
-        // GLOBAL CONFIG
-        const WS_URL = 'ws://localhost:8000/ws';
+        // --- MOCK SUGGESTIONS FOR EMPTY STATE ---
+        const SUGGESTIONS = [
+            { icon: "Compass", text: "Brainstorm team bonding activities for our work retreat" },
+            { icon: "Code", text: "Write a Python script to automate daily reports" },
+            { icon: "PenTool", text: "Draft a response to a difficult client email" },
+            { icon: "Lightbulb", text: "Give me 5 creative ideas for a product launch" },
+        ];
 
         // --- COMPONENTS ---
 
-        // 1. Markdown/Mermaid Renderer
+        // 1. Markdown Renderer
         const MessageContent = ({ content }) => {
             const containerRef = useRef(null);
-
             useEffect(() => {
                 if (!containerRef.current) return;
-                
-                if (content.includes("```mermaid")) {
-                    // Simple split for mermaid diagrams
-                    const parts = content.split(/```mermaid\n([\s\S]*?)```/g);
-                    let html = "";
-                    
-                    // The split results in [text, code, text, code...]
-                    parts.forEach((part, index) => {
-                        if (index % 2 === 1) { // This is the code part
-                             const id = `mermaid-${Date.now()}-${index}`;
-                             html += `<div class="mermaid text-center my-4" id="${id}">${part}</div>`;
-                             // We'll init mermaid after render
-                        } else {
-                            html += marked.parse(part);
-                        }
-                    });
-                    
-                    containerRef.current.innerHTML = html;
-                    
-                    // Initialize new mermaid diagrams
-                    setTimeout(() => {
-                        try { mermaid.init(undefined, document.querySelectorAll('.mermaid')); } catch(e) {}
-                    }, 100);
-
-                } else {
-                    containerRef.current.innerHTML = marked.parse(content);
-                }
-
-                // Syntax Highlight
-                if (window.Prism) {
-                    window.Prism.highlightAllUnder(containerRef.current);
-                }
+                // Simple markdown render
+                containerRef.current.innerHTML = marked.parse(content);
+                // Highlight code
+                if (window.Prism) window.Prism.highlightAllUnder(containerRef.current);
             }, [content]);
-
-            return <div ref={containerRef} className="markdown-body text-[15px] font-light text-gray-100" />;
+            return <div ref={containerRef} className="markdown-body text-[15px] font-normal text-[#e3e3e3] leading-7" />;
         };
 
         // 2. Main App
@@ -153,407 +151,265 @@
             const [isGenerating, setIsGenerating] = useState(false);
             const [isVoiceMode, setVoiceMode] = useState(false);
             const [visionActive, setVisionActive] = useState(false);
-            const [voiceStatus, setVoiceStatus] = useState("Listening...");
-            const [liveTranscript, setLiveTranscript] = useState("");
+            const [wsStatus, setWsStatus] = useState("Connecting...");
 
             // Refs
             const ws = useRef(null);
-            const recognition = useRef(null);
             const videoRef = useRef(null);
             const fileInputRef = useRef(null);
             const messagesEndRef = useRef(null);
-            const silenceTimer = useRef(null);
-            const streamRef = useRef(null);
+            const recognition = useRef(null);
 
-            // --- 1. WebSocket Setup ---
-            const connectWebSocket = () => {
-                try {
-                    ws.current = new WebSocket(WS_URL);
-                    
-                    ws.current.onopen = () => console.log("MIRO: Connected to Neural Backend");
-                    
+            // --- WEBSOCKET CONNECTION ---
+            useEffect(() => {
+                const connect = () => {
+                    ws.current = new WebSocket('ws://localhost:8000/ws');
+                    ws.current.onopen = () => setWsStatus("Online");
+                    ws.current.onclose = () => { setWsStatus("Offline"); setTimeout(connect, 3000); };
                     ws.current.onmessage = (event) => {
                         const data = event.data;
+                        if (data.includes("Vision Camera On")) { setVisionActive(true); startWebcam(); return; }
+                        if (data.includes("Disconnected")) { setVisionActive(false); stopWebcam(); return; }
                         
-                        // Handle Control Messages
-                        if (data.includes("Vision Camera On")) {
-                            setVisionActive(true);
-                            startWebcam();
-                            return;
-                        }
-                        if (data.includes("Disconnected")) {
-                            setVisionActive(false);
-                            stopWebcam();
-                            return;
-                        }
-
-                        // Handle Text Message
                         setIsGenerating(false);
-                        const newMsg = { id: Date.now(), role: 'assistant', content: data };
-                        setMessages(prev => [...prev, newMsg]);
-                        
+                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: data }]);
                         if (isVoiceMode) speak(data);
                     };
-
-                    ws.current.onclose = () => {
-                        console.log("MIRO: Disconnected. Reconnecting...");
-                        setTimeout(connectWebSocket, 3000);
-                    };
-                } catch (err) {
-                    console.error("WebSocket connection failed", err);
-                }
-            };
-
-            useEffect(() => {
-                connectWebSocket();
-                loadVoices();
-                return () => {
-                    if (ws.current) ws.current.close();
-                    stopWebcam();
                 };
-            }, []);
+                connect();
+                return () => { if(ws.current) ws.current.close(); stopWebcam(); }
+            }, [isVoiceMode]);
 
             // Scroll to bottom
-            useEffect(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, [messages, isGenerating]);
+            useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isGenerating]);
 
+            // --- VOICE & VISION UTILS ---
+            const startWebcam = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (videoRef.current) videoRef.current.srcObject = stream;
+                    setVisionActive(true);
+                } catch(e) { console.error("Cam error", e); }
+            };
 
-            // --- 2. Voice & TTS Engine ---
-            const loadVoices = () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.getVoices();
-                }
+            const stopWebcam = () => {
+                const stream = videoRef.current?.srcObject;
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                setVisionActive(false);
             };
 
             const speak = (text) => {
                 if (!('speechSynthesis' in window)) return;
-                
                 window.speechSynthesis.cancel();
-                // Strip markdown for speech
-                const cleanText = text.replace(/[*#`_]/g, '').replace(/<[^>]*>/g, '').replace(/```[\s\S]*?```/g, "Code block generated.");
-                
-                const u = new SpeechSynthesisUtterance(cleanText);
+                const u = new SpeechSynthesisUtterance(text.replace(/[*#`]/g, ''));
                 const voices = window.speechSynthesis.getVoices();
-                // Try to find Zira or a good English voice
-                const voice = voices.find(v => v.name.includes("Zira")) || voices.find(v => v.name.includes("Google US English")) || voices[0];
-                if (voice) u.voice = voice;
-                
-                u.onend = () => {
-                   if(isVoiceMode) setVoiceStatus("Listening...");
-                };
+                u.voice = voices.find(v => v.name.includes("Google US English")) || voices[0];
                 window.speechSynthesis.speak(u);
             };
 
-            const toggleVoiceMode = () => {
-                if (isVoiceMode) {
-                    setVoiceMode(false);
-                    window.speechSynthesis.cancel();
-                    try { recognition.current?.stop(); } catch(e){}
-                } else {
-                    setVoiceMode(true);
-                    setVoiceStatus("Listening...");
-                    speak("Good day, Revanth. I am Miro.");
-                    try { recognition.current?.start(); } catch(e){}
-                }
-            };
-
-            useEffect(() => {
-                if ('webkitSpeechRecognition' in window) {
-                    const r = new webkitSpeechRecognition();
-                    r.continuous = true;
-                    r.interimResults = true;
-                    r.lang = 'en-US';
-
-                    r.onstart = () => setVoiceStatus("Listening...");
-                    
-                    r.onresult = (e) => {
-                        const result = e.results[e.results.length - 1];
-                        const t = result[0].transcript.trim();
-                        const lower = t.toLowerCase();
-
-                        // Barge-in
-                        if (window.speechSynthesis.speaking && t.length > 2) {
-                            window.speechSynthesis.cancel();
-                        }
-
-                        // Wake Word (when not in voice mode)
-                        if (!isVoiceMode && (lower.includes("hey miro") || lower.includes("hello miro"))) {
-                            toggleVoiceMode();
-                            return;
-                        }
-
-                        if (isVoiceMode) {
-                            setLiveTranscript(t);
-                            clearTimeout(silenceTimer.current);
-
-                            if (result.isFinal) {
-                                handleVoiceCommand(t);
-                            } else {
-                                // Silence detection for rapid commands
-                                silenceTimer.current = setTimeout(() => {
-                                    if (t.length > 1) {
-                                        r.abort();
-                                        handleVoiceCommand(t);
-                                        setTimeout(() => { try{r.start();}catch(e){} }, 50);
-                                    }
-                                }, 1200);
-                            }
-                        }
-                    };
-
-                    r.onend = () => {
-                        if (isVoiceMode) try { r.start(); } catch (e) {}
-                    };
-
-                    recognition.current = r;
-                }
-            }, [isVoiceMode]);
-
-            const handleVoiceCommand = (text) => {
-                setLiveTranscript("");
-                setVoiceStatus("Processing...");
-                handleSend(text);
-            };
-
-
-            // --- 3. Vision Engine ---
-            const startWebcam = async () => {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    streamRef.current = stream;
-                    if (videoRef.current) videoRef.current.srcObject = stream;
-                    setVisionActive(true);
-                } catch (e) {
-                    console.error("Camera Error:", e);
-                    setMessages(prev => [...prev, {id: Date.now(), role: 'assistant', content: "Error accessing camera. Please check permissions."}]);
-                }
-            };
-
-            const stopWebcam = () => {
-                if (streamRef.current) {
-                    streamRef.current.getTracks().forEach(t => t.stop());
-                }
-                setVisionActive(false);
-            };
-
-            // --- 4. Messaging Logic ---
-            const handleSend = (textOverride) => {
-                const text = typeof textOverride === 'string' ? textOverride : inputValue;
+            const handleSend = (text = inputValue) => {
                 if (!text.trim()) return;
-
-                // Optimistic Update
                 setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }]);
                 setInputValue("");
                 setIsGenerating(true);
-
-                // Send to Backend
-                if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                
+                if (ws.current?.readyState === WebSocket.OPEN) {
                     if (visionActive && videoRef.current) {
                         const canvas = document.createElement("canvas");
                         canvas.width = 640; canvas.height = 480;
-                        canvas.getContext("2d").drawImage(videoRef.current, 0, 0, 640, 480);
-                        const imageBase64 = canvas.toDataURL("image/jpeg", 0.7);
-                        ws.current.send(JSON.stringify({ text: text, image: imageBase64 }));
+                        canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
+                        ws.current.send(JSON.stringify({ text, image: canvas.toDataURL("image/jpeg", 0.7) }));
                     } else {
                         ws.current.send(text);
                     }
                 } else {
-                    // Fallback simulation if WS is dead
                     setTimeout(() => {
                         setIsGenerating(false);
-                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: "MIRO Backend Disconnected. Please ensure the Python server is running on port 8000." }]);
+                        setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: "Miro Backend is offline. Please check the server." }]);
                     }, 1000);
                 }
             };
 
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const payload = JSON.stringify({ type: "upload", filename: file.name, file: ev.target.result });
-                    if(ws.current) ws.current.send(payload);
-                    setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📂 Uploaded: ${file.name}` }]);
-                };
-                reader.readAsDataURL(file);
-            };
-
-            const triggerAction = (action) => {
-                 if (action === "Upload") fileInputRef.current.click();
-                 else if (action === "Disconnect") { if(ws.current) ws.current.send("disconnect"); }
-                 else {
-                     if(ws.current) ws.current.send(`Activate ${action}`);
-                     setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `Activate ${action}` }]);
-                 }
+            const triggerTool = (tool) => {
+                if(tool === "Upload") fileInputRef.current.click();
+                else if(tool === "Camera") { setVisionActive(prev => !prev); if(!visionActive) startWebcam(); else stopWebcam(); }
+                else handleSend(`Activate ${tool}`);
             };
 
             // --- RENDER ---
             return (
-                <div className="flex h-screen w-full bg-gemini-bg text-gray-200 overflow-hidden font-sans selection:bg-gemini-accent selection:text-black">
+                <div className="flex h-screen w-full bg-bg text-textMain overflow-hidden font-sans selection:bg-accent selection:text-bg">
                     
-                    {/* Hidden File Input */}
-                    <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept=".pdf,.txt" />
+                    {/* HIDDEN INPUTS */}
+                    <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => handleSend(`Uploaded: ${e.target.files[0]?.name}`)} />
 
-                    {/* Left Sidebar */}
+                    {/* SIDEBAR (Gemini Style) */}
                     <motion.aside 
-                        initial={{ width: 0, opacity: 0 }}
+                        initial={false}
                         animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
-                        className="hidden md:flex flex-col h-full bg-gemini-surface border-r border-white/5 shrink-0"
+                        className="hidden md:flex flex-col h-full bg-surface shrink-0 overflow-hidden transition-all duration-300"
                     >
-                        <div className="p-4 w-[280px]">
-                            <div className="flex items-center gap-2 mb-8 px-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gemini-accent to-gemini-purple animate-pulse-slow"></div>
-                                <span className="font-medium tracking-widest text-lg">MIRO</span>
+                        <div className="p-4 w-[280px] flex flex-col h-full">
+                            <div className="flex items-center gap-3 mb-6 pl-2">
+                                <button onClick={() => setSidebarOpen(false)} className="hover:bg-surfaceHover p-2 rounded-full text-textSec"><Icon name="Menu" /></button>
                             </div>
 
-                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-gemini-surfaceHover rounded-full text-sm font-medium hover:text-white transition-colors mb-4 w-fit">
-                                <SafeIcon name="Plus" size={18} /> <span className="text-gray-300">New Chat</span>
+                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-surfaceHover rounded-full text-sm font-medium hover:bg-[#3c3d40] transition-colors mb-6 w-fit text-textSec">
+                                <Icon name="Plus" size={18} /> <span className="text-[#e3e3e3]">New chat</span>
                             </button>
 
-                            <div className="text-xs font-bold text-gray-500 uppercase px-2 mb-2">Tools</div>
-                            <div className="space-y-1">
-                                <button onClick={() => triggerAction('Camera')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="Eye" size={16} /> Vision</button>
-                                <button onClick={() => triggerAction('Sign')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="Power" size={16} /> Sign Language</button>
-                                <button onClick={() => triggerAction('Mouse')} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded-lg transition"><SafeIcon name="MousePointer2" size={16} /> AI Mouse</button>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                <div className="text-xs font-medium text-textSec mb-2 px-4 mt-2">Recent</div>
+                                <div className="space-y-1">
+                                    {["React Project Help", "Python Script Debug", "Weekend Plans"].map((t, i) => (
+                                        <button key={i} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-textMain hover:bg-surfaceHover rounded-full transition-colors truncate">
+                                            <Icon name="MessageSquare" size={16} className="shrink-0" />
+                                            <span className="truncate">{t}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="mt-auto pt-4 space-y-1">
+                                <button onClick={() => triggerTool('Camera')} className={`flex items-center gap-3 w-full px-4 py-2 text-sm rounded-full transition-colors ${visionActive ? 'bg-red-500/20 text-red-300' : 'hover:bg-surfaceHover text-textMain'}`}>
+                                    <Icon name="Eye" size={18} /> Vision {visionActive ? "On" : "Off"}
+                                </button>
+                                <button className="flex items-center gap-3 w-full px-4 py-2 text-sm text-textMain hover:bg-surfaceHover rounded-full transition-colors">
+                                    <Icon name="Settings" size={18} /> Settings
+                                </button>
                             </div>
                         </div>
                     </motion.aside>
 
-                    {/* Main Content */}
+                    {/* MAIN CONTENT */}
                     <main className="flex-1 flex flex-col relative h-full min-w-0">
                         
-                        {/* Header */}
-                        <header className="absolute top-0 w-full z-10 flex items-center justify-between px-6 py-4">
+                        {/* HEADER */}
+                        <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg/95 backdrop-blur-md">
                             <div className="flex items-center gap-2">
                                 {!sidebarOpen && (
-                                    <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded-full text-gray-400">
-                                        <SafeIcon name="Menu" size={20} />
+                                    <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-surfaceHover rounded-full text-textSec mr-2">
+                                        <Icon name="Menu" size={20} />
                                     </button>
                                 )}
-                                <div className="text-lg font-medium text-gray-400 flex items-center gap-1 cursor-pointer">
-                                    Gemini <SafeIcon name="ChevronDown" size={14} className="opacity-50"/>
+                                <div className="flex items-center gap-1 text-xl text-textMain font-normal cursor-pointer hover:bg-surfaceHover px-2 py-1 rounded-lg transition-colors">
+                                    Gemini <Icon name="ChevronDown" size={16} className="opacity-50 mt-1"/>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className={`text-xs px-2 py-1 rounded border ${visionActive ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-green-500/20 border-green-500 text-green-400'}`}>
-                                    {visionActive ? "● VISION ACTIVE" : "● SYSTEM ONLINE"}
-                                </div>
-                                <img src="[https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth](https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth)" className="w-8 h-8 rounded-full border border-gray-600" alt="User" />
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${wsStatus === 'Online' ? 'border-green-800 text-green-400 bg-green-900/20' : 'border-red-800 text-red-400'}`}>{wsStatus.toUpperCase()}</span>
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Revanth" className="w-8 h-8 rounded-full border border-gray-700 hover:border-accent cursor-pointer transition-colors" />
                             </div>
                         </header>
 
-                        {/* Chat Area */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4 pt-20 pb-40">
-                            <div className="max-w-3xl mx-auto space-y-8">
-                                {messages.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center mt-20 text-center opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]">
-                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center text-3xl shadow-2xl mb-6">✨</div>
-                                        <h1 className="text-4xl md:text-5xl font-medium bg-gradient-to-r from-gemini-accent via-white to-gemini-purple bg-clip-text text-transparent pb-2">Hello, Revanth</h1>
-                                        <p className="text-xl text-gray-500">How can I help you today?</p>
-                                    </div>
-                                )}
-
-                                {messages.map((msg) => (
-                                    <motion.div 
-                                        key={msg.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                                    >
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'assistant' ? '' : 'bg-transparent'}`}>
-                                            {msg.role === 'assistant' ? <SafeIcon name="Sparkles" size={20} className="text-gemini-accent" /> : <div className="font-bold text-xs">YOU</div>}
-                                        </div>
-                                        <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-gemini-surface px-5 py-3 rounded-[20px] rounded-tr-sm text-gray-200' : ''}`}>
-                                            <MessageContent content={msg.content} />
-                                        </div>
-                                    </motion.div>
-                                ))}
-                                
-                                {isGenerating && (
-                                    <div className="flex gap-4">
-                                        <div className="w-8 h-8 flex items-center justify-center mt-1"><SafeIcon name="Sparkles" size={20} className="text-gemini-accent animate-spin" /></div>
-                                        <div className="flex gap-1 items-center h-8">
-                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                        {/* CHAT AREA */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4">
+                            <div className="max-w-[850px] mx-auto pb-40 pt-4">
+                                {messages.length === 0 ? (
+                                    // EMPTY STATE (Hello Screen)
+                                    <div className="flex flex-col items-start mt-12 animate-[fadeIn_0.5s_ease-out]">
+                                        <h1 className="text-5xl md:text-6xl font-medium mb-2 bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] bg-clip-text text-transparent pb-1">Hello, Revanth</h1>
+                                        <h2 className="text-5xl md:text-6xl font-medium text-[#444746] dark:text-[#444746] mb-12">How can I help today?</h2>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
+                                            {SUGGESTIONS.map((s, i) => (
+                                                <button key={i} onClick={() => setInputValue(s.text)} className="bg-surface hover:bg-surfaceHover p-4 rounded-xl text-left h-48 flex flex-col justify-between transition-colors group relative overflow-hidden">
+                                                    <span className="text-[15px] text-textMain font-medium z-10">{s.text}</span>
+                                                    <div className="self-end p-2 bg-black/20 rounded-full group-hover:bg-black/40 transition-colors z-10">
+                                                        <Icon name={s.icon} size={20} className={i%2===0 ? "text-accent" : "text-[#d96570]"} />
+                                                    </div>
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
+                                ) : (
+                                    // MESSAGE LIST
+                                    <div className="space-y-6">
+                                        {messages.map((msg) => (
+                                            <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'assistant' ? '' : 'hidden'}`}>
+                                                    {msg.role === 'assistant' && <Icon name="Sparkles" size={20} className="text-accent" />}
+                                                </div>
+                                                <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-surface px-5 py-3 rounded-[20px] rounded-tr-sm text-textMain' : ''}`}>
+                                                    <MessageContent content={msg.content} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {isGenerating && (
+                                            <div className="flex gap-4">
+                                                <div className="w-8 h-8 mt-1"><Icon name="Sparkles" size={20} className="text-accent animate-pulse" /></div>
+                                                <div className="text-textSec text-sm mt-2">Thinking...</div>
+                                            </div>
+                                        )}
+                                        <div ref={messagesEndRef} />
+                                    </div>
                                 )}
-                                <div ref={messagesEndRef} />
                             </div>
                         </div>
 
-                        {/* Input Area */}
-                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-gemini-bg via-gemini-bg to-transparent pb-6 pt-10 px-4">
-                            <div className="max-w-3xl mx-auto relative">
-                                <div className="bg-gemini-surface border border-white/10 rounded-[28px] relative transition-all focus-within:ring-1 focus-within:ring-white/20">
-                                    <div className="absolute left-3 top-3 flex gap-1">
-                                        <button onClick={() => triggerAction('Upload')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"><SafeIcon name="Upload" size={20} /></button>
-                                        <button onClick={() => triggerAction('Camera')} className={`p-2 hover:bg-white/10 rounded-full transition-colors ${visionActive ? 'text-gemini-accent' : 'text-gray-400'}`}><SafeIcon name="Eye" size={20} /></button>
+                        {/* INPUT COMPOSER (Sticky Bottom) */}
+                        <div className="absolute bottom-0 w-full bg-bg pb-6 pt-2 px-4">
+                            <div className="max-w-[850px] mx-auto">
+                                <div className={`relative bg-surface rounded-[28px] transition-colors ${isGenerating ? 'opacity-60' : 'hover:bg-surfaceHover'} focus-within:bg-surfaceHover`}>
+                                    
+                                    {/* Left Icons */}
+                                    <div className="absolute left-3 top-[14px] flex gap-1">
+                                        <button onClick={() => triggerTool('Upload')} className="p-2 rounded-full hover:bg-[#3c3d40] text-textSec transition-colors">
+                                            <Icon name="PlusCircle" size={22} />
+                                        </button>
+                                        <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] transition-colors ${visionActive ? 'text-red-400' : 'text-textSec'}`}>
+                                            <Icon name="Image" size={22} />
+                                        </button>
                                     </div>
 
+                                    {/* Textarea */}
                                     <textarea
                                         value={inputValue}
                                         onChange={(e) => setInputValue(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                                         placeholder="Enter a prompt here"
-                                        className="w-full bg-transparent border-0 focus:ring-0 resize-none py-4 pl-28 pr-14 min-h-[60px] max-h-[200px] text-gray-200 placeholder:text-gray-500"
+                                        className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec"
                                         rows={1}
                                     />
 
-                                    <div className="absolute right-3 bottom-2.5">
+                                    {/* Right Icons (Mic/Send) */}
+                                    <div className="absolute right-3 top-[10px] flex items-center gap-1">
                                         {inputValue.trim() ? (
-                                            <button onClick={() => handleSend()} className="p-2 bg-white text-black rounded-full hover:scale-105 transition-transform"><SafeIcon name="Send" size={18} /></button>
+                                            <button onClick={() => handleSend()} className="p-2 bg-textMain text-bg rounded-full hover:scale-105 transition-transform">
+                                                <Icon name="Send" size={18} />
+                                            </button>
                                         ) : (
-                                            <button onClick={toggleVoiceMode} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><SafeIcon name="Mic" size={22} /></button>
+                                            <button onClick={() => setVoiceMode(true)} className="p-3 rounded-full hover:bg-[#3c3d40] text-textSec transition-colors">
+                                                <Icon name="Mic" size={22} />
+                                            </button>
                                         )}
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-center mt-3 text-gray-500">Miro may display inaccurate info, including about people, so double-check its responses.</p>
+                                <p className="text-[11px] text-center mt-2 text-textSec">Gemini may display inaccurate info, including about people, so double-check its responses.</p>
                             </div>
                         </div>
+
                     </main>
 
-                    {/* --- OVERLAYS --- */}
-
-                    {/* 1. Vision Camera PIP */}
+                    {/* OVERLAYS */}
+                    
+                    {/* Vision PIP */}
                     <AnimatePresence>
                         {visionActive && (
-                            <motion.div 
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                className="absolute bottom-32 right-6 w-64 h-48 bg-black border-2 border-gemini-accent rounded-xl overflow-hidden shadow-2xl z-40"
-                                drag
-                                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                            >
+                            <motion.div initial={{scale:0}} animate={{scale:1}} exit={{scale:0}} className="absolute bottom-32 right-8 w-64 h-48 bg-black border border-accent rounded-xl overflow-hidden shadow-2xl z-50">
                                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                                <div className="absolute bottom-2 left-2 bg-black/80 text-gemini-accent text-[10px] font-bold px-2 py-1 rounded">● VISION</div>
+                                <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded text-[10px] text-accent font-bold"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/> LIVE</div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* 2. Voice Mode Overlay */}
+                    {/* Voice Mode Fullscreen */}
                     <AnimatePresence>
                         {isVoiceMode && (
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center"
-                            >
-                                <button onClick={toggleVoiceMode} className="absolute top-6 right-6 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition"><SafeIcon name="X" size={24} /></button>
-                                
-                                <div className="relative mb-12">
-                                    <div className="voice-orb"></div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <SafeIcon name="Mic" size={48} className="text-white drop-shadow-lg" />
-                                    </div>
-                                </div>
-
-                                <h2 className="text-2xl font-light tracking-widest text-white mb-4 uppercase">{voiceStatus}</h2>
-                                <p className="text-gray-400 text-lg max-w-2xl text-center px-4 h-8 transition-all">{liveTranscript || "Go ahead, I'm listening."}</p>
+                            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 z-[100] bg-bg/95 backdrop-blur-xl flex flex-col items-center justify-center">
+                                <button onClick={() => setVoiceMode(false)} className="absolute top-8 right-8 p-4 bg-surface hover:bg-surfaceHover rounded-full text-textMain transition-colors"><Icon name="X" size={24} /></button>
+                                <div className="voice-orb mb-12" />
+                                <h2 className="text-2xl font-light text-textMain tracking-widest uppercase mb-4">Listening...</h2>
                             </motion.div>
                         )}
                     </AnimatePresence>

@@ -1,0 +1,23 @@
+{
+  "id": "3bc800fd",
+  "title": "HI ",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 12:03 PM, Date: Tuesday, January 27, 2026 | USER: None] HI "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hi there! How can I help you today?\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-27 12:03:23.810948"
+}

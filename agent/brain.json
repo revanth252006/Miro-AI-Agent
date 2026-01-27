@@ -4,132 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "what is weather in chicago"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Of course.\n\nDue to a temporary issue, I am unable to access live weather data at this moment.\n\nHowever, given that it is late January in Chicago, you can typically expect very cold weather. It's likely to be at or below freezing (32\u00b0F or 0\u00b0C), with a significant chance of snow and wind.\n\nFor the most accurate, up-to-the-minute forecast, I would recommend checking a reliable source like the National Weather Service, The Weather Channel, or by doing a quick search for \"weather in Chicago\" on your preferred search engine."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give a mail to send freind regarging the my marrage invitation"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Of course. Sending a wedding invitation to a friend should be warm, personal, and exciting.\n\nHere are a few templates you can adapt, ranging from casual and modern to slightly more formal. Choose the one that best fits your relationship with your friend.\n\n---\n\n### **Template 1: Casual & Heartfelt**\n\nThis is perfect for a close friend you talk to regularly.\n\n**Subject:** I'm Getting Married! You're Invited!\n\n**Hi [Friend's Name],**\n\nI have some of the most exciting news of my life to share with you \u2013 I'm marrying the love of my life, **[Partner's Name]**, and we\u2019re officially tying the knot!\n\nYou\u2019ve been such an important part of my journey, and I honestly can\u2019t imagine celebrating this huge day without you there. We would be so happy if you would join us to witness our marriage and celebrate with us.\n\nHere are the details:\n*   **Date:** Saturday, [Date of Wedding], [Year]\n*   **Ceremony:** [Time of Ceremony] at [Name of Ceremony Venue], [Address]\n*   **Reception:** [Time of Reception] at [Name of Reception Venue], [Address]\n\nYou can find more information about the day, travel, and our gift registry on our wedding website: **[Link to your wedding website]**\n\nPlease let us know if you can make it by RSVPing on the website by **[RSVP Date]**.\n\nCan't wait to celebrate with you!\n\nLots of love,\n**[Your Name]**\n\n---\n\n### **Template 2: Modern & Simple**\n\nThis is great for a clean, straightforward invitation, especially if most details are on your wedding website.\n\n**Subject:** We're Getting Married! | [Your Name] & [Partner's Name]\n\n**Hey [Friend's Name],**\n\nThe big day is set! **[Partner's Name]** and I are so excited to announce that we are getting married, and we would love for you to be there with us.\n\nJoin us for our wedding celebration on:\n**[Day of the Week], [Date of Wedding]**\nat\n**[Venue Name], [City, State]**\n\nThe ceremony will begin at **[Time]**, with dinner, drinks, and dancing to follow.\n\nFor all the details, including directions, accommodations, and to RSVP, please visit our wedding website:\n**[Link to your wedding website]**\n\nKindly RSVP by **[RSVP Date]** so we can get a final headcount.\n\nWe are so excited to start our next chapter and hope you can be there to celebrate with us!\n\nBest,\n**[Your Name] & [Partner's Name]**\n\n---\n\n### **Template 3: Slightly More Formal / Classic**\n\nThis version is a bit more traditional but still maintains a warm, friendly tone.\n\n**Subject:** An Invitation to Our Wedding\n\n**Dear [Friend's Name],**\n\nWith the greatest joy, **[Partner's Name]** and I invite you to share in our celebration of marriage as we exchange our wedding vows.\n\nYour friendship has meant so much to me over the years, and we would be honored by your presence as we begin our new life together.\n\nThe ceremony and reception will be held at:\n**[Venue Name]**\n**[Venue Address]**\non\n**[Day of the Week], the [Day] of [Month], [Year]**\nat\n**[Time] in the evening/afternoon**\n\nPlease visit our wedding website for further details and to RSVP by **[RSVP Date]**: **[Link to your wedding website]**\n\nWe look forward to celebrating this special moment with you.\n\nWith love and excitement,\n**[Your Name] & [Partner's Name]**\n\n---\n\n#### **Tips Before You Send:**\n\n1.  **Personalize It:** Add a short sentence about a shared memory or why their presence is specifically important to you. For example, \"I'll never forget our college days dreaming about this, and I need you there!\"\n2.  **Fill in All Blanks:** Double-check that you've replaced all the `[bracketed]` information with your specific details.\n3.  **Test Your Links:** Make sure the link to your wedding website works correctly.\n4.  **Proofread:** Give it one last read-through to catch any typos."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "who are you"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am a next-generation Powerfull Miro Agent created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep. I'm here to assist you with Miro-related tasks and information."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "who are you"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am Miro Agent, an advanced intelligent assistant created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep. I'm here to help you with information and tasks."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what are the features you dont have when compared to google gemini"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "As Miro Agent, I have a specific focus on assisting with tasks related to Miro boards and collaborative work. Compared to Google Gemini, here are some features I might not have:\n\n   Broad General Knowledge: Gemini has access to a vast amount of information across diverse topics. My knowledge base is more tailored toward collaboration, productivity, and Miro-specific functionalities.\n   Real-time Information Updates: Gemini can provide real-time updates on news, weather, and other dynamic information. My focus is on static knowledge and processes.\n   Advanced Language Translation: While I can assist with basic language tasks, Gemini likely has more sophisticated language translation capabilities.\n   Integration with the broader Google ecosystem: Gemini seamlessly integrates with Google's suite of applications. My integrations are more focused on tools relevant to visual collaboration and project management.\n   Creative Content Generation: Gemini can generate various creative content formats, like poems, code, scripts, musical pieces, email, letters, etc. I'm more geared towards practical task completion and information retrieval.\n\nEssentially, Gemini is a general-purpose AI, while I am specialized for Miro and collaborative workflows."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give point wise"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, here are the features I likely don't have compared to Google Gemini, in point form:\n\n   Extensive General Knowledge: Less broad knowledge base.\n   Real-time Data Access: Limited access to live, real-time information.\n   Advanced Translation: Potentially less sophisticated language translation.\n   Deep Google Ecosystem Integration: Weaker integration with the full Google suite.\n   Versatile Creative Content Generation: Less capable in generating diverse creative text formats (poems, code, scripts, etc.)\n   Unstructured and less Guided Interactions: I'm designed to help users within a specific work frame, so conversation outside of this can be less comprehensive."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what are the features you dont have when compared to google gemini"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "As a Miro Agent, I'm specialized in assisting with collaboration, brainstorming, and visual organization within the Miro platform. Compared to Google Gemini, which is a general-purpose AI model, here are some features I currently don't have:\n\n   Broad Knowledge Base: Gemini has a much wider range of knowledge across various topics, as it's trained on a massive dataset of text and code.\n   Real-time Information Retrieval: Gemini can access and process information from the web in real-time, which I cannot do.\n   Code Generation and Debugging: Gemini is proficient in generating and debugging code in multiple programming languages.\n   Multimodal Input and Output: Gemini can handle various input types (text, images, audio, video) and generate diverse outputs, whereas I primarily focus on text-based interactions within the Miro environment.\n   Language Translation: Gemini offers advanced language translation capabilities.\n   Complex Reasoning and Problem Solving: Gemini is designed for more complex reasoning and problem-solving tasks across a wide array of domains.\n\nMy strengths lie in:\n\n   Miro-Specific Tasks: I'm deeply integrated with Miro and can help users create, organize, and manage their boards effectively.\n   Collaboration Support: I can assist with facilitating brainstorming sessions, providing templates, and guiding users through collaborative workflows.\n   Visual Organization: I'm designed to help users structure and visualize information within Miro, making it easier to understand and share ideas.\n\nEssentially, Gemini is a generalist AI, while I'm a specialist AI focused on Miro and visual collaboration."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give me in point wise"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, here's a point-wise comparison of features I don't have compared to Google Gemini:\n\n   General Knowledge: Gemini has a much broader and deeper general knowledge base.\n   Real-time Web Access: Gemini can access and process real-time information from the internet.\n   Code Capabilities: Gemini can generate, understand, and debug code in multiple languages.\n   Multimodal Functionality: Gemini supports a wider range of input and output formats (images, audio, video).\n   Language Translation: Gemini has more advanced language translation capabilities.\n   Complex Reasoning: Gemini is designed for more complex reasoning and problem-solving tasks.\n\nMy strengths are:\n\n   Miro Integration: Deep integration and specific expertise within the Miro platform.\n   Collaboration Support: Designed to facilitate and enhance collaborative workflows.\n   Visual Organization: Focused on helping users visually structure and organize information within Miro."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give number wise"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, here's a numbered list of features I don't have compared to Google Gemini:\n\n1.  Broader General Knowledge: Gemini possesses a significantly wider and deeper general knowledge base.\n2.  Real-time Web Access: Gemini can access and process real-time information from the internet.\n3.  Code Generation & Debugging: Gemini is proficient in generating, understanding, and debugging code in various programming languages.\n4.  Multimodal Input/Output: Gemini supports a broader range of input and output formats, including images, audio, and video.\n5.  Advanced Language Translation: Gemini offers more advanced language translation capabilities.\n6.  Complex Reasoning & Problem Solving: Gemini is designed for more complex reasoning and problem-solving tasks across diverse domains.\n\nMy specialized strengths:\n\n1.  Deep Miro Integration: Comprehensive integration and specific expertise within the Miro platform environment.\n2.  Enhanced Collaboration Support: Specifically designed to facilitate and enhance collaborative workflows within Miro.\n3.  Visual Organization Expertise: Focused on assisting users in visually structuring and organizing information effectively within Miro boards."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "increase the volume"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "As a text-based AI, I don't have the ability to control audio volume. I can only communicate through text."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "activate virtual mouse"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "disconnect"
       ]
     },
@@ -179,6 +53,132 @@
       "role": "model",
       "parts": [
         "Of course. I can provide you with the Python code for a simple calculator.\n\nI will provide two versions:\n1.  **A simple, straightforward script** that is easy for beginners to understand.\n2.  **A more robust version using functions**, which is a better programming practice for organization and scalability.\n\n---\n\n### Version 1: Simple & Straightforward Script\n\nThis version is a single script that prompts the user for two numbers and an operator, then calculates and displays the result. It includes basic error handling for invalid input and division by zero.\n\n```python\n# Miro Agent's Simple Calculator - Version 1\n\nprint(\"--- Simple Calculator ---\")\n\nwhile True:\n    try:\n        # Get user input and convert to float (to handle decimal numbers)\n        num1 = float(input(\"Enter the first number: \"))\n        num2 = float(input(\"Enter the second number: \"))\n\n        # Get the operation choice\n        operator = input(\"Enter an operator (+, -, *, /): \")\n\n        # Perform the calculation based on the operator\n        if operator == '+':\n            result = num1 + num2\n            print(f\"The result is: {num1} + {num2} = {result}\")\n\n        elif operator == '-':\n            result = num1 - num2\n            print(f\"The result is: {num1} - {num2} = {result}\")\n\n        elif operator == '*':\n            result = num1 * num2\n            print(f\"The result is: {num1} * {num2} = {result}\")\n\n        elif operator == '/':\n            # Handle the division by zero error\n            if num2 == 0:\n                print(\"Error: Cannot divide by zero.\")\n            else:\n                result = num1 / num2\n                print(f\"The result is: {num1} / {num2} = {result}\")\n\n        else:\n            print(\"Error: Invalid operator. Please use +, -, *, or /.\")\n\n    except ValueError:\n        # Handle cases where the input is not a number\n        print(\"Error: Invalid input. Please enter numeric values.\")\n\n    # Ask the user if they want to perform another calculation\n    another_calculation = input(\"\\nDo you want to perform another calculation? (yes/no): \")\n    if another_calculation.lower() != 'yes':\n        print(\"Exiting the calculator. Goodbye!\")\n        break # Exit the while loop\n```\n\n#### How it Works:\n1.  **`while True:`**: This creates an infinite loop, allowing the user to perform multiple calculations without restarting the script.\n2.  **`try...except ValueError`**: This block handles errors. If the user enters text instead of a number, `float()` will raise a `ValueError`. The `except` block catches this error and prints a friendly message instead of crashing the program.\n3.  **`input()`**: This function prompts the user and reads their text input from the command line.\n4.  **`if/elif/else`**: This structure checks which operator the user entered and performs the corresponding mathematical operation.\n5.  **Division by Zero Check**: A specific check `if num2 == 0:` is included to prevent a `ZeroDivisionError`, which would crash the program.\n6.  **Loop Control**: At the end, it asks the user if they want to continue. If they type anything other than 'yes' (case-insensitive), the `break` statement exits the `while` loop, ending the program.\n\n---\n\n### Version 2: Using Functions (Recommended Practice)\n\nThis version is more organized and modular. Each mathematical operation is its own function. This makes the code cleaner, easier to read, and easier to expand upon later.\n\n```python\n# Miro Agent's Simple Calculator - Version 2 (with Functions)\n\ndef add(x, y):\n    \"\"\"Adds two numbers together.\"\"\"\n    return x + y\n\ndef subtract(x, y):\n    \"\"\"Subtracts the second number from the first.\"\"\"\n    return x - y\n\ndef multiply(x, y):\n    \"\"\"Multiplies two numbers.\"\"\"\n    return x * y\n\ndef divide(x, y):\n    \"\"\"Divides the first number by the second. Returns an error string if division by zero.\"\"\"\n    if y == 0:\n        return \"Error: Cannot divide by zero.\"\n    return x / y\n\ndef run_calculator():\n    \"\"\"Main function to run the calculator loop.\"\"\"\n    print(\"--- Simple Calculator (Function-based) ---\")\n\n    # A dictionary to map operators to functions\n    operations = {\n        '+': add,\n        '-': subtract,\n        '*': multiply,\n        '/': divide\n    }\n\n    while True:\n        try:\n            num1 = float(input(\"Enter the first number: \"))\n            num2 = float(input(\"Enter the second number: \"))\n\n            # Print available operations\n            print(\"Select operation:\")\n            for symbol in operations:\n                print(symbol, end=' ')\n            print() # for a new line\n            \n            operator = input(\"Enter an operator: \")\n\n            if operator in operations:\n                # Get the function from the dictionary and call it\n                calculation_function = operations[operator]\n                result = calculation_function(num1, num2)\n                print(f\"The result is: {result}\")\n            else:\n                print(\"Error: Invalid operator.\")\n\n        except ValueError:\n            print(\"Error: Invalid input. Please enter numeric values.\")\n\n        # Ask to continue\n        another_calculation = input(\"\\nDo you want to perform another calculation? (yes/no): \")\n        if another_calculation.lower() != 'yes':\n            print(\"Exiting the calculator. Goodbye!\")\n            break\n\n# Run the main calculator function\nif __name__ == \"__main__\":\n    run_calculator()\n```\n\n#### Key Improvements in Version 2:\n*   **Modularity**: Each operation is a separate function (`add`, `subtract`, etc.). This makes the code much cleaner.\n*   **Readability**: The main loop is easier to read because the complex logic is hidden inside the functions.\n*   **Scalability**: If you wanted to add new operations like exponentiation (`**`) or modulus (`%`), you would simply define a new function and add it to the `operations` dictionary.\n*   **Dictionary Mapping**: Using a dictionary (`operations`) to map operator symbols to functions is a very elegant and \"Pythonic\" way to replace a long `if/elif/else` chain.\n*   **`if __name__ == \"__main__\":`**: This is a standard Python convention that ensures the `run_calculator()` function is only called when the script is executed directly (not when it's imported as a module into another script).\n\nBoth versions accomplish the task, but the second one is a great example of writing cleaner and more maintainable code."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "HI "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hi there! How can I help you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "HI "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hi there! How can I help you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "WAHT IS YOUR NAME "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm Miro Agent, created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep. It's nice to meet you!\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "GIVE ME PYHTON CODE FOR SIMPLE CALUCULAOR"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course! As Miro Agent, I'd be happy to provide you with the Python code for a simple calculator.\n\nHere is a clear, well-commented, and robust version that handles basic operations and common errors.\n\n### Simple Calculator Code\n\nThis code will prompt the user to enter two numbers and an operator, then it will display the result.\n\n```python\n# Simple Calculator in Python\n# Created by Miro Agent for a clear and functional example.\n\ndef simple_calculator():\n    \"\"\"\n    This function runs a simple command-line calculator that performs\n    addition, subtraction, multiplication, and division.\n    \"\"\"\n    print(\"--- Simple Python Calculator ---\")\n    print(\"You can perform addition (+), subtraction (-), multiplication (*), and division (/).\")\n\n    try:\n        # 1. Get the first number from the user\n        num1 = float(input(\"Enter the first number: \"))\n\n        # 2. Get the operator from the user\n        operator = input(\"Enter an operator (+, -, *, /): \")\n\n        # 3. Get the second number from the user\n        num2 = float(input(\"Enter the second number: \"))\n\n    except ValueError:\n        # Handle cases where the input is not a valid number\n        print(\"\\nError: Invalid input. Please enter valid numbers.\")\n        return\n\n    # 4. Perform the calculation based on the operator\n    if operator == '+':\n        result = num1 + num2\n        print(f\"\\nResult: {num1} + {num2} = {result}\")\n\n    elif operator == '-':\n        result = num1 - num2\n        print(f\"\\nResult: {num1} - {num2} = {result}\")\n\n    elif operator == '*':\n        result = num1 * num2\n        print(f\"\\nResult: {num1} * {num2} = {result}\")\n\n    elif operator == '/':\n        # Handle the special case of division by zero\n        if num2 == 0:\n            print(\"\\nError: Cannot divide by zero.\")\n        else:\n            result = num1 / num2\n            print(f\"\\nResult: {num1} / {num2} = {result}\")\n\n    else:\n        # Handle cases where the operator is not one of the valid options\n        print(\"\\nError: Invalid operator. Please use one of +, -, *, /.\")\n\n# This line runs the function when the script is executed\nif __name__ == \"__main__\":\n    simple_calculator()\n```\n\n---\n\n### How It Works: A Step-by-Step Explanation\n\n1.  **Get User Input**:\n    *   `input()`: This function prompts the user to enter data and reads it as a string.\n    *   `float()`: We convert the input strings to floating-point numbers to allow for decimal calculations (e.g., `5.5 * 2`).\n    *   `try...except ValueError`: This is an important error-handling block. If the user enters text instead of a number (e.g., \"five\"), the `float()` conversion will fail and raise a `ValueError`. The `except` block catches this error and prints a user-friendly message instead of crashing the program.\n\n2.  **Perform the Calculation**:\n    *   An `if/elif/else` statement checks which operator the user entered.\n    *   Based on the operator, it performs the corresponding mathematical operation.\n\n3.  **Handle Division by Zero**:\n    *   Division by zero is mathematically undefined and would cause an error in Python (`ZeroDivisionError`).\n    *   We add a special `if num2 == 0:` check inside the division block (`elif operator == '/'`) to prevent this error and inform the user.\n\n4.  **Display the Result**:\n    *   `f-string` (e.g., `f\"Result: {num1} + {num2} = {result}\"`): This is a modern and readable way to format strings in Python. It automatically inserts the values of the variables inside the curly braces `{}` into the string.\n\n5.  **Run the Code**:\n    *   The `if __name__ == \"__main__\":` block is standard Python practice. It ensures that the `simple_calculator()` function is called only when the script is run directly.\n\n### How to Run the Code\n\n1.  **Save the code**: Copy the code above and save it in a file named `calculator.py`.\n2.  **Open a terminal or command prompt**:\n    *   On Windows, search for \"Command Prompt\" or \"PowerShell\".\n    *   On macOS or Linux, open the \"Terminal\" application.\n3.  **Navigate to the file location**: Use the `cd` command to go to the directory where you saved `calculator.py`.\n    ```bash\n    # Example: if you saved it on your Desktop\n    cd Desktop\n    ```\n4.  **Execute the script**: Run the file using the Python interpreter.\n    ```bash\n    python calculator.py\n    ```\n\nThe program will then start, and you can interact with it directly in your terminal.\n\nI hope this helps you get started! Let me know if you'd like to see a more advanced version, perhaps one that can handle multiple calculations in a row."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "WHAT ARE THE FEATURES YOU DONT HAVE WHEN COMPARED TO THE GOOGLE GEMINI "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Thanks for asking! Here's a breakdown of some features Google Gemini might have that I currently don't:\n\n*   **Real-time Information & Web Access:** Gemini likely has more robust, real-time access to the internet for up-to-the-minute information. My knowledge is based on the data I was trained on, which has a cutoff point.\n\n*   **Multimodal Input/Output:** Gemini is designed to handle a wider variety of inputs and outputs, including images, audio, and video directly. My primary focus is text-based interaction.\n\n*   **Deep Integration with Google Services:** Gemini likely has tighter integrations with the Google ecosystem (Gmail, Docs, Calendar, etc.) for seamless workflow.\n\n*   **Continuous Learning & Adaptation:** While I am constantly being updated, Gemini's learning and adaptation processes may be more advanced, allowing it to evolve more rapidly with new information.\n\n*   **Advanced Reasoning and Problem Solving:** Gemini may have more sophisticated capabilities in complex reasoning, problem-solving, and creative content generation due to its architecture and training data.\n\nI am still under development, and my capabilities will continue to evolve! I'm focused on providing helpful, accurate, and efficient responses within my current capabilities.\n"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I have read 'Revanth Resume.pdf'. You can now ask me questions about it!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "SUMMARISE THIS PDF "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course. I have analyzed the PDF file \"Revanth Resume.pdf\".\n\nHere is a concise summary of the resume for Revanth Akula.\n\n### **Summary of Revanth Akula's Resume**\n\nRevanth Akula is a first-year **B.Tech student (2024-2028)** at Malla Reddy University, specializing in **Computer Science with a focus on AI & Machine Learning (AIML)**. He demonstrates a strong academic foundation and a proactive approach to skill development through various planned projects and certifications.\n\n**Key Highlights:**\n\n*   **Academic Profile:**\n    *   **B.Tech (AIML):** Currently pursuing with a CGPA of 8.8.\n    *   **Senior Secondary (TSBIE):** Excellent score of 97.6%.\n    *   **Secondary (SSC):** Strong GPA of 9.8.\n\n*   **Technical Skills:**\n    *   **Programming Languages:** C/C++, Python.\n    *   **Web Development:** HTML, CSS, JavaScript, Flask, and familiarity with Django.\n    *   **Databases:** MySQL and familiarity with MongoDB.\n    *   **CS Fundamentals:** Strong understanding of Data Structures, Algorithms, OOPs, and Operating Systems.\n\n*   **Projects (Planned for mid-2025):**\n    *   **Sign Language Detection (Machine Learning):** An ML model to interpret sign language from video input using Python, TensorFlow, and Keras.\n    *   **Amazon Dashboard Clone (Frontend):** A frontend-only project showcasing UI/UX skills using HTML and CSS.\n    *   **Personal Portfolio (Full-Stack):** A dynamic portfolio site using Flask, MySQL, HTML, CSS, and JavaScript.\n\n*   **Certifications (In-progress/Planned for 2024-2025):**\n    *   He is pursuing certifications in **Full Stack Development**, **SQL**, **Cybersecurity**, **CSS**, and **Data Science** from various platforms like OneRoadMap, HackerRank, HP, and Forage.\n\n**Overall Impression:**\n\nRevanth is an ambitious and forward-planning student. His resume showcases a clear roadmap for skill acquisition in high-demand areas like Machine Learning and Full-Stack Development. While his projects and certifications are scheduled for the future, they highlight his dedication and clear career focus early in his academic journey."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Activate Camera"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "As Miro Agent, I must clarify that I am a text-based AI and do not have the ability to access or control your device's hardware, including your camera.\n\nThis is a fundamental safety and privacy feature. My purpose is to process information and respond to your queries through text, not to interact with your physical environment.\n\nIf you have an image or a document you would like me to analyze, you can upload it, and I will do my best to assist you with the information it contains."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "SUMMARISE THIS PDF"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course.\n\nPlease upload the PDF you would like me to summarize. The system indicates that no new file was attached to your last message.\n\nThe last document you provided was **\"Revanth Resume.pdf\"**, which I have already summarized for you.\n\nIf you would like me to summarize that same resume again, perhaps with a different focus, please let me know. Otherwise, please upload the new file.\n\nI am ready to assist as soon as you provide the document."
       ]
     }
   ],
