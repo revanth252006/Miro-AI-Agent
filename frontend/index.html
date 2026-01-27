@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miro | Gemini UI</title>
+    <title>Miro Agent</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -294,7 +294,7 @@
                         <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg/95 backdrop-blur-md">
                             <div className="flex items-center gap-2">
                                 {!sidebarOpen && <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-surfaceHover rounded-full text-textSec"><Icons.Menu /></button>}
-                                <div className="text-xl text-textMain px-2 font-medium">Gemini</div>
+                                <div className="text-xl text-textMain px-2 font-medium">Miro</div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${wsStatus === 'Online' ? 'border-green-800 text-green-400 bg-green-900/20' : 'border-red-800 text-red-400'}`}>{wsStatus.toUpperCase()}</span>
@@ -374,7 +374,7 @@
                                     </div>
 
                                 </div>
-                                <p className="text-[11px] text-center mt-2 text-textSec">Gemini may display inaccurate info, including about people, so double-check its responses.</p>
+                                <p className="text-[11px] text-center mt-2 text-textSec">Miro may display inaccurate info, including about people, so double-check its responses.</p>
                             </div>
                         </div>
                     </main>
