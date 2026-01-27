@@ -1,0 +1,39 @@
+{
+  "id": "62c661c3",
+  "title": "what are you doing",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 12:48 PM, Date: Tuesday, January 27, 2026 | USER: None] what are you doing"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I'm currently in standby mode, waiting for your requests and ready to assist you with anything related to Miro! How can I help you today?\n"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 12:49 PM, Date: Tuesday, January 27, 2026 | USER: None] who created you"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I was created by Revanth and his team, including Manoj Kumar, Amit Kumar, and Jaideep.\n"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-27 12:49:02.952333"
+}

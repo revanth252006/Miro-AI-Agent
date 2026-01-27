@@ -65,8 +65,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 20px; }
         .markdown-body pre { background: #0d0d0d; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
         .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #a8c7fa; }
-        
-        /* EXACT VOICE ORB FROM OLD UI */
         .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,243,255,0.8) 0%, rgba(189,0,255,0.4) 60%, transparent 80%); border-radius: 50%; filter: blur(10px); animation: pulse-glow 2s infinite; }
         @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
     </style>
@@ -109,20 +107,20 @@
             const [liveTranscript, setLiveTranscript] = useState("");
             const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
 
-            // Logic Refs (The "Old Code" Engine)
+            // Refs
             const ws = useRef(null);
             const videoRef = useRef(null);
             const fileInputRef = useRef(null);
             const messagesEndRef = useRef(null);
             
-            // Voice State Refs (To mimic global variables in your old code)
+            // Voice Refs
             const recognition = useRef(null);
             const isVoiceModeRef = useRef(false);
             const isAiSpeakingRef = useRef(false);
             const silenceTimer = useRef(null);
             const selectedVoiceRef = useRef(null);
 
-            // Sync Ref with State
+            // Update ref when state changes so event listener can see it
             useEffect(() => { isVoiceModeRef.current = isVoiceMode; }, [isVoiceMode]);
 
             // --- 1. WEBSOCKET SETUP ---
@@ -140,7 +138,6 @@
                         const newMsg = { id: Date.now(), role: 'assistant', content: data };
                         setMessages(prev => [...prev, newMsg]);
                         
-                        // Speak if in voice mode (using Ref to be safe)
                         if (isVoiceModeRef.current) speak(data);
                     };
                 };
@@ -150,31 +147,27 @@
 
             useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isGenerating]);
 
-            // --- 2. VOICE ENGINE (EXACT PORT FROM OLD CODE) ---
-            
-            // Load Voices
-            const loadVoices = () => {
-                const voices = window.speechSynthesis.getVoices();
-                if (voices.length > 0) {
-                    selectedVoiceRef.current = voices.find(v => v.name.includes("Zira")) || 
-                                             voices.find(v => v.name.includes("Google US English")) || 
-                                             voices[0];
-                }
-            };
-
+            // --- 2. VOICE ENGINE (FIXED) ---
             useEffect(() => {
+                const loadVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices.length > 0) {
+                        selectedVoiceRef.current = voices.find(v => v.name.includes("Zira")) || 
+                                                 voices.find(v => v.name.includes("Google US English")) || 
+                                                 voices[0];
+                    }
+                };
                 window.speechSynthesis.onvoiceschanged = loadVoices;
                 loadVoices();
 
-                // SETUP RECOGNITION
                 if ('webkitSpeechRecognition' in window) {
                     const r = new webkitSpeechRecognition();
-                    r.continuous = true; // CRITICAL
+                    r.continuous = true; 
                     r.interimResults = true;
                     r.lang = 'en-US';
 
                     r.onstart = () => {
-                        if(isVoiceModeRef.current) setVoiceStatusText("LISTENING...");
+                        console.log("Mic Active");
                     };
 
                     r.onresult = (e) => {
@@ -182,20 +175,19 @@
                         const t = result[0].transcript.trim();
                         const lower = t.toLowerCase();
 
-                        // 1. BARGE-IN LOGIC
-                        if (isAiSpeakingRef.current && t.length > 2) {
+                        // 1. Barge-In
+                        if (isAiSpeakingRef.current && t.length > 1) {
                             window.speechSynthesis.cancel();
                             isAiSpeakingRef.current = false;
-                            console.log("Interruption detected!");
                         }
 
-                        // 2. WAKE WORD
+                        // 2. Wake Word (Background)
                         if (!isVoiceModeRef.current && (lower.includes("hey miro") || lower.includes("hello miro"))) {
                             toggleVoiceMode(true);
                             return;
                         }
 
-                        // 3. VOICE COMMAND LOGIC
+                        // 3. Active Voice Mode
                         if (isVoiceModeRef.current) {
                             setLiveTranscript(t);
                             clearTimeout(silenceTimer.current);
@@ -203,34 +195,35 @@
                             if (result.isFinal) {
                                 handleVoiceCommand(t);
                             } else {
-                                // THE "SILENCE TIMER HACK" FROM OLD CODE
+                                // Send if silence for 1s
                                 silenceTimer.current = setTimeout(() => {
                                     if (t.length > 1) {
-                                        r.abort(); // Flush buffer
+                                        // We don't abort here anymore to prevent restart lag, just fire command
                                         handleVoiceCommand(t);
-                                        // It will auto-restart in onend or we can force it
-                                        setTimeout(() => { try{r.start();}catch(e){} }, 50);
+                                        // Optional: Clear transcript visual
                                     }
                                 }, 1000);
                             }
                         }
                     };
 
-                    r.onend = () => {
-                        isAiSpeakingRef.current = false;
-                        // Auto-restart to keep listening for wake words or commands
-                        try { r.start(); } catch(e) {}
-                    };
-
+                    // Auto-restart loop
+                    r.onend = () => { try { r.start(); } catch(e) {} };
                     try { r.start(); } catch(e) {}
                     recognition.current = r;
                 }
-            }, []); // Run once on mount
+            }, []);
 
             const handleVoiceCommand = (text) => {
-                if(!text || text.length < 2) return;
-                setVoiceStatusText("MIRO...");
+                if(!text || text.length < 1) return;
+                setVoiceStatusText("PROCESSING...");
+                setLiveTranscript("");
+                
+                // IMPORTANT: We send the text to handleSend
                 handleSend(text);
+                
+                // Reset status text after a moment
+                setTimeout(() => setVoiceStatusText("LISTENING..."), 1000);
             };
 
             const toggleVoiceMode = (forceState) => {
@@ -238,32 +231,24 @@
                 setVoiceMode(newState);
                 
                 if (newState) {
-                    // Greetings Logic
                     const h = new Date().getHours();
                     const g = h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening";
                     speak(`${g}, Revanth. I am Miro.`);
-                    try { recognition.current.start(); } catch(e){}
                 } else {
                     window.speechSynthesis.cancel();
-                    try { recognition.current.stop(); } catch(e){}
+                    setLiveTranscript("");
                 }
             };
 
             const speak = (text) => {
-                // Cleaning Logic
                 const cleanText = text.replace(/[*#`_]/g, '').replace(/<[^>]*>/g, '').replace(/```[\s\S]*?```/g, "Code block generated.");
-                
                 isAiSpeakingRef.current = true;
                 window.speechSynthesis.cancel();
 
                 const u = new SpeechSynthesisUtterance(cleanText);
                 if (selectedVoiceRef.current) u.voice = selectedVoiceRef.current;
                 u.lang = 'en-US';
-
-                u.onend = () => { 
-                    isAiSpeakingRef.current = false; 
-                    if(isVoiceModeRef.current) setVoiceStatusText("LISTENING..."); 
-                };
+                u.onend = () => { isAiSpeakingRef.current = false; };
                 
                 window.speechSynthesis.speak(u);
             };
@@ -284,11 +269,14 @@
 
             // --- 4. MESSAGING ---
             const handleSend = (text = inputValue) => {
-                if (!text.trim()) return;
+                if (!text || !text.trim()) return;
+                
+                // Add User Message
                 setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }]);
-                setInputValue("");
+                setInputValue(""); // Clear Input
                 setIsGenerating(true);
                 
+                // Send to Backend
                 if (ws.current?.readyState === WebSocket.OPEN) {
                     if (visionActive && videoRef.current) {
                         const canvas = document.createElement("canvas");
@@ -319,7 +307,6 @@
             return (
                 <div className="flex h-screen w-full bg-bg text-textMain overflow-hidden font-sans selection:bg-accent selection:text-bg">
                     
-                    {/* Hidden Inputs */}
                     <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => handleSend(`Uploaded: ${e.target.files[0]?.name}`)} />
 
                     {/* Sidebar */}
@@ -343,7 +330,6 @@
 
                     {/* Main Content */}
                     <main className="flex-1 flex flex-col relative h-full min-w-0">
-                        {/* Header */}
                         <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg/95 backdrop-blur-md">
                             <div className="flex items-center gap-2">
                                 {!sidebarOpen && <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-surfaceHover rounded-full text-textSec"><Icon name="Menu" size={20} /></button>}
@@ -355,7 +341,6 @@
                             </div>
                         </header>
 
-                        {/* Chat */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4">
                             <div className="max-w-[850px] mx-auto pb-40 pt-4">
                                 {messages.length === 0 ? (
@@ -396,8 +381,23 @@
                                         <button onClick={() => triggerTool('Upload')} className="p-2 rounded-full hover:bg-[#3c3d40] text-textSec"><Icon name="PlusCircle" size={22} /></button>
                                         <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] ${visionActive?'text-red-400':'text-textSec'}`}><Icon name="Image" size={22} /></button>
                                     </div>
-                                    <textarea value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} placeholder="Enter a prompt here" className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec" rows={1} />
-                                    <div className="absolute right-3 top-[10px] flex items-center gap-1">
+                                    
+                                    <textarea 
+                                        value={inputValue} 
+                                        onChange={(e) => setInputValue(e.target.value)} 
+                                        onKeyDown={(e) => { 
+                                            if (e.key === 'Enter' && !e.shiftKey) { 
+                                                e.preventDefault(); 
+                                                handleSend(); 
+                                            } 
+                                        }} 
+                                        placeholder="Enter a prompt here" 
+                                        className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec" 
+                                        rows={1} 
+                                    />
+                                    
+                                    {/* SEND / MIC BUTTON LOGIC - FIXED */}
+                                    <div className="absolute right-3 top-[10px] flex items-center gap-1 z-10">
                                         {inputValue.trim() ? (
                                             <button onClick={() => handleSend()} className="p-2 bg-textMain text-bg rounded-full hover:scale-105 transition-transform"><Icon name="Send" size={18} /></button>
                                         ) : (
@@ -420,17 +420,14 @@
                         )}
                     </AnimatePresence>
                     
-                    {/* Exact Voice Overlay from Old UI */}
                     <AnimatePresence>
                         {isVoiceMode && (
                             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center">
                                 <button onClick={() => toggleVoiceMode(false)} className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"><Icon name="X" size={24} /></button>
-                                
                                 <div className="relative mb-8">
                                     <div className="voice-orb" />
                                     <div className="absolute inset-0 flex items-center justify-center"><Icon name="Mic" size={48} className="text-white drop-shadow-lg" /></div>
                                 </div>
-
                                 <h2 className="text-2xl font-light text-white tracking-widest uppercase mb-4">{voiceStatusText}</h2>
                                 <p className="text-gray-400 text-lg h-8 transition-all">{liveTranscript || "Go ahead, I'm listening."}</p>
                             </motion.div>
