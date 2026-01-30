@@ -8,22 +8,13 @@ import subprocess
 import aiohttp
 import logging
 import webbrowser
-import pyautogui  # For System Control
-import time       # For delays in automation
+import pyautogui  # New: For System Control
+import time       # New: For delays in automation
 from datetime import datetime
 from typing import Optional, Union, List, Dict
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from duckduckgo_search import DDGS
-
-# --- NEW IMPORTS FOR SHOPPING ENGINE ---
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 logger = logging.getLogger("Tools")
 
@@ -33,9 +24,7 @@ class GlobalStore:
     
 STORE = GlobalStore()
 
-# ==========================================
-# 1. NEW SYSTEM AUTOMATION TOOLS
-# ==========================================
+# --- 1. NEW SYSTEM AUTOMATION TOOLS ---
 
 async def set_volume(level: str) -> str:
     """
@@ -47,14 +36,14 @@ async def set_volume(level: str) -> str:
         if "up" in level or "increase" in level:
             for _ in range(5): 
                 pyautogui.press("volumeup")
-            return "Volume increased."
+            return " Volume increased."
         elif "down" in level or "decrease" in level:
             for _ in range(5): 
                 pyautogui.press("volumedown")
-            return "Volume decreased."
+            return " Volume decreased."
         elif "mute" in level or "silent" in level:
             pyautogui.press("volumemute")
-            return "System muted."
+            return " System muted."
         return "Volume unchanged."
 
     # Run in executor to prevent blocking the async loop
@@ -73,7 +62,7 @@ async def take_screenshot() -> str:
 
     loop = asyncio.get_event_loop()
     filename = await loop.run_in_executor(None, _perform_screenshot)
-    return f"Screenshot saved as {filename}"
+    return f" Screenshot saved as {filename} "
 
 async def minimize_windows() -> str:
     """
@@ -124,9 +113,7 @@ async def open_application(app_name: str) -> str:
     return await loop.run_in_executor(None, _perform_open)
 
 
-# ==========================================
-# 2. EXISTING TOOLS (Web, Email, Info)
-# ==========================================
+# --- 2. EXISTING TOOLS (Preserved) ---
 
 async def get_system_time() -> str:
     """Get the current real-time date and time."""
@@ -276,135 +263,6 @@ async def search_product(product_name: str) -> str:
     webbrowser.open(url)
     return f"Opened Amazon search for '{product_name}'."
 
-
-# ==========================================
-# 3. 🛍️ NEW PERSONAL SHOPPER (Selenium Automation)
-# ==========================================
-
-class PersonalShopper:
-    def __init__(self):
-        self.driver = None
-
-    def _get_driver(self):
-        """Starts Chrome with your REAL user profile to skip login."""
-        if self.driver:
-            return self.driver
-            
-        options = webdriver.ChromeOptions()
-        options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
-        
-        # ⚠️ IMPORTANT: Replace 'YOUR_USERNAME' with your actual Windows Username
-        # To find path: Type chrome://version in Chrome address bar -> look for "Profile Path"
-        # Example: user_data_path = r"C:\Users\Revanth\AppData\Local\Google\Chrome\User Data"
-        
-        # Uncomment and update the line below to use your saved login!
-        # options.add_argument(r"user-data-dir=C:\Users\YOUR_USERNAME\AppData\Local\Google\Chrome\User Data")
-        
-        # This keeps the browser open after the bot finishes
-        options.add_experimental_option("detach", True)
-        
-        # Suppress logging
-        options.add_argument("--log-level=3")
-        
-        try:
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        except Exception as e:
-            print(f"Browser Error (Close other Chrome windows): {e}")
-            # Fallback to fresh session if profile is locked
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-            
-        return self.driver
-
-    def search_amazon(self, product):
-        """Searches Amazon and returns the top product details."""
-        driver = self._get_driver()
-        driver.get("https://www.amazon.in")
-        
-        try:
-            print(f"🛍️ Searching Amazon for: {product}")
-            
-            # Wait for search box
-            search_box = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "twotabsearchtextbox"))
-            )
-            search_box.clear()
-            search_box.send_keys(product)
-            search_box.send_keys(Keys.RETURN)
-            
-            # Click the first valid product (ignoring Sponsored if possible, but taking first result)
-            first_item = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] h2 a"))
-            )
-            title = first_item.text
-            link = first_item.get_attribute("href")
-            
-            # Switch to the product tab
-            driver.get(link) 
-            
-            # Get Price (Clean formatting)
-            try:
-                price_elem = WebDriverWait(driver, 3).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".a-price-whole"))
-                )
-                price = int(price_elem.text.replace(",", "").replace("₹", ""))
-            except:
-                price = 0
-                
-            return {"platform": "Amazon", "price": price, "title": title, "url": link}
-            
-        except Exception as e:
-            print(f"Amazon Search Failed: {e}")
-            return None
-
-    def buy_now(self, product_url):
-        """Navigates to product and clicks Buy Now."""
-        driver = self._get_driver()
-        # If we are not already on the page, go there
-        if driver.current_url != product_url:
-            driver.get(product_url)
-        
-        try:
-            print("💳 Proceeding to Payment Page...")
-            
-            # Click 'Buy Now' button
-            # Amazon often has two types of Buy Now buttons
-            buy_btn = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "buy-now-button"))
-            )
-            buy_btn.click()
-            
-            # Logic stops here: The user is now on the Payment/Checkout page
-            return "I have clicked 'Buy Now'. Please complete the payment on the screen."
-        except Exception as e:
-            return f"I opened the product, but couldn't click Buy Now automatically. Error: {e}"
-
-# Global instance for the shopping agent
-shopper = PersonalShopper()
-
-async def shop_online(product_query: str) -> str:
-    """
-    Orchestrator function: Searches Amazon and initiates checkout.
-    """
-    # Run blocking Selenium code in a separate thread so it doesn't freeze the AI
-    loop = asyncio.get_event_loop()
-    
-    def _perform_shopping():
-        # 1. Search
-        result = shopper.search_amazon(product_query)
-        
-        if not result:
-            return f"I couldn't find '{product_query}' on Amazon."
-        
-        summary = f"Found '{result['title'][:50]}...' for ₹{result['price']}."
-        
-        # 2. Buy
-        status = shopper.buy_now(result['url'])
-        
-        return f"{summary}\n{status}"
-
-    return await loop.run_in_executor(None, _perform_shopping)
-
-
 # --- TOOL REGISTRY ---
 AVAILABLE_TOOLS = {
     "get_system_time": get_system_time,
@@ -419,7 +277,5 @@ AVAILABLE_TOOLS = {
     "set_volume": set_volume,
     "take_screenshot": take_screenshot,
     "minimize_windows": minimize_windows,
-    "open_application": open_application,
-    # New Shopping Tool
-    "shop_online": shop_online 
+    "open_application": open_application
 }
