@@ -2,18 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        "```python\n# --- Simple Python Calculator ---\n\ndef simple_calculator():\n    \"\"\"\n    A simple calculator that runs in a loop, handling basic arithmetic\n    operations and user input errors gracefully.\n    \"\"\"\n    print(\"--- Welcome to the Simple Python Calculator ---\")\n    print(\"You can type 'exit' at any time to quit the program.\")\n\n    while True:\n        # 1. Get the first number from the user\n        try:\n            num1_input = input(\"\\nEnter the first number: \")\n            # Allow user to exit\n            if num1_input.lower() == 'exit':\n                break\n            num1 = float(num1_input)\n        except ValueError:\n            print(\"Invalid input. Please enter a numeric value.\")\n            continue # Skips the rest of the loop and starts a new one\n\n        # 2. Get the operator from the user\n        operator = input(\"Enter an operator (+, -, *, /): \")\n        if operator.lower() == 'exit':\n            break\n        # Check if the operator is valid\n        if operator not in ['+', '-', '*', '/']:\n            print(\"Invalid operator. Please use one of: +, -, *, /\")\n            continue\n\n        # 3. Get the second number from the user\n        try:\n            num2_input = input(\"Enter the second number: \")\n            if num2_input.lower() == 'exit':\n                break\n            num2 = float(num2_input)\n        except ValueError:\n            print(\"Invalid input. Please enter a numeric value.\")\n            continue\n\n        # 4. Perform the calculation\n        result = None\n        if operator == '+':\n            result = num1 + num2\n        elif operator == '-':\n            result = num1 - num2\n        elif operator == '*':\n            result = num1 * num2\n        elif operator == '/':\n            if num2 == 0:\n                print(\"Error: Division by zero is not allowed.\")\n                continue # Skip printing and start a new calculation\n            else:\n                result = num1 / num2\n        \n        # 5. Print the formatted result\n        if result is not None:\n            print(\"-------------------------------------\")\n            print(f\"---> Result: {num1} {operator} {num2} = {result}\")\n            print(\"-------------------------------------\")\n\n    print(\"\\nThank you for using the calculator. Goodbye!\")\n\n# This line ensures the function runs only when the script is executed directly\nif __name__ == \"__main__\":\n    simple_calculator()\n```"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "disconnect"
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         "hello hello hello hello hello"
@@ -179,6 +167,18 @@
       "role": "model",
       "parts": [
         "Hello! How can I help you today?\n"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hello "
       ]
     }
   ],
