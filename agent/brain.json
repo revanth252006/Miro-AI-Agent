@@ -4,42 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "oder the iphone 17 pro max"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am sorry, but I cannot directly place orders for you. Is there anything else I can assist you with?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder it from amazon"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I apologize, but I am an AI and cannot directly place orders on Amazon or any other platform for you. I can provide information or help with other tasks if you'd like."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "order iphone 16 promax from amazon"
       ]
     },
@@ -173,6 +137,42 @@
       "role": "user",
       "parts": [
         "order iphone 15promax "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "check it again "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Current Time: 12:18 PM, Date: Saturday, January 31, 2026. Checked."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax"
       ]
     },
     {

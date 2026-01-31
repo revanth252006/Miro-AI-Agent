@@ -420,24 +420,32 @@ class VoiceAssistant:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
             # --- NEW: SHOPPING AGENT ---
-# --- SHOPPING COMMAND (ROBUST TRIGGERS) ---
-        # Added 'purchase', 'shop', 'get' to catch more variations
+# --- SHOPPING COMMAND (MULTI-PLATFORM) ---
         triggers = ["order", "buy", "purchase", "shop", "get me a"]
         if any(t in clean_text for t in triggers):
-            # Clean input safely
-            target_item = clean_text
-            for t in triggers:
-                target_item = target_item.replace(t, "")
             
+            # 1. Detect Platform
+            target_platform = None
+            if "amazon" in clean_text: target_platform = "Amazon"
+            if "flipkart" in clean_text: target_platform = "Flipkart"
+            
+            # 2. If NO platform specified, Ask User
+            if not target_platform:
+                return "Which store should I use? Please say 'Order from Amazon' or 'Order from Flipkart'."
+
+            # 3. Clean Input (Remove trigger words AND platform names)
+            target_item = clean_text
+            for t in triggers: target_item = target_item.replace(t, "")
+            target_item = target_item.replace("from amazon", "").replace("on amazon", "").replace("amazon", "")
+            target_item = target_item.replace("from flipkart", "").replace("on flipkart", "").replace("flipkart", "")
             target_item = target_item.replace(" me ", " ").replace(" a ", " ").replace(" an ", " ").strip()
             
-            # If the user just said "buy", ask what.
             if len(target_item) < 2:
                 return "What item would you like me to order?"
 
             try:
                 from tools import shop_online
-                return await shop_online(target_item)
+                return await shop_online(target_item, target_platform)
             except Exception as e:
                 return f"Shopping Error: {str(e)}"
         
