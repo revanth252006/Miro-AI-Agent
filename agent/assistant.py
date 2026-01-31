@@ -420,20 +420,14 @@ class VoiceAssistant:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
             # --- NEW: SHOPPING AGENT ---
-# --- SHOPPING COMMAND (MULTI-PLATFORM) ---
+# --- SHOPPING COMMAND (FIXED) ---
         triggers = ["order", "buy", "purchase", "shop", "get me a"]
         if any(t in clean_text for t in triggers):
             
-            # 1. Detect Platform
-            target_platform = None
-            if "amazon" in clean_text: target_platform = "Amazon"
-            if "flipkart" in clean_text: target_platform = "Flipkart"
-            
-            # 2. If NO platform specified, Ask User
-            if not target_platform:
-                return "Which store should I use? Please say 'Order from Amazon' or 'Order from Flipkart'."
+            # Default to Amazon if not specified
+            target_platform = "Flipkart" if "flipkart" in clean_text else "Amazon"
 
-            # 3. Clean Input (Remove trigger words AND platform names)
+            # Clean the product name
             target_item = clean_text
             for t in triggers: target_item = target_item.replace(t, "")
             target_item = target_item.replace("from amazon", "").replace("on amazon", "").replace("amazon", "")
@@ -445,9 +439,10 @@ class VoiceAssistant:
 
             try:
                 from tools import shop_online
+                # This will now run without freezing the server
                 return await shop_online(target_item, target_platform)
             except Exception as e:
-                return f"Shopping Error: {str(e)}"
+                return f"System Error: {str(e)}"
         
         
 
