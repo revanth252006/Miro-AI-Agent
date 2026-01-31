@@ -286,8 +286,11 @@ async def search_product(product_name: str) -> str:
 # ==========================================
 
 # ==========================================
-# 3. 🛍️ CONFLICT-FREE SHOPPING ENGINE
+# 3. 🛍️ ROBUST SHOPPING ENGINE (DEDICATED PROFILE)
 # ==========================================
+import os
+import shutil
+
 class PersonalShopper:
     def __init__(self):
         self.driver = None
@@ -307,7 +310,7 @@ class PersonalShopper:
         options.add_argument("--log-level=3")
         
         # --- THE FIX: Create a separate folder for the bot ---
-        # This prevents it from crashing when your main Chrome is open.
+        # This prevents the "Thinking..." freeze by isolating the bot.
         current_folder = os.getcwd()
         profile_path = os.path.join(current_folder, "bot_profile")
         options.add_argument(f"user-data-dir={profile_path}")
@@ -322,7 +325,7 @@ class PersonalShopper:
 
     def search_and_buy(self, product, platform):
         driver = self._get_driver()
-        wait = WebDriverWait(driver, 5) # 5s timeout prevents freezing
+        wait = WebDriverWait(driver, 8) # Increased wait time
         
         # 1. Determine URL
         target_url = "https://www.flipkart.com" if "flipkart" in platform.lower() else "https://www.amazon.in"
@@ -336,9 +339,13 @@ class PersonalShopper:
                 box = wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
                 box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
                 
-                # Robust Selector
-                try: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] h2 a")))
-                except: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "span[data-component-type='s-product-image'] a")))
+                # ROBUST SELECTOR: Just find the first Heading Link (h2 a)
+                # This fixes "Couldn't find" errors.
+                try: 
+                    item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h2 a")))
+                except: 
+                    # Fallback for grid views
+                    item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] a")))
 
             else: 
                 # Flipkart Search
@@ -360,14 +367,16 @@ class PersonalShopper:
             print("💳 Clicking Buy Button...")
             try:
                 if "amazon" in platform.lower():
-                    buy_btn = wait.until(EC.element_to_be_clickable((By.ID, "buy-now-button")))
+                    # Amazon has multiple ID variations for Buy Now
+                    try: buy_btn = wait.until(EC.element_to_be_clickable((By.ID, "buy-now-button")))
+                    except: buy_btn = wait.until(EC.element_to_be_clickable((By.NAME, "submit.buy-now")))
                 else:
                     buy_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Buy Now']")))
                 
                 buy_btn.click()
                 status = "✅ I clicked 'Buy Now'. Please finish the payment."
             except:
-                status = "⚠️ Opened product, but 'Buy Now' button was hidden."
+                status = "⚠️ Opened product, but 'Buy Now' button was hidden (Login might be required)."
 
             return f"Found: {title[:40]}...\n{status}"
 

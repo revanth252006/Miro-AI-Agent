@@ -262,42 +262,42 @@ class VoiceAssistant:
 
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
     def _init_models(self):
-        """Initializes FAST (voice) + SMART (chat) Gemini models safely"""
-
+        """Initializes Models: FORCES Gemini 2.5 as requested."""
+        
         key_fast = os.getenv("GOOGLE_API_KEY")
-        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast
+        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast 
 
-        # FAST MODEL
+        # 1. FAST BRAIN (Voice) -> Trying Gemini 2.5 Flash
         genai.configure(api_key=key_fast)
-        model_fast = genai.GenerativeModel(
-            "gemini-2.5-flash",
-            system_instruction=PERSONALITIES[self.current_persona]
-            + "\nGOAL: Reply instantly. Short responses."
-        )
-        chat_fast = model_fast.start_chat(history=[])
-
-        # SMART MODEL
-        genai.configure(api_key=key_smart)
         try:
-            model_smart = genai.GenerativeModel(
-    "gemini-2.5-pro",
-    system_instruction=(
-        PERSONALITIES[self.current_persona]
-        + "\nGOAL: Deep reasoning, coding, Markdown output."
-    )
-)
-
-        except:
-            model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro",
-                system_instruction=PERSONALITIES[self.current_persona]
+            print("🚀 Loading Gemini 2.5 Flash...")
+            model_fast = genai.GenerativeModel(
+                "gemini-2.5-flash",  # <--- YOUR REQUESTED MODEL
+                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Reply Instantly."
             )
+            chat_fast = model_fast.start_chat(history=[])
+            print("✅ Gemini 2.5 Flash Online")
+        except Exception as e:
+            print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 1.5 Flash.")
+            model_fast = genai.GenerativeModel("gemini-1.5-flash", system_instruction=PERSONALITIES[self.current_persona])
+            chat_fast = model_fast.start_chat(history=[])
 
-        chat_smart = model_smart.start_chat(history=[])
+        # 2. SMART BRAIN (Chat) -> Trying Gemini 2.5 Pro
+        if key_smart != key_fast: genai.configure(api_key=key_smart)
+        try:
+            print("🧠 Loading Gemini 2.5 Pro...")
+            model_smart = genai.GenerativeModel(
+                "gemini-2.5-pro",  # <--- YOUR REQUESTED MODEL
+                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Deep Reasoning & Coding."
+            )
+            chat_smart = model_smart.start_chat(history=[])
+            print("✅ Gemini 2.5 Pro Online")
+        except Exception as e:
+            print(f"⚠️ Gemini 2.5 Pro Unavailable ({e}). Fallback to 1.5 Pro.")
+            model_smart = genai.GenerativeModel("gemini-1.5-pro", system_instruction=PERSONALITIES[self.current_persona])
+            chat_smart = model_smart.start_chat(history=[])
 
-        # Reset key
         genai.configure(api_key=key_fast)
-
         return chat_fast, chat_smart
 
 
@@ -420,7 +420,7 @@ class VoiceAssistant:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
             # --- NEW: SHOPPING AGENT ---
-# --- SHOPPING COMMAND (REPLACEMENT) ---
+# --- SHOPPING COMMAND (MULTI-PLATFORM) ---
         triggers = ["order", "buy", "purchase", "shop", "get me a"]
         if any(t in clean_text for t in triggers):
             
@@ -441,6 +441,7 @@ class VoiceAssistant:
 
             try:
                 from tools import shop_online
+                # Now passing BOTH item and platform
                 return await shop_online(target_item, target_platform)
             except Exception as e:
                 return f"Shopping Error: {str(e)}"
