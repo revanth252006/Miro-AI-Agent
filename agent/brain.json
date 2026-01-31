@@ -2,96 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "Hello."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I assist you today?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "What are you doing?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I'm currently waiting to assist you with any questions you might have about Miro or any tasks you'd like me to perform related to Miro! Just let me know what you need.\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hlo "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hello "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hi"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hii"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what is your name "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am Miro Agent."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "who create you "
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "I was created by Revanth and his team, which includes Manoj Kumar, Amit Kumar, and Jaideep."
@@ -179,6 +89,96 @@
       "role": "model",
       "parts": [
         "I apologize, but I am an AI and cannot directly place orders on Amazon or any other platform for you. I can provide information or help with other tasks if you'd like."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 16 promax from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "check in the other platforms"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Could you please clarify what you'd like me to check and which platforms you're referring to?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "flipcart"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I understand you're referring to Flipkart. As an AI, I don't have direct access to browse live external websites like Flipkart.\n\nCould you please tell me what information you're looking for or what you'd like me to check on Flipkart? I can try to help you find general information if you describe it."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder iphone 14 "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I cannot directly place an order for an iPhone 14 on Flipkart for you.\n\nYou can order it yourself by visiting the Flipkart website or using their mobile app."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "from amazon"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I cannot directly place an order for an iPhone 14 on Amazon for you.\n\nYou can order it yourself by visiting the Amazon website or using their mobile app."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder i phone 14 pro max from amazon"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Yes, you can check Amazon for iPhone 14 Pro Max availability."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "i cannot see it order it for me"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order it "
       ]
     }
   ],

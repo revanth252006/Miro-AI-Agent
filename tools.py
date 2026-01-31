@@ -299,7 +299,7 @@ class PersonalShopper:
         options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
         
         # If you specifically need 'Profile 1', add this separate line:
-        options.add_argument(r"--profile-directory=Profile 1")
+        options.add_argument(r"--profile-directory=Profile 2")
         #
         # options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
         
