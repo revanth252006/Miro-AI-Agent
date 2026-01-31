@@ -8,15 +8,15 @@ import subprocess
 import aiohttp
 import logging
 import webbrowser
-import pyautogui  # For System Control
-import time       # For delays in automation
+import pyautogui      # For System Control
+import time           # For delays in automation
 from datetime import datetime
 from typing import Optional, Union, List, Dict
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from duckduckgo_search import DDGS
 
-# --- NEW IMPORTS FOR SHOPPING ENGINE ---
+# --- SELENIUM IMPORTS ---
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -34,13 +34,11 @@ class GlobalStore:
 STORE = GlobalStore()
 
 # ==========================================
-# 1. NEW SYSTEM AUTOMATION TOOLS
+# 1. SYSTEM AUTOMATION TOOLS (Preserved)
 # ==========================================
 
 async def set_volume(level: str) -> str:
-    """
-    Controls system volume (up, down, mute).
-    """
+    """Controls system volume (up, down, mute)."""
     level = level.lower()
     
     def _perform_volume():
@@ -57,14 +55,11 @@ async def set_volume(level: str) -> str:
             return "System muted."
         return "Volume unchanged."
 
-    # Run in executor to prevent blocking the async loop
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _perform_volume)
 
 async def take_screenshot() -> str:
-    """
-    Takes a screenshot and saves it to the current folder.
-    """
+    """Takes a screenshot and saves it to the current folder."""
     def _perform_screenshot():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"screenshot_{timestamp}.png"
@@ -76,9 +71,7 @@ async def take_screenshot() -> str:
     return f"Screenshot saved as {filename}"
 
 async def minimize_windows() -> str:
-    """
-    Minimizes all windows to show the desktop.
-    """
+    """Minimizes all windows to show the desktop."""
     def _perform_minimize():
         pyautogui.hotkey('win', 'd')
         return "Desktop visible."
@@ -87,9 +80,7 @@ async def minimize_windows() -> str:
     return await loop.run_in_executor(None, _perform_minimize)
 
 async def open_application(app_name: str) -> str:
-    """
-    Opens common applications or searches for them using the Start menu.
-    """
+    """Opens common applications or searches for them using the Start menu."""
     app_name = app_name.lower().strip()
     
     # 1. Direct Command Map (Faster & More Reliable)
@@ -125,7 +116,7 @@ async def open_application(app_name: str) -> str:
 
 
 # ==========================================
-# 2. EXISTING TOOLS (Web, Email, Info)
+# 2. WEB, EMAIL & INFO TOOLS (Preserved)
 # ==========================================
 
 async def get_system_time() -> str:
@@ -145,9 +136,7 @@ async def get_weather(city: str) -> str:
         return f"Error: {str(e)}"
 
 async def search_web(query: str) -> str:
-    """
-    Search the web using DuckDuckGo (No API Key required).
-    """
+    """Search the web using DuckDuckGo."""
     try:
         loop = asyncio.get_event_loop()
         
@@ -169,32 +158,16 @@ async def search_web(query: str) -> str:
     except Exception as e:
         return f"Search failed: {str(e)}"
 
-async def send_email(
-    to_email: str,
-    subject: str,
-    message: str,
-    cc_email: Optional[str] = None
-) -> str:
-    """
-    Send an ACTUAL email through Gmail using SMTP_SSL (Port 465).
-    """
+async def send_email(to_email: str, subject: str, message: str, cc_email: Optional[str] = None) -> str:
+    """Send an ACTUAL email through Gmail using SMTP_SSL."""
     print(f"\n📨 STARTING EMAIL SEND PROCESS...")
-    print(f"   To: {to_email}")
-    print(f"   Subject: {subject}")
-
     try:
-        # 1. Check Credentials
         gmail_user = os.getenv("GMAIL_USER")
         gmail_password = os.getenv("GMAIL_APP_PASSWORD")
         
         if not gmail_user or not gmail_password:
-            error_msg = "❌ CRITICAL ERROR: GMAIL_USER or GMAIL_APP_PASSWORD is missing in .env file."
-            print(error_msg)
-            return error_msg
-            
-        print(f"   🔑 Credentials found for user: {gmail_user}")
+            return "❌ CRITICAL ERROR: GMAIL_USER or GMAIL_APP_PASSWORD is missing in .env file."
 
-        # 2. Create Message
         msg = MIMEMultipart()
         msg['From'] = gmail_user
         msg['To'] = to_email
@@ -204,28 +177,16 @@ async def send_email(
         if cc_email:
             msg['Cc'] = cc_email
             
-        # 3. Connect via SSL (Port 465 - More Reliable)
-        print("   🔌 Connecting to Gmail Server (smtp.gmail.com:465)...")
         context = ssl.create_default_context()
         
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            print("   🔓 Logging in...")
             server.login(gmail_user, gmail_password)
-            print("   🚀 Sending message...")
             server.send_message(msg)
             
-        success_msg = f"✅ SUCCESS: Email sent to {to_email}"
-        print(success_msg)
-        return success_msg
+        return f"✅ SUCCESS: Email sent to {to_email}"
 
-    except smtplib.SMTPAuthenticationError:
-        err = "❌ AUTHENTICATION ERROR: Your App Password or Email is incorrect."
-        print(err)
-        return err
     except Exception as e:
-        err = f"❌ SENDING FAILED: {str(e)}"
-        print(err)
-        return err
+        return f"❌ SENDING FAILED: {str(e)}"
 
 async def open_website(site_name: str, search_query: Union[str, None] = None) -> str:
     """Universal browser opener."""
@@ -257,6 +218,7 @@ async def open_website(site_name: str, search_query: Union[str, None] = None) ->
     return f"Opened {url} for you."
 
 async def manage_shopping(action: str, item_name: str = "", price: float = 0.0) -> str:
+    """Manages the internal cart logic (Preserved)."""
     if action == "search":
         return f"Found {item_name} for ₹{price}. Add to cart?"
     elif action == "add":
@@ -278,25 +240,14 @@ async def search_product(product_name: str) -> str:
 
 
 # ==========================================
-# 3. 🛍️ NEW PERSONAL SHOPPER (Selenium Automation)
+# 3. 🛍️ ROBUST SHOPPING ENGINE (THE FIXED PART)
 # ==========================================
-
-# ==========================================
-# 3. 🛍️ NEW PERSONAL SHOPPER (Multi-Platform)
-# ==========================================
-
-# ==========================================
-# 3. 🛍️ ROBUST SHOPPING ENGINE (DEDICATED PROFILE)
-# ==========================================
-import os
-import shutil
-
 class PersonalShopper:
     def __init__(self):
         self.driver = None
 
     def _get_driver(self):
-        """Starts Chrome using a SEPARATE bot profile to avoid file locks."""
+        """Starts Chrome in a separate profile to prevent crashes."""
         if self.driver:
             try:
                 self.driver.current_url
@@ -309,25 +260,22 @@ class PersonalShopper:
         options.add_experimental_option("detach", True)
         options.add_argument("--log-level=3")
         
-        # --- THE FIX: Create a separate folder for the bot ---
-        # This prevents the "Thinking..." freeze by isolating the bot.
+        # --- FIX: Use dedicated bot folder ---
         current_folder = os.getcwd()
         profile_path = os.path.join(current_folder, "bot_profile")
         options.add_argument(f"user-data-dir={profile_path}")
 
         try:
             self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        except Exception as e:
-            print(f"❌ Driver Error: {e}")
+        except Exception:
             self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
             
         return self.driver
 
     def search_and_buy(self, product, platform):
         driver = self._get_driver()
-        wait = WebDriverWait(driver, 8) # Increased wait time
+        wait = WebDriverWait(driver, 8) 
         
-        # 1. Determine URL
         target_url = "https://www.flipkart.com" if "flipkart" in platform.lower() else "https://www.amazon.in"
         driver.get(target_url)
         
@@ -339,13 +287,11 @@ class PersonalShopper:
                 box = wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
                 box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
                 
-                # ROBUST SELECTOR: Just find the first Heading Link (h2 a)
-                # This fixes "Couldn't find" errors.
+                # Robust Selector (XPath)
                 try: 
                     item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h2 a")))
                 except: 
-                    # Fallback for grid views
-                    item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] a")))
+                    item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div.s-result-item a")))
 
             else: 
                 # Flipkart Search
@@ -354,29 +300,27 @@ class PersonalShopper:
                 try: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a._1fQZEK")))
                 except: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.s1Q9rs")))
 
-            # 2. Get Details & Go
+            # Get Details & Go
             title = item.text.split('\n')[0]
             link = item.get_attribute("href")
             driver.get(link)
             
-            # Handle Tabs
             if len(driver.window_handles) > 1:
                 driver.switch_to.window(driver.window_handles[-1])
 
-            # 3. Click Buy Now
+            # Click Buy
             print("💳 Clicking Buy Button...")
             try:
                 if "amazon" in platform.lower():
-                    # Amazon has multiple ID variations for Buy Now
                     try: buy_btn = wait.until(EC.element_to_be_clickable((By.ID, "buy-now-button")))
                     except: buy_btn = wait.until(EC.element_to_be_clickable((By.NAME, "submit.buy-now")))
                 else:
                     buy_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Buy Now']")))
                 
                 buy_btn.click()
-                status = "✅ I clicked 'Buy Now'. Please finish the payment."
+                status = "✅ Clicked 'Buy Now'. Please pay."
             except:
-                status = "⚠️ Opened product, but 'Buy Now' button was hidden (Login might be required)."
+                status = "⚠️ Product open. 'Buy Now' button not found (Login required?)."
 
             return f"Found: {title[:40]}...\n{status}"
 
@@ -386,180 +330,8 @@ class PersonalShopper:
 shopper = PersonalShopper()
 
 async def shop_online(product_query: str, platform: str) -> str:
-    # Run in background to keep 'Thinking...' animation moving
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, shopper.search_and_buy, product_query, platform)
-
-    def buy_now(self, platform):
-        driver = self._get_driver()
-        try:
-            print(f"💳 Proceeding to {platform} Payment...")
-            if platform.lower() == "amazon":
-                buy_btn = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "buy-now-button")))
-                buy_btn.click()
-            elif platform.lower() == "flipkart":
-                buy_btn = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Buy Now']")))
-                buy_btn.click()
-            return f"I have clicked 'Buy Now' on {platform}. Please complete payment."
-        except Exception as e:
-            return f"Opened product, but couldn't auto-click Buy Now. Error: {e}"
-
-shopper = PersonalShopper()
-
-async def shop_online(product_query: str, platform: str) -> str:
-    loop = asyncio.get_event_loop()
-    
-    def _perform_shopping():
-        if platform.lower() == "flipkart":
-            result = shopper.search_flipkart(product_query)
-        else:
-            result = shopper.search_amazon(product_query)
-        
-        if not result:
-            return f"I couldn't find '{product_query}' on {platform}."
-        
-        summary = f"Found '{result['title'][:40]}...' for ₹{result['price']}."
-        status = shopper.buy_now(result['platform'])
-        return f"{summary}\n{status}"
-
-        return await loop.run_in_executor(None, _perform_shopping)
-
-        # 2. Start New Driver
-        options = webdriver.ChromeOptions()
-        options.add_argument("--start-maximized")
-        options.add_experimental_option("detach", True)
-        options.add_argument("--log-level=3") 
-        
-        # Stability Flags
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-
-        # ⚠️ YOUR PROFILE PATH (Uncomment and check username)
-        # options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
-        
-        try:
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        except Exception as e:
-            print(f"❌ Critical Browser Error: {e}")
-            print("👉 TIP: Close ALL Chrome windows and try again.")
-            # Fallback to guest mode if profile is locked
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-            
-        return self.driver
-        
-        #
-        # options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
-        
-        # ⚠️ IMPORTANT: Replace 'YOUR_USERNAME' with your actual Windows Username
-        # To find path: Type chrome://version in Chrome address bar -> look for "Profile Path"
-        # Example: user_data_path = r"C:\Users\Revanth\AppData\Local\Google\Chrome\User Data"
-        
-        # Uncomment and update the line below to use your saved login!
-        # options.add_argument(r"user-data-dir=C:\Users\YOUR_USERNAME\AppData\Local\Google\Chrome\User Data")
-        
-        # This keeps the browser open after the bot finishes
-        options.add_experimental_option("detach", True)
-        
-        # Suppress logging
-        options.add_argument("--log-level=3")
-        
-        try:
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        except Exception as e:
-            print(f"Browser Error (Close other Chrome windows): {e}")
-            # Fallback to fresh session if profile is locked
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-            
-        return self.driver
-
-    def search_amazon(self, product):
-        """Searches Amazon and returns the top product details."""
-        driver = self._get_driver()
-        driver.get("https://www.amazon.in")
-        
-        try:
-            print(f"🛍️ Searching Amazon for: {product}")
-            
-            # Wait for search box
-            search_box = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "twotabsearchtextbox"))
-            )
-            search_box.clear()
-            search_box.send_keys(product)
-            search_box.send_keys(Keys.RETURN)
-            
-            # Click the first valid product (ignoring Sponsored if possible, but taking first result)
-            first_item = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] h2 a"))
-            )
-            title = first_item.text
-            link = first_item.get_attribute("href")
-            
-            # Switch to the product tab
-            driver.get(link) 
-            
-            # Get Price (Clean formatting)
-            try:
-                price_elem = WebDriverWait(driver, 3).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".a-price-whole"))
-                )
-                price = int(price_elem.text.replace(",", "").replace("₹", ""))
-            except:
-                price = 0
-                
-            return {"platform": "Amazon", "price": price, "title": title, "url": link}
-            
-        except Exception as e:
-            print(f"Amazon Search Failed: {e}")
-            return None
-
-    def buy_now(self, product_url):
-        """Navigates to product and clicks Buy Now."""
-        driver = self._get_driver()
-        # If we are not already on the page, go there
-        if driver.current_url != product_url:
-            driver.get(product_url)
-        
-        try:
-            print("💳 Proceeding to Payment Page...")
-            
-            # Click 'Buy Now' button
-            # Amazon often has two types of Buy Now buttons
-            buy_btn = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "buy-now-button"))
-            )
-            buy_btn.click()
-            
-            # Logic stops here: The user is now on the Payment/Checkout page
-            return "I have clicked 'Buy Now'. Please complete the payment on the screen."
-        except Exception as e:
-            return f"I opened the product, but couldn't click Buy Now automatically. Error: {e}"
-
-# Global instance for the shopping agent
-shopper = PersonalShopper()
-
-async def shop_online(product_query: str) -> str:
-    """
-    Orchestrator function: Searches Amazon and initiates checkout.
-    """
-    # Run blocking Selenium code in a separate thread so it doesn't freeze the AI
-    loop = asyncio.get_event_loop()
-    
-    def _perform_shopping():
-        # 1. Search
-        result = shopper.search_amazon(product_query)
-        
-        if not result:
-            return f"I couldn't find '{product_query}' on Amazon."
-        
-        summary = f"Found '{result['title'][:50]}...' for ₹{result['price']}."
-        
-        # 2. Buy
-        status = shopper.buy_now(result['url'])
-        
-        return f"{summary}\n{status}"
-
-    return await loop.run_in_executor(None, _perform_shopping)
 
 
 # --- TOOL REGISTRY ---
