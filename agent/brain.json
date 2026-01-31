@@ -4,18 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "hello hello hello hello hello"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "what are you doing"
       ]
     },
@@ -179,6 +167,18 @@
       "role": "user",
       "parts": [
         "hello "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
       ]
     }
   ],

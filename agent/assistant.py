@@ -255,49 +255,54 @@ class VoiceAssistant:
         self.fast_chat, self.smart_chat = self._init_models()
         self.email_mode = False; self.email_step = 0; self.email_draft = {}
 
-    def _init_models(self):
-        """Initializes TWO models using separate keys if available."""
-        
-        # --- KEY CONFIG ---
-        key_fast = os.getenv("GOOGLE_API_KEY")
-        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast 
+def _init_models(self):
+    """Initializes FAST (voice) + SMART (chat) Gemini models safely"""
 
-        # 1. The Sprinter (Flash 2.0)
-        genai.configure(api_key=key_fast)
-        try:
-            model_fast = genai.GenerativeModel(
-                "gemini-2.0-flash-exp", 
-                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Reply Instantly."
+    key_fast = os.getenv("GOOGLE_API_KEY")
+    key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast
+
+    # ---------- FAST MODEL (VOICE / LOW LATENCY) ----------
+    genai.configure(api_key=key_fast)
+
+    try:
+        model_fast = genai.GenerativeModel(
+            "gemini-2.5-flash",
+            system_instruction=(
+                PERSONALITIES[self.current_persona]
+                + "\nGOAL: Reply instantly. Short responses."
             )
-            chat_fast = model_fast.start_chat(history=[])
-        except Exception:
-            # Fallback
-            model_fast = genai.GenerativeModel("gemini-1.5-flash", system_instruction=PERSONALITIES[self.current_persona])
-            chat_fast = model_fast.start_chat(history=[])
+        )
+        chat_fast = model_fast.start_chat(history=[])
+    except Exception as e:
+        raise RuntimeError(f"Fast model init failed: {e}")
 
-        # 2. The Thinker (Pro 2.5/1.5)
-        if key_smart != key_fast: genai.configure(api_key=key_smart)
-        
-        try:
-            # Prefer 2.5 Pro as available in your logs
-            model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro", 
-                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Deep Reasoning & Coding. Use Markdown."
+    # ---------- SMART MODEL (CHAT / CODING / REASONING) ----------
+    genai.configure(api_key=key_smart)
+
+    try:
+        # Try best model first
+        model_smart = genai.GenerativeModel(
+            "gemini-3-pro",
+            system_instruction=(
+                PERSONALITIES[self.current_persona]
+                + "\nGOAL: Deep reasoning, coding, Markdown output."
             )
-            chat_smart = model_smart.start_chat(history=[])
-        except Exception:
-            try:
-                model_smart = genai.GenerativeModel("gemini-2.5-pro", system_instruction=PERSONALITIES[self.current_persona])
-                chat_smart = model_smart.start_chat(history=[])
-            except:
-                # Final fallback to Flash to prevent crash
-                model_smart = genai.GenerativeModel("gemini-2.0-flash-exp", system_instruction=PERSONALITIES[self.current_persona])
-                chat_smart = model_smart.start_chat(history=[])
+        )
+        chat_smart = model_smart.start_chat(history=[])
 
-        # Reset to global key
-        genai.configure(api_key=key_fast)
-        
-        return chat_fast, chat_smart
+    except Exception:
+        # Fallback to 2.5 Pro
+        model_smart = genai.GenerativeModel(
+            "gemini-2.5-pro",
+            system_instruction=PERSONALITIES[self.current_persona]
+        )
+        chat_smart = model_smart.start_chat(history=[])
+
+    # Reset key
+    genai.configure(api_key=key_fast)
+
+    return chat_fast, chat_smart
+
 
     def switch_personality(self, persona_key):
         if persona_key in PERSONALITIES:
