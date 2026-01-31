@@ -19,7 +19,9 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-import google.generativeai as genai
+# import google.generativeai as genai
+from google import genai
+
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -234,11 +236,11 @@ class VoiceAssistant:
         # 1. Initialize Memory
         self.memory = MemoryManager()
         self.session_manager = SessionManager()
-        self.safety = SafetyGuardrail() 
-        
+        self.safety = SafetyGuardrail()
+
         self.user_name = self.memory.get_name()
-        self.knowledge_base = "" 
-        
+        self.knowledge_base = ""
+
         # 2. Load Past History
         past_history = self.memory.get_history()
         if not past_history:
@@ -249,59 +251,52 @@ class VoiceAssistant:
 
         # 3. Initialize Session
         self.current_session_id = self.session_manager.create_session()
-        
+
         # 4. Initialize HYBRID Models
         self.current_persona = "default"
         self.fast_chat, self.smart_chat = self._init_models()
-        self.email_mode = False; self.email_step = 0; self.email_draft = {}
 
-def _init_models(self):
-    """Initializes FAST (voice) + SMART (chat) Gemini models safely"""
+        self.email_mode = False
+        self.email_step = 0
+        self.email_draft = {}
 
-    key_fast = os.getenv("GOOGLE_API_KEY")
-    key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast
+    # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
+    def _init_models(self):
+        """Initializes FAST (voice) + SMART (chat) Gemini models safely"""
 
-    # ---------- FAST MODEL (VOICE / LOW LATENCY) ----------
-    genai.configure(api_key=key_fast)
+        key_fast = os.getenv("GOOGLE_API_KEY")
+        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast
 
-    try:
+        # FAST MODEL
+        genai.configure(api_key=key_fast)
         model_fast = genai.GenerativeModel(
             "gemini-2.5-flash",
-            system_instruction=(
-                PERSONALITIES[self.current_persona]
-                + "\nGOAL: Reply instantly. Short responses."
-            )
+            system_instruction=PERSONALITIES[self.current_persona]
+            + "\nGOAL: Reply instantly. Short responses."
         )
         chat_fast = model_fast.start_chat(history=[])
-    except Exception as e:
-        raise RuntimeError(f"Fast model init failed: {e}")
 
-    # ---------- SMART MODEL (CHAT / CODING / REASONING) ----------
-    genai.configure(api_key=key_smart)
-
-    try:
-        # Try best model first
-        model_smart = genai.GenerativeModel(
-            "gemini-3-pro",
-            system_instruction=(
-                PERSONALITIES[self.current_persona]
+        # SMART MODEL
+        genai.configure(api_key=key_smart)
+        try:
+            model_smart = genai.GenerativeModel(
+                "gemini-3-pro",
+                system_instruction=PERSONALITIES[self.current_persona]
                 + "\nGOAL: Deep reasoning, coding, Markdown output."
             )
-        )
+        except:
+            model_smart = genai.GenerativeModel(
+                "gemini-2.5-pro",
+                system_instruction=PERSONALITIES[self.current_persona]
+            )
+
         chat_smart = model_smart.start_chat(history=[])
 
-    except Exception:
-        # Fallback to 2.5 Pro
-        model_smart = genai.GenerativeModel(
-            "gemini-2.5-pro",
-            system_instruction=PERSONALITIES[self.current_persona]
-        )
-        chat_smart = model_smart.start_chat(history=[])
+        # Reset key
+        genai.configure(api_key=key_fast)
 
-    # Reset key
-    genai.configure(api_key=key_fast)
+        return chat_fast, chat_smart
 
-    return chat_fast, chat_smart
 
 
     def switch_personality(self, persona_key):
@@ -407,11 +402,22 @@ def _init_models(self):
             self.memory.add_message("model", resp)
             return resp
 
-        # --- PERSONALITY & HARDWARE ---
-        if "activate Miro" in clean_text: return self.switch_personality("Miro")
-        if "activate bro" in clean_text: return self.switch_personality("bro")
-        if "activate professional" in clean_text: return self.switch_personality("professional")
-        if "reset mode" in clean_text: return self.switch_personality("default")
+        # # --- PERSONALITY & HARDWARE ---
+        # if "activate Miro" in clean_text: return self.switch_personality("Miro")
+        # if "activate bro" in clean_text: return self.switch_personality("bro")
+        # if "activate professional" in clean_text: return self.switch_personality("professional")
+        # if "reset mode" in clean_text: return self.switch_personality("default")
+        if "activate miro" in clean_text:
+            return self.switch_personality("miro_prime")
+
+        if "activate developer" in clean_text:
+            return self.switch_personality("developer_godmode")
+
+        if "activate teacher" in clean_text:
+            return self.switch_personality("teacher_adaptive")
+
+        if "reset mode" in clean_text:
+            return self.switch_personality("default")
 
         # --- ACTION HANDLERS (Fixes Hallucination) ---
         
