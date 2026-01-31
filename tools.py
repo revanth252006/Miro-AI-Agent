@@ -286,18 +286,42 @@ class PersonalShopper:
         self.driver = None
 
     def _get_driver(self):
-        """Starts Chrome with your REAL user profile to skip login."""
+        """Starts Chrome. auto-restarts if the window was closed."""
+        # 1. Check if existing driver is actually alive
         if self.driver:
-            return self.driver
-            
+            try:
+                # tiny command to check connection
+                self.driver.current_url 
+                return self.driver
+            except Exception:
+                print("⚠️ Browser session dead. Restarting Chrome...")
+                try:
+                    self.driver.quit()
+                except: pass
+                self.driver = None
+
+        # 2. Start New Driver
         options = webdriver.ChromeOptions()
-        # CORRECT FORMAT:
-        # 1. Use 'r' before the quote (r"...") to fix backslash errors.
-        # 2. Point to 'User Data' folder ONLY. Do not add 'Profile 1' or 'Default'.
-        # 3. Replace 'areva' with your actual username if different.
+        options.add_argument("--start-maximized")
+        options.add_experimental_option("detach", True)
+        options.add_argument("--log-level=3") 
         
-        options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
+        # Stability Flags
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        # ⚠️ YOUR PROFILE PATH (Uncomment and check username)
+        # options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
         
+        try:
+            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        except Exception as e:
+            print(f"❌ Critical Browser Error: {e}")
+            print("👉 TIP: Close ALL Chrome windows and try again.")
+            # Fallback to guest mode if profile is locked
+            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+            
+        return self.driver
         
         #
         # options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")

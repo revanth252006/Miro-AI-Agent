@@ -4,42 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "who are you "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am a Miro Agent, created by Revanth and his team (Manoj Kumar, Amit Kumar, and Jaideep)."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what is u r name "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I am a Miro Agent."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "oder the iphone 17 pro max"
       ]
     },
@@ -179,6 +143,42 @@
       "role": "user",
       "parts": [
         "order iphone 15 from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15 pro max from flipcart"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder the 15promax"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "As an AI, I cannot place orders directly. You can order the iPhone 15 Pro Max from the official Apple website or authorized retailers."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order for me"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15promax"
       ]
     }
   ],
