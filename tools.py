@@ -291,7 +291,7 @@ class PersonalShopper:
             return self.driver
             
         options = webdriver.ChromeOptions()
-        options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
+        #options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
         
         # ⚠️ IMPORTANT: Replace 'YOUR_USERNAME' with your actual Windows Username
         # To find path: Type chrome://version in Chrome address bar -> look for "Profile Path"
