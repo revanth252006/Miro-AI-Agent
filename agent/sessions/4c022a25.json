@@ -1,0 +1,39 @@
+{
+  "id": "4c022a25",
+  "title": "who are you ",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:20 AM, Date: Saturday, January 31, 2026 | USER: None] who are you "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am a Miro Agent, created by Revanth and his team (Manoj Kumar, Amit Kumar, and Jaideep)."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:21 AM, Date: Saturday, January 31, 2026 | USER: None] what is u r name "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am a Miro Agent."
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-31 11:21:07.828709"
+}
