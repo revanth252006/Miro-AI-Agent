@@ -280,10 +280,13 @@ class VoiceAssistant:
         genai.configure(api_key=key_smart)
         try:
             model_smart = genai.GenerativeModel(
-                "gemini-3-pro",
-                system_instruction=PERSONALITIES[self.current_persona]
-                + "\nGOAL: Deep reasoning, coding, Markdown output."
-            )
+    "gemini-2.5-pro",
+    system_instruction=(
+        PERSONALITIES[self.current_persona]
+        + "\nGOAL: Deep reasoning, coding, Markdown output."
+    )
+)
+
         except:
             model_smart = genai.GenerativeModel(
                 "gemini-2.5-pro",

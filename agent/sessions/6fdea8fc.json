@@ -1,0 +1,55 @@
+{
+  "id": "6fdea8fc",
+  "title": "hii",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:16 AM, Date: Saturday, January 31, 2026 | USER: None] hii"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hello! How can I help you?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:16 AM, Date: Saturday, January 31, 2026 | USER: None] what is your name "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am Miro Agent."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:16 AM, Date: Saturday, January 31, 2026 | USER: None] who create you "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I was created by Revanth and his team, which includes Manoj Kumar, Amit Kumar, and Jaideep."
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-31 11:16:25.084142"
+}
