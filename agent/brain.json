@@ -4,42 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "dfdfgdfg"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I'm ready. Just tell me what you need!\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Hey."
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hey there! How can I help you today?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hello"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! What can I do for you?\n"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "Hello."
       ]
     },
@@ -179,6 +143,42 @@
       "role": "model",
       "parts": [
         "I am a Miro Agent."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder the iphone 17 pro max"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am sorry, but I cannot directly place orders for you. Is there anything else I can assist you with?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder it from amazon"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I apologize, but I am an AI and cannot directly place orders on Amazon or any other platform for you. I can provide information or help with other tasks if you'd like."
       ]
     }
   ],

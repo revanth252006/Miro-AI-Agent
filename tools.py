@@ -291,7 +291,17 @@ class PersonalShopper:
             return self.driver
             
         options = webdriver.ChromeOptions()
-        #options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
+        # CORRECT FORMAT:
+        # 1. Use 'r' before the quote (r"...") to fix backslash errors.
+        # 2. Point to 'User Data' folder ONLY. Do not add 'Profile 1' or 'Default'.
+        # 3. Replace 'areva' with your actual username if different.
+        
+        options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
+        
+        # If you specifically need 'Profile 1', add this separate line:
+        options.add_argument(r"--profile-directory=Profile 1")
+        #
+        # options.add_argument("C:\Users\areva\AppData\Local\Google\Chrome\User Data\Profile 1")
         
         # ⚠️ IMPORTANT: Replace 'YOUR_USERNAME' with your actual Windows Username
         # To find path: Type chrome://version in Chrome address bar -> look for "Profile Path"

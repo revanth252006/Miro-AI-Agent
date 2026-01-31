@@ -420,23 +420,26 @@ class VoiceAssistant:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
             # --- NEW: SHOPPING AGENT ---
-        if "order" in clean_text or "buy" in clean_text:
-            # 1. Clean the input to get the product name
-            # Removes "buy", "order", "me", "a", "an" to isolate the item name
-            target_item = clean_text.replace("order", "").replace("buy", "").replace(" me ", " ").replace(" a ", " ").replace(" an ", " ").strip()
+# --- SHOPPING COMMAND (ROBUST TRIGGERS) ---
+        # Added 'purchase', 'shop', 'get' to catch more variations
+        triggers = ["order", "buy", "purchase", "shop", "get me a"]
+        if any(t in clean_text for t in triggers):
+            # Clean input safely
+            target_item = clean_text
+            for t in triggers:
+                target_item = target_item.replace(t, "")
             
-            if not target_item:
-                return "What would you like me to order?"
+            target_item = target_item.replace(" me ", " ").replace(" a ", " ").replace(" an ", " ").strip()
+            
+            # If the user just said "buy", ask what.
+            if len(target_item) < 2:
+                return "What item would you like me to order?"
 
-            # 2. Import and Run Shopping Logic
             try:
-                # We import here to prevent circular dependency errors
                 from tools import shop_online
                 return await shop_online(target_item)
-            except ImportError:
-                return "Shopping tool missing in tools.py"
             except Exception as e:
-                return f"Shopping failed: {str(e)}"
+                return f"Shopping Error: {str(e)}"
         
         
 
