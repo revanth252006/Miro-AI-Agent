@@ -285,116 +285,101 @@ async def search_product(product_name: str) -> str:
 # 3. 🛍️ NEW PERSONAL SHOPPER (Multi-Platform)
 # ==========================================
 
+# ==========================================
+# 3. 🛍️ CONFLICT-FREE SHOPPING ENGINE
+# ==========================================
 class PersonalShopper:
     def __init__(self):
         self.driver = None
 
     def _get_driver(self):
-        """Starts Chrome with auto-healing."""
+        """Starts Chrome using a SEPARATE bot profile to avoid file locks."""
         if self.driver:
             try:
                 self.driver.current_url
                 return self.driver
             except:
-                try: self.driver.quit()
-                except: pass
                 self.driver = None
 
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
         options.add_experimental_option("detach", True)
         options.add_argument("--log-level=3")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
         
-        # ⚠️ YOUR USER DATA PATH (Keep your existing path here)
-        options.add_argument(r"user-data-dir=C:\Users\areva\AppData\Local\Google\Chrome\User Data")
+        # --- THE FIX: Create a separate folder for the bot ---
+        # This prevents it from crashing when your main Chrome is open.
+        current_folder = os.getcwd()
+        profile_path = os.path.join(current_folder, "bot_profile")
+        options.add_argument(f"user-data-dir={profile_path}")
 
         try:
             self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         except Exception as e:
-            print(f"Browser Error: {e}")
+            print(f"❌ Driver Error: {e}")
             self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+            
         return self.driver
 
-    def search_amazon(self, product):
+    def search_and_buy(self, product, platform):
         driver = self._get_driver()
-        driver.get("https://www.amazon.in")
+        wait = WebDriverWait(driver, 5) # 5s timeout prevents freezing
+        
+        # 1. Determine URL
+        target_url = "https://www.flipkart.com" if "flipkart" in platform.lower() else "https://www.amazon.in"
+        driver.get(target_url)
         
         try:
-            # 1. Search
-            search_box = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
-            search_box.clear()
-            search_box.send_keys(product)
-            search_box.send_keys(Keys.RETURN)
+            print(f"🔎 Searching {platform} for {product}...")
             
-            # 2. Click First Result (Robust Selectors)
-            # Tries 3 different ways to find the product link in case layout changes
-            selectors = [
-                "div[data-component-type='s-search-result'] h2 a",
-                "div.s-result-item h2 a",
-                "span[data-component-type='s-product-image'] a"
-            ]
-            
-            first_item = None
-            for sel in selectors:
-                try:
-                    first_item = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, sel)))
-                    if first_item: break
-                except: continue
-
-            if not first_item: return None
-
-            title = first_item.text
-            link = first_item.get_attribute("href")
-            driver.get(link)
-            
-            # 3. Get Price
-            try:
-                price_elem = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".a-price-whole")))
-                price = price_elem.text
-            except: price = "Unknown"
+            if "amazon" in platform.lower():
+                # Amazon Search
+                box = wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
+                box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
                 
-            return {"platform": "Amazon", "price": price, "title": title, "url": link}
-        except: return None
+                # Robust Selector
+                try: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-component-type='s-search-result'] h2 a")))
+                except: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "span[data-component-type='s-product-image'] a")))
 
-    def search_flipkart(self, product):
-        driver = self._get_driver()
-        driver.get("https://www.flipkart.com")
-        
-        try:
-            # 1. Search
-            search_box = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "q")))
-            search_box.clear()
-            search_box.send_keys(product)
-            search_box.send_keys(Keys.RETURN)
-            
-            # 2. Click First Result
-            # Flipkart class names are weird, so we use partial text or common classes
-            try:
-                # Try finding by the main container class for list view
-                first_item = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div._1AtVbE a._1fQZEK"))
-                )
-            except:
-                # Fallback for grid view
-                first_item = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div._1AtVbE a.s1Q9rs"))
-                )
+            else: 
+                # Flipkart Search
+                box = wait.until(EC.presence_of_element_located((By.NAME, "q")))
+                box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
+                try: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a._1fQZEK")))
+                except: item = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.s1Q9rs")))
 
-            title = first_item.text.split('\n')[0]
-            link = first_item.get_attribute("href")
+            # 2. Get Details & Go
+            title = item.text.split('\n')[0]
+            link = item.get_attribute("href")
             driver.get(link)
             
+            # Handle Tabs
+            if len(driver.window_handles) > 1:
+                driver.switch_to.window(driver.window_handles[-1])
+
+            # 3. Click Buy Now
+            print("💳 Clicking Buy Button...")
             try:
-                price_elem = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div._30jeq3._16Jk6d")))
-                price = price_elem.text
-            except: price = "Unknown"
-            
-            return {"platform": "Flipkart", "price": price, "title": title, "url": link}
-        except Exception as e: 
-            print(f"Flipkart Error: {e}")
-            return None
+                if "amazon" in platform.lower():
+                    buy_btn = wait.until(EC.element_to_be_clickable((By.ID, "buy-now-button")))
+                else:
+                    buy_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Buy Now']")))
+                
+                buy_btn.click()
+                status = "✅ I clicked 'Buy Now'. Please finish the payment."
+            except:
+                status = "⚠️ Opened product, but 'Buy Now' button was hidden."
+
+            return f"Found: {title[:40]}...\n{status}"
+
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+
+shopper = PersonalShopper()
+
+async def shop_online(product_query: str, platform: str) -> str:
+    # Run in background to keep 'Thinking...' animation moving
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, shopper.search_and_buy, product_query, platform)
 
     def buy_now(self, platform):
         driver = self._get_driver()
