@@ -19,8 +19,8 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-# import google.generativeai as genai
-from google import genai
+import google.generativeai as genai
+# from google import genai
 
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -402,22 +402,11 @@ class VoiceAssistant:
             self.memory.add_message("model", resp)
             return resp
 
-        # # --- PERSONALITY & HARDWARE ---
-        # if "activate Miro" in clean_text: return self.switch_personality("Miro")
-        # if "activate bro" in clean_text: return self.switch_personality("bro")
-        # if "activate professional" in clean_text: return self.switch_personality("professional")
-        # if "reset mode" in clean_text: return self.switch_personality("default")
-        if "activate miro" in clean_text:
-            return self.switch_personality("miro_prime")
-
-        if "activate developer" in clean_text:
-            return self.switch_personality("developer_godmode")
-
-        if "activate teacher" in clean_text:
-            return self.switch_personality("teacher_adaptive")
-
-        if "reset mode" in clean_text:
-            return self.switch_personality("default")
+        # --- PERSONALITY & HARDWARE ---
+        if "activate Miro" in clean_text: return self.switch_personality("Miro")
+        if "activate bro" in clean_text: return self.switch_personality("bro")
+        if "activate professional" in clean_text: return self.switch_personality("professional")
+        if "reset mode" in clean_text: return self.switch_personality("default")
 
         # --- ACTION HANDLERS (Fixes Hallucination) ---
         
