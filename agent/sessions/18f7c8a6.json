@@ -1,0 +1,39 @@
+{
+  "id": "18f7c8a6",
+  "title": "hey",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 03:10 PM, Date: Saturday, January 31, 2026 | USER: None] hey"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hey there! I'm Miro, an advanced intelligent agent created by Revanth and his team. How can I help you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 03:10 PM, Date: Saturday, January 31, 2026 | USER: None] what is your name"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My name is Miro! I'm an advanced intelligent agent created by Revanth and his team."
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-31 15:10:49.548118"
+}

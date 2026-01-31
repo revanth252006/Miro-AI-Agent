@@ -4,54 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "order iphone 15promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "check it again "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Current Time: 12:18 PM, Date: Saturday, January 31, 2026. Checked."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! I'm Miro Agent, created by Revanth and his team. How can I help you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "hi"
       ]
     },
@@ -179,6 +131,54 @@
       "role": "user",
       "parts": [
         "order iphone 16 pro max "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hey there! I'm Miro, an advanced intelligent agent created by Revanth and his team. How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is your name"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "My name is Miro! I'm an advanced intelligent agent created by Revanth and his team."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 16 pro max "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15pro in amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord 5"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord 5"
       ]
     }
   ],

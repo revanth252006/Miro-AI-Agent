@@ -163,14 +163,22 @@ class PersonalShopper:
         data = {"platform": platform, "price": 99999999, "url": "", "title": ""}
         
         try:
+            print(f"🔎 Checking {platform}...")
             if platform == "Amazon":
                 driver.get("https://www.amazon.in")
                 box = wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
                 box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
                 
-                # Find Item
-                try: item = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.s-result-item[data-component-type='s-search-result']")))
-                except: return data
+                # Find Item - Try multiple selectors
+                item = None
+                selectors = ["div.s-result-item[data-component-type='s-search-result']", "div.s-product-image-container"]
+                for sel in selectors:
+                    try: 
+                        item = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
+                        break
+                    except: continue
+                
+                if not item: return data
 
                 # Get Price
                 try: 
@@ -183,28 +191,31 @@ class PersonalShopper:
                     link = item.find_element(By.TAG_NAME, "h2").find_element(By.TAG_NAME, "a")
                     data["url"] = link.get_attribute("href")
                     data["title"] = link.text
-                except: pass
+                except: 
+                     # Fallback URL
+                    try: data["url"] = item.find_element(By.TAG_NAME, "a").get_attribute("href")
+                    except: pass
 
             elif platform == "Flipkart":
                 driver.get("https://www.flipkart.com")
                 try:
                     box = wait.until(EC.presence_of_element_located((By.NAME, "q")))
                     box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
-                except: return data # Flipkart blocking bot
+                except: return data 
                 
-                # Find Item & Price
+                # Find Item & Price (Flipkart has variable classes)
                 try:
-                    # Try list view class
+                    # List View
                     container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a._1fQZEK")))
                     price_text = container.find_element(By.CSS_SELECTOR, "div._30jeq3").text
                     data["price"] = self.parse_price(price_text)
                     data["url"] = container.get_attribute("href")
                     data["title"] = container.find_element(By.CSS_SELECTOR, "div._4rR01T").text
                 except:
-                    # Try grid view class
+                    # Grid View
                     try:
                         container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div._4ddWZP a.s1Q9rs")))
-                        price_text = driver.find_element(By.CSS_SELECTOR, "div._30jeq3").text # Grid price often nearby
+                        price_text = driver.find_element(By.CSS_SELECTOR, "div._30jeq3").text
                         data["price"] = self.parse_price(price_text)
                         data["url"] = container.get_attribute("href")
                         data["title"] = container.get_attribute("title")
@@ -215,19 +226,20 @@ class PersonalShopper:
 
     def execute_shopping(self, product, forced_platform=None):
         driver = self._get_driver()
-        wait = WebDriverWait(driver, 4)
+        wait = WebDriverWait(driver, 5)
         
-        # 1. DECIDE STRATEGY
+        # 1. PRICE COMPARISON
         if forced_platform and forced_platform.lower() != "auto":
-            print(f"🛒 User selected {forced_platform}. Skipping comparison.")
             best_deal = self.check_platform(driver, wait, forced_platform, product)
         else:
-            print(f"⚖️ Comparing prices for '{product}'...")
             amazon_deal = self.check_platform(driver, wait, "Amazon", product)
             flipkart_deal = self.check_platform(driver, wait, "Flipkart", product)
             
-            print(f"   Amazon: ₹{amazon_deal['price']}")
-            print(f"   Flipkart: ₹{flipkart_deal['price']}")
+            # Print for debugging
+            print(f"\n💰 COMPARE: Amazon [₹{amazon_deal['price']}] vs Flipkart [₹{flipkart_deal['price']}]")
+            
+            if amazon_deal['price'] == 99999999 and flipkart_deal['price'] == 99999999:
+                 return f"❌ Could not find '{product}' on Amazon OR Flipkart."
             
             if flipkart_deal['price'] < amazon_deal['price']:
                 best_deal = flipkart_deal
@@ -236,18 +248,24 @@ class PersonalShopper:
 
         # 2. BUY EXECUTION
         if not best_deal["url"]:
-            return f"❌ Could not find '{product}' on {best_deal['platform']} (or both)."
+            return f"❌ Could not find URL for '{product}'."
 
+        print(f"🚀 Winning Deal: {best_deal['platform']} at ₹{best_deal['price']}. Opening...")
         driver.get(best_deal["url"])
+        
+        # Switch tab if needed
         if len(driver.window_handles) > 1: driver.switch_to.window(driver.window_handles[-1])
 
         status = f"✅ Best Price: ₹{best_deal['price']} on {best_deal['platform']}."
         
-        # Attempt Purchase
+        # 3. CLICK BUY BUTTON
         try:
+            print("💳 Clicking 'Buy' button...")
             if best_deal["platform"] == "Amazon":
-                try: driver.find_element(By.ID, "buy-now-button").click()
+                try: 
+                    driver.find_element(By.ID, "buy-now-button").click()
                 except: 
+                    # Fallback: Add to Cart -> Checkout
                     driver.find_element(By.ID, "add-to-cart-button").click()
                     time.sleep(2)
                     driver.find_element(By.NAME, "proceedToRetailCheckout").click()
@@ -255,7 +273,7 @@ class PersonalShopper:
                 # Flipkart Buy
                 driver.find_element(By.XPATH, "//button[normalize-space()='Buy Now']").click()
         except:
-            status += " (Opened item, but Login required to auto-click Buy)."
+            status += " (Item opened. 'Buy Now' button hidden/Login required)."
 
         return status
 
