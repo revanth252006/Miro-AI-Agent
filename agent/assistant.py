@@ -272,14 +272,17 @@ class VoiceAssistant:
         try:
             print("🚀 Loading Gemini 2.5 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-2.5-flash",  # <--- YOUR REQUESTED MODEL
+                "gemini-2.5-flash",  # Will try this first
                 system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Reply Instantly."
             )
             chat_fast = model_fast.start_chat(history=[])
             print("✅ Gemini 2.5 Flash Online")
         except Exception as e:
             print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 1.5 Flash.")
-            model_fast = genai.GenerativeModel("gemini-1.5-flash", system_instruction=PERSONALITIES[self.current_persona])
+            model_fast = genai.GenerativeModel(
+                "gemini-1.5-flash", 
+                system_instruction=PERSONALITIES[self.current_persona]
+            )
             chat_fast = model_fast.start_chat(history=[])
 
         # 2. SMART BRAIN (Chat) -> Trying Gemini 2.5 Pro
@@ -287,17 +290,22 @@ class VoiceAssistant:
         try:
             print("🧠 Loading Gemini 2.5 Pro...")
             model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro",  # <--- YOUR REQUESTED MODEL
+                "gemini-2.5-pro",  # Will try this first
                 system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Deep Reasoning & Coding."
             )
             chat_smart = model_smart.start_chat(history=[])
             print("✅ Gemini 2.5 Pro Online")
         except Exception as e:
             print(f"⚠️ Gemini 2.5 Pro Unavailable ({e}). Fallback to 1.5 Pro.")
-            model_smart = genai.GenerativeModel("gemini-1.5-pro", system_instruction=PERSONALITIES[self.current_persona])
+            model_smart = genai.GenerativeModel(
+                "gemini-1.5-pro", 
+                system_instruction=PERSONALITIES[self.current_persona]
+            )
             chat_smart = model_smart.start_chat(history=[])
 
+        # Reset global config to default key
         genai.configure(api_key=key_fast)
+        
         return chat_fast, chat_smart
 
 
