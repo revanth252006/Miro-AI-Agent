@@ -4,150 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "order iphone 16 promax from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "check in the other platforms"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Could you please clarify what you'd like me to check and which platforms you're referring to?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "flipcart"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I understand you're referring to Flipkart. As an AI, I don't have direct access to browse live external websites like Flipkart.\n\nCould you please tell me what information you're looking for or what you'd like me to check on Flipkart? I can try to help you find general information if you describe it."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder iphone 14 "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I cannot directly place an order for an iPhone 14 on Flipkart for you.\n\nYou can order it yourself by visiting the Flipkart website or using their mobile app."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "from amazon"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I cannot directly place an order for an iPhone 14 on Amazon for you.\n\nYou can order it yourself by visiting the Amazon website or using their mobile app."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder i phone 14 pro max from amazon"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Yes, you can check Amazon for iPhone 14 Pro Max availability."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "i cannot see it order it for me"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order it "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder i phone 14 pro max from amazon"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Yes, you can order an iPhone 14 Pro Max from Amazon."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order it for me"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15 pro max from flipcart "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15 from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15 pro max from flipcart"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder the 15promax"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "As an AI, I cannot place orders directly. You can order the iPhone 15 Pro Max from the official Apple website or authorized retailers."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order for me"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15promax "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "order iphone 15promax"
       ]
     },
@@ -179,6 +35,150 @@
       "role": "user",
       "parts": [
         "order iphone 15promax"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello! I'm Miro Agent, created by Revanth and his team. How can I help you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hi"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hi there! How can I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is ur  name"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "My name is Miro Agent. I was created by Revanth and his team."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "give me the pyhton code to simple calculator"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course. Hello! I am Miro Agent, created by Revanth and his team to assist you.\n\nHere is the Python code for a simple, easy-to-understand calculator that performs basic arithmetic operations. I will provide two versions:\n\n1.  A basic version that performs a single calculation.\n2.  An enhanced version that allows for continuous calculations until the user decides to exit.\n\n---\n\n### Version 1: Simple Single-Calculation Calculator\n\nThis code is perfect for beginners. It asks for two numbers and an operator, performs the calculation, prints the result, and then exits.\n\n**Code:**\n\n```python\n# simple_calculator.py\n\ndef add(x, y):\n    \"\"\"This function adds two numbers\"\"\"\n    return x + y\n\ndef subtract(x, y):\n    \"\"\"This function subtracts two numbers\"\"\"\n    return x - y\n\ndef multiply(x, y):\n    \"\"\"This function multiplies two numbers\"\"\"\n    return x * y\n\ndef divide(x, y):\n    \"\"\"This function divides two numbers\"\"\"\n    if y == 0:\n        return \"Error! Division by zero.\"\n    return x / y\n\nprint(\"Welcome to the Simple Calculator!\")\nprint(\"Select operation:\")\nprint(\"  + for Addition\")\nprint(\"  - for Subtraction\")\nprint(\"  * for Multiplication\")\nprint(\"  / for Division\")\nprint(\"-\" * 20)\n\ntry:\n    # Get input from the user\n    num1_str = input(\"Enter first number: \")\n    operator = input(\"Enter operator (+, -, *, /): \")\n    num2_str = input(\"Enter second number: \")\n\n    # Convert string inputs to floating-point numbers\n    num1 = float(num1_str)\n    num2 = float(num2_str)\n\n    result = None\n\n    # Perform the calculation based on the operator\n    if operator == '+':\n        result = add(num1, num2)\n    elif operator == '-':\n        result = subtract(num1, num2)\n    elif operator == '*':\n        result = multiply(num1, num2)\n    elif operator == '/':\n        result = divide(num1, num2)\n    else:\n        print(\"Invalid operator. Please use one of +, -, *, /\")\n\n    # Display the result if a valid operation was performed\n    if result is not None:\n        print(f\"The result is: {num1} {operator} {num2} = {result}\")\n\nexcept ValueError:\n    print(\"Invalid input. Please enter valid numbers.\")\nexcept Exception as e:\n    print(f\"An unexpected error occurred: {e}\")\n\n```\n\n#### How It Works:\n\n1.  **Functions for Operations**: We define separate functions (`add`, `subtract`, `multiply`, `divide`) for each mathematical operation. This makes the code clean and organized. The `divide` function includes a special check to prevent a `ZeroDivisionError`.\n2.  **User Input**: The `input()` function prompts the user to enter two numbers and an operator.\n3.  **Error Handling (`try...except`)**: The main logic is wrapped in a `try...except` block.\n    *   The `try` block attempts to convert the user's input into numbers (`float`) and perform the calculation.\n    *   If the user enters text that cannot be converted to a number (like \"hello\"), a `ValueError` occurs, and the `except ValueError` block is executed, printing a user-friendly error message instead of crashing the program.\n4.  **Calculation Logic**: An `if/elif/else` statement checks which operator the user entered and calls the corresponding function.\n5.  **Print Result**: The final result is printed in a clear, formatted string (f-string).\n\n---\n\n### Version 2: Enhanced Calculator with Continuous Calculations\n\nThis version is more practical. It wraps the logic in a `while` loop, allowing you to perform multiple calculations in a row without restarting the program.\n\n**Code:**\n\n```python\n# continuous_calculator.py\n\ndef add(x, y):\n    \"\"\"This function adds two numbers\"\"\"\n    return x + y\n\ndef subtract(x, y):\n    \"\"\"This function subtracts two numbers\"\"\"\n    return x - y\n\ndef multiply(x, y):\n    \"\"\"This function multiplies two numbers\"\"\"\n    return x * y\n\ndef divide(x, y):\n    \"\"\"This function divides two numbers\"\"\"\n    if y == 0:\n        return \"Error! Division by zero.\"\n    return x / y\n\nprint(\"Welcome to the Miro Calculator!\")\nprint(\"Enter 'exit' to quit at any time.\")\nprint(\"-\" * 20)\n\nwhile True:  # Main loop to keep the calculator running\n    try:\n        # Get input from the user\n        num1_str = input(\"Enter first number: \")\n        if num1_str.lower() == 'exit':\n            break\n\n        operator = input(\"Enter operator (+, -, *, /): \")\n        if operator.lower() == 'exit':\n            break\n\n        num2_str = input(\"Enter second number: \")\n        if num2_str.lower() == 'exit':\n            break\n\n        # Convert string inputs to floating-point numbers\n        num1 = float(num1_str)\n        num2 = float(num2_str)\n\n        result = None\n\n        # Perform the calculation based on the operator\n        if operator == '+':\n            result = add(num1, num2)\n        elif operator == '-':\n            result = subtract(num1, num2)\n        elif operator == '*':\n            result = multiply(num1, num2)\n        elif operator == '/':\n            result = divide(num1, num2)\n        else:\n            print(\"Invalid operator. Please use one of +, -, *, /\")\n\n        # Display the result if a valid operation was performed\n        if result is not None:\n            print(f\"Result: {num1} {operator} {num2} = {result}\")\n            print(\"-\" * 20) # Separator for the next calculation\n\n    except ValueError:\n        print(\"Invalid input. Please enter valid numbers. Try again.\")\n        print(\"-\" * 20)\n    except Exception as e:\n        print(f\"An unexpected error occurred: {e}\")\n        break # Exit on unexpected errors\n\nprint(\"Thank you for using the Miro Calculator!\")\n```\n\n#### Key Improvements in Version 2:\n\n1.  **`while True:` Loop**: This creates an infinite loop that keeps the program running.\n2.  **Exit Condition**: The user can type `exit` at any prompt to break out of the loop and end the program gracefully. The `.lower()` method ensures that `exit`, `Exit`, or `EXIT` will all work.\n3.  **User Experience**: A separator (`-` * 20) is printed after each calculation to make the interface cleaner for repeated use. Error messages guide the user to try again instead of ending the program.\n\nTo run either of these scripts, save the code in a file (e.g., `calculator.py`) and run it from your terminal using the command: `python calculator.py`."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15pro max from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15pro max from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15pro max from flipcart"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 15pro max from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord ce4 "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord ce4 "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord ce4 from amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order oneplus nord ce5"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "oder iphone 17 promax "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The iPhone 17 Pro Max is a future, unreleased device, so its exact specifications and features are still speculative.\n\nCould you please clarify what you mean by \"oder\"? \"Oder\" is the German word for \"or,\" so it sounds like you might be asking to compare the iPhone 17 Pro Max with something else, or you might have a different question in mind.\n\nIf you let me know what you'd like to compare it to, or what specific information you're looking for, I'd be happy to help!"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "from amazon"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The iPhone 17 Pro Max is a future product that Apple has not yet announced or released. Therefore, it is not currently available for purchase on Amazon or any other retailer.\n\nOnce new iPhone models are released, they are typically available through various channels, including:\n*   Apple's official website and Apple Stores.\n*   Major carriers (like AT&T, Verizon, T-Mobile, etc.).\n*   Authorized third-party retailers, which often include Amazon. Amazon usually carries new iPhones either directly from Apple's official store on Amazon or through authorized resellers, once the devices are launched.\n\nHowever, since the iPhone 17 Pro Max is still a speculative, unreleased device, any information about its availability or pricing on Amazon (or anywhere else) is purely theoretical at this stage."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order lenovo loq laptop in amazon"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "open flipcart"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "open instagram "
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "order iphone 16 pro max "
       ]
     }
   ],

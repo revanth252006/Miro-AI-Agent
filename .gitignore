@@ -3,3 +3,5 @@ __pycache__/
 .env
 .DS_Store
 sign_detection/Model/keras_model.h5
+bot_profile/
+*.log

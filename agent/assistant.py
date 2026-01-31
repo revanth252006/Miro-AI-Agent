@@ -428,12 +428,12 @@ class VoiceAssistant:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
             # --- NEW: SHOPPING AGENT ---
-# --- SHOPPING COMMAND (MULTI-PLATFORM) ---
+# --- SHOPPING COMMAND (AUTO-COMPARE) ---
         triggers = ["order", "buy", "purchase", "shop", "get me a"]
         if any(t in clean_text for t in triggers):
             
-            # 1. Detect Platform (Default to Amazon)
-            target_platform = "Amazon"
+            # 1. Detect Platform (Default to 'auto' for price comparison)
+            target_platform = "auto" 
             if "flipkart" in clean_text: target_platform = "Flipkart"
             if "amazon" in clean_text: target_platform = "Amazon"
 
@@ -449,7 +449,6 @@ class VoiceAssistant:
 
             try:
                 from tools import shop_online
-                # Now passing BOTH item and platform
                 return await shop_online(target_item, target_platform)
             except Exception as e:
                 return f"Shopping Error: {str(e)}"
