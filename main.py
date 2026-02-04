@@ -10,8 +10,8 @@ import os
 import speech_recognition as sr
 import asyncio
 import zipfile
-import webbrowser  # <--- ADDED: To open your Interface
-import pyttsx3     # <--- ADDED: To make Miro speak
+import webbrowser  
+import pyttsx3     
 from fastapi.staticfiles import StaticFiles
 
 # --- DEPENDENCIES CHECK ---
@@ -25,7 +25,6 @@ except ImportError:
     print("👉 Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition pyttsx3")
     sys.exit()
 
-# Add current path
 sys.path.append(".")
 
 # --- IMPORT AGENT ---
@@ -41,20 +40,19 @@ except ImportError as e:
 class SystemState:
     def __init__(self):
         self.camera_active = False
-        self.mode = "IDLE"  # IDLE, MOUSE, SIGN
+        self.mode = "IDLE" 
         self.listening_for_wake_word = True
         self.stop_event = threading.Event()
 
 STATE = SystemState()
 
 # ==========================================
-# 0. TEXT TO SPEECH ENGINE (NEW)
+# 0. TEXT TO SPEECH ENGINE
 # ==========================================
 def speak(text):
     """Makes the AI speak out loud"""
     try:
         engine = pyttsx3.init()
-        # Optional: Adjust Rate (Speed) and Volume
         engine.setProperty('rate', 170) 
         engine.setProperty('volume', 1.0)
         engine.say(text)
@@ -63,7 +61,7 @@ def speak(text):
         print(f"❌ TTS Error: {e}")
 
 # ==========================================
-# 1. OPTIMIZED VIRTUAL MOUSE LOGIC
+# 1. VIRTUAL MOUSE LOGIC
 # ==========================================
 class VirtualMouse:
     def __init__(self):
@@ -83,7 +81,6 @@ class VirtualMouse:
         h, w, _ = img.shape
         cv2.rectangle(img, (self.frameR, self.frameR), (w - self.frameR, h - self.frameR), (255, 0, 255), 2)
 
-        # Move
         if fingers[1] == 1 and fingers[2] == 0:
             x1, y1 = lmList[8][0], lmList[8][1]
             x3 = np.interp(x1, (self.frameR, w - self.frameR), (0, self.wScr))
@@ -95,7 +92,6 @@ class VirtualMouse:
             cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
             self.plocX, self.plocY = self.clocX, self.clocY
 
-        # Click
         if fingers[1] == 1 and fingers[2] == 1:
             length, info, img = detector.findDistance(lmList[8][0:2], lmList[12][0:2], img)
             if length < 40:
@@ -106,7 +102,7 @@ class VirtualMouse:
         return img
 
 # ==========================================
-# 2. EMBEDDED SIGN DETECTOR LOGIC
+# 2. SIGN DETECTOR LOGIC
 # ==========================================
 class SignDetector:
     def __init__(self):
@@ -240,22 +236,21 @@ def voice_loop_thread():
                 print(f"⚡ WAKE WORD DETECTED: {active_word}!")
                 STATE.listening_for_wake_word = False
                 
-                # --- 1. NAVIGATE TO INTERFACE ---
-                # Opens the browser to your Agent's UI
-                webbrowser.open("http://localhost:8000")
+                # ========================================================
+                # 🔽 CHANGED: Point this to your specific Voice HTML file!
+                # If your file is named "agent.html", change this to "/agent.html"
+                # ========================================================
+                webbrowser.open("http://localhost:8000/voice.html") 
                 
-                # --- 2. SPEAK ACKNOWLEDGEMENT ---
                 speak("I'm listening.")
                 
-                # --- 3. LISTEN FOR COMMAND ---
                 cmd = listen_for_command()
                 if cmd:
                     print(f"🤖 Processing: {cmd}")
                     resp = asyncio.run(ai_logic.process_message(cmd))
                     
-                    # --- 4. SPEAK THE ANSWER (DO ALL WORDS) ---
                     print(f"🤖 AI: {resp}")
-                    speak(resp)
+                    speak(resp) # Speak the answer
                 
                 print("💤 Returning to sleep...")
                 STATE.listening_for_wake_word = True
