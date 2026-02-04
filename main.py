@@ -48,14 +48,25 @@ class SystemState:
 STATE = SystemState()
 
 # ==========================================
-# 0. TEXT TO SPEECH ENGINE
+# 0. IMPROVED TEXT TO SPEECH ENGINE
 # ==========================================
 def speak(text):
     """Makes the AI speak out loud"""
     try:
         engine = pyttsx3.init()
-        engine.setProperty('rate', 170) 
+        
+        # --- VOICE SELECTION ---
+        voices = engine.getProperty('voices')
+        # Windows usually has: [0] David (Male), [1] Zira (Female)
+        # We try to set it to [1] for a better assistant voice.
+        try:
+            engine.setProperty('voice', voices[1].id) 
+        except:
+            engine.setProperty('voice', voices[0].id)
+
+        engine.setProperty('rate', 160) # Slightly slower for clarity
         engine.setProperty('volume', 1.0)
+        
         engine.say(text)
         engine.runAndWait()
         del engine
@@ -228,6 +239,17 @@ def voice_loop_thread():
     wake = WakeWordListener()
     if not wake.start(): return
 
+    # --- PRINT AVAILABLE VOICES ON STARTUP ---
+    try:
+        engine = pyttsx3.init()
+        voices = engine.getProperty('voices')
+        print("--- 🗣️ AVAILABLE VOICES ---")
+        for i, v in enumerate(voices):
+            print(f"[{i}] {v.name}")
+        print("---------------------------")
+        del engine
+    except: pass
+    
     ai_logic = VoiceAssistant()
     active_word = "Hey Miro" if wake.miro_path else "Jarvis"
     print(f"👂 Voice System Online. Say '{active_word}' to wake me up.")
@@ -240,8 +262,7 @@ def voice_loop_thread():
                 
                 # --- AUTO-NAVIGATE TO VERCEL ---
                 if not STATE.browser_opened:
-                     # 🔽 UPDATED: Now points to your Vercel App
-                     webbrowser.open("https://miro-ai-agent.vercel.app/") 
+                     webbrowser.open("https://miro-ai-agent.vercel.app/voice") 
                      STATE.browser_opened = True
 
                 speak("I'm listening.")
@@ -304,8 +325,6 @@ def main():
     if AGENT_AVAILABLE and app:
         print("🔗 Linking Agent...")
         set_system_state_callback(handle_command)
-        # Hosting local is optional now since you use Vercel, 
-        # but we keep it running for the backend API
         uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
     else: print("❌ Critical: Agent not loaded.")
 
