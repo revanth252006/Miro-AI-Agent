@@ -2,48 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "i didnot recive the mail"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I'm sorry to hear that you haven't received the email. Sometimes, there can be a slight delay in delivery, or it might have landed in a different folder.\n\nCould you please check your spam or junk folder?\n\nAlso, could you confirm the email address one more time for me, just to make sure there wasn't any typo? It was `2411cs020023@mallareddyuniversity.ac.in`.\n\nIf you still can't find it, I can try resending it for you."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "yes same mail"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I understand. Since the email address is correct and you haven't received it, I will resend the email for you right now.\n\n*   **To:** 2411cs020023@mallareddyuniversity.ac.in\n*   **Subject:** hello\n*   **Message:** Revanth\n\nPlease let me know if you receive it this time."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "send to adepumanojkumar96@gmail.com same message"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I will send the email with the same subject and message to `adepumanojkumar96@gmail.com`.\n\n*   **To:** adepumanojkumar96@gmail.com\n*   **Subject:** hello\n*   **Message:** Revanth\n\nYour email has been sent! Please let me know if you receive it."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "what are the questions i have asked you in our previous conversation "
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "As an AI, I do not have memory of past conversations. Each interaction with me is stateless, meaning I don't retain information from previous discussions.\n\nTherefore, I cannot tell you what questions you have asked me in our previous conversation. If you'd like to refer to something specific, please provide the context again."
@@ -179,6 +137,48 @@
       "role": "model",
       "parts": [
         "The word \"complement\" has several meanings, depending on the context:\n\n1.  **Completing or enhancing:** Something that completes or makes perfect; an addition that improves or enhances something else.\n    *   *Example:* \"The scarf was the perfect **complement** to her outfit.\"\n\n2.  **Grammar:** A word or phrase that completes the meaning of an expression (like a subject **complement** or object **complement**).\n    *   *Example:* In \"She is a doctor,\" \"a doctor\" is the subject **complement**.\n\n3.  **Mathematics:**\n    *   **Angles:** One of two angles whose sum is 90 degrees (e.g., the **complement** of a 30-degree angle is a 60-degree angle).\n    *   **Set Theory:** The set of all elements in the universal set that are not in a given set.\n    *   **Binary Numbers:** Used in computing (e.g., one's **complement** or two's **complement**).\n\n4.  **Biology/Medicine:** A system of proteins in the blood plasma that helps antibodies kill pathogens.\n\nIt's also often confused with **\"compliment\"** (with an \"i\"), which means an expression of praise or admiration.\n\nTo give you the most accurate information, could you please tell me what kind of \"complement\" you are referring to?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Open Google."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Java for the same HTML."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course! Hello, I'm Miro, ready to help. I was created by Revanth and his team: Manoj Kumar, Amit Kumar, and Jaideep.\n\nYou've asked for \"Java for the same HTML,\" but the HTML itself wasn't provided. Not to worry! I can show you the most common ways Java interacts with HTML using a standard example.\n\nLet's assume you're working with this simple login form HTML:\n\n```html\n<!-- login.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Login Page</title>\n    <style>\n        body { font-family: sans-serif; margin: 2em; }\n        form { border: 1px solid #ccc; padding: 1em; width: 300px; }\n        input { margin-bottom: 0.5em; width: 95%; padding: 0.5em; }\n        input[type=\"submit\"] { background-color: #007BFF; color: white; cursor: pointer; }\n    </style>\n</head>\n<body>\n    <h2>Login Form</h2>\n    <form action=\"/login\" method=\"post\">\n        <label for=\"username\">Username:</label><br>\n        <input type=\"text\" id=\"username\" name=\"username\" required><br><br>\n\n        <label for=\"password\">Password:</label><br>\n        <input type=\"password\" id=\"password\" name=\"password\" required><br><br>\n\n        <input type=\"submit\" value=\"Login\">\n    </form>\n</body>\n</html>\n```\n\nHere are the three most common things you might want to do with this HTML using Java:\n\n1.  **Generate this HTML** from a Java Web Server (using a Servlet).\n2.  **Serve this HTML file** as a static resource from a simple Java Server.\n3.  **Parse or \"Scrape\" this HTML** to extract information from it.\n\n---\n\n### Scenario 1: Generating HTML with a Java Servlet\n\nThis is the classic approach for dynamic web applications. The Java code runs on a server (like Apache Tomcat) and writes the HTML directly to the user's browser.\n\n**You will need:**\n*   A Java Development Kit (JDK).\n*   A servlet container like Apache Tomcat.\n*   Your project configured with the `jakarta.servlet-api` dependency.\n\n**Maven Dependency:**\n```xml\n<dependency>\n    <groupId>jakarta.platform</groupId>\n    <artifactId>jakarta.jakartaee-web-api</artifactId>\n    <version>10.0.0</version>\n    <scope>provided</scope>\n</dependency>\n```\n\n**`LoginPageServlet.java`**\n```java\nimport jakarta.servlet.ServletException;\nimport jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\nimport jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\nimport java.io.IOException;\nimport java.io.PrintWriter;\n\n// This annotation maps the URL \"/showLoginPage\" to this servlet\n@WebServlet(\"/showLoginPage\")\npublic class LoginPageServlet extends HttpServlet {\n\n    @Override\n    protected void doGet(HttpServletRequest request, HttpServletResponse response) \n            throws ServletException, IOException {\n        \n        // 1. Set the content type of the response to HTML\n        response.setContentType(\"text/html\");\n        response.setCharacterEncoding(\"UTF-8\");\n\n        // 2. Get a PrintWriter to send text data to the client\n        PrintWriter out = response.getWriter();\n\n        // 3. Write the HTML content, line by line\n        out.println(\"<!DOCTYPE html>\");\n        out.println(\"<html lang=\\\"en\\\">\");\n        out.println(\"<head>\");\n        out.println(\"    <meta charset=\\\"UTF-8\\\">\");\n        out.println(\"    <title>Login Page</title>\");\n        out.println(\"    <style>\");\n        out.println(\"        body { font-family: sans-serif; margin: 2em; }\");\n        out.println(\"        form { border: 1px solid #ccc; padding: 1em; width: 300px; }\");\n        out.println(\"        input { margin-bottom: 0.5em; width: 95%; padding: 0.5em; }\");\n        out.println(\"        input[type=\\\"submit\\\"] { background-color: #007BFF; color: white; cursor: pointer; }\");\n        out.println(\"    </style>\");\n        out.println(\"</head>\");\n        out.println(\"<body>\");\n        out.println(\"    <h2>Login Form (Generated by Java)</h2>\");\n        out.println(\"    <form action=\\\"/login\\\" method=\\\"post\\\">\");\n        out.println(\"        <label for=\\\"username\\\">Username:</label><br>\");\n        out.println(\"        <input type=\\\"text\\\" id=\\\"username\\\" name=\\\"username\\\" required><br><br>\");\n        out.println(\"        <label for=\\\"password\\\">Password:</label><br>\");\n        out.println(\"        <input type=\\\"password\\\" id=\\\"password\\\" name=\\\"password\\\" required><br><br>\");\n        out.println(\"        <input type=\\\"submit\\\" value=\\\"Login\\\">\");\n        out.println(\"    </form>\");\n        out.println(\"</body>\");\n        out.println(\"</html>\");\n    }\n}\n```\n\n---\n\n### Scenario 2: Serving `login.html` as a Static File\n\nIf you already have the HTML file, you can use Java to create a simple web server that just serves it. This example uses a server built into the JDK, requiring no external libraries.\n\n**Steps:**\n1.  Save the HTML above as a file named `login.html`.\n2.  Save the Java code below as `SimpleFileServer.java` in the **same directory**.\n3.  Compile and run `SimpleFileServer.java`.\n4.  Open your web browser and go to `http://localhost:8080`.\n\n**`SimpleFileServer.java`**\n```java\nimport com.sun.net.httpserver.HttpServer;\nimport com.sun.net.httpserver.HttpHandler;\nimport com.sun.net.httpserver.HttpExchange;\nimport java.io.IOException;\nimport java.io.OutputStream;\nimport java.net.InetSocketAddress;\nimport java.nio.file.Files;\nimport java.nio.file.Paths;\n\npublic class SimpleFileServer {\n\n    public static void main(String[] args) throws IOException {\n        // Create a server on port 8080\n        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);\n        \n        // Create a context for the root URL \"/\" and set its handler\n        server.createContext(\"/\", new FileHandler());\n        \n        // Use the default executor\n        server.setExecutor(null); \n        \n        // Start the server\n        server.start();\n        System.out.println(\"Server started on port 8080. Access at http://localhost:8080\");\n    }\n\n    static class FileHandler implements HttpHandler {\n        @Override\n        public void handle(HttpExchange exchange) throws IOException {\n            try {\n                // Read the login.html file into a byte array\n                byte[] fileBytes = Files.readAllBytes(Paths.get(\"login.html\"));\n\n                // Set response headers: 200 OK and the content length\n                exchange.sendResponseHeaders(200, fileBytes.length);\n\n                // Get the response body stream and write the file content\n                OutputStream os = exchange.getResponseBody();\n                os.write(fileBytes);\n                os.close();\n\n            } catch (IOException e) {\n                String response = \"Error: File not found.\";\n                exchange.sendResponseHeaders(404, response.length());\n                OutputStream os = exchange.getResponseBody();\n                os.write(response.getBytes());\n                os.close();\n            }\n        }\n    }\n}\n```\n\n---\n\n### Scenario 3: Parsing HTML with Jsoup\n\nThis is for when you want to read an HTML document and extract data from it. The **Jsoup** library is the standard for this in Java.\n\n**You will need:**\n*   The Jsoup library added to your project.\n\n**Maven Dependency:**\n```xml\n<dependency>\n    <groupId>org.jsoup</groupId>\n    <artifactId>jsoup</artifactId>\n    <version>1.17.2</version>\n</dependency>\n```\n\n**`HtmlParser.java`**\n```java\nimport org.jsoup.Jsoup;\nimport org.jsoup.nodes.Document;\nimport org.jsoup.nodes.Element;\nimport org.jsoup.select.Elements;\n\npublic class HtmlParser {\n\n    public static void main(String[] args) {\n        // The HTML content we want to parse\n        String htmlContent = \"<!DOCTYPE html>\"\n            + \"<html lang=\\\"en\\\">\"\n            + \"<head>\"\n            + \"    <meta charset=\\\"UTF-8\\\">\"\n            + \"    <title>Login Page</title>\"\n            + \"</head>\"\n            + \"<body>\"\n            + \"    <h2>Login Form</h2>\"\n            + \"    <form action=\\\"/login\\\" method=\\\"post\\\">\"\n            + \"        <label for=\\\"username\\\">Username:</label><br>\"\n            + \"        <input type=\\\"text\\\" id=\\\"username\\\" name=\\\"username\\\" required><br><br>\"\n            + \"        <label for=\\\"password\\\">Password:</label><br>\"\n            + \"        <input type=\\\"password\\\" id=\\\"password\\\" name=\\\"password\\\" required><br><br>\"\n            + \"        <input type=\\\"submit\\\" value=\\\"Login\\\">\"\n            + \"    </form>\"\n            + \"</body>\"\n            + \"</html>\";\n\n        // Parse the HTML string into a Jsoup Document object\n        Document doc = Jsoup.parse(htmlContent);\n\n        // --- EXAMPLES OF EXTRACTING DATA ---\n\n        // 1. Get the page title\n        String title = doc.title();\n        System.out.println(\"Page Title: \" + title);\n\n        // 2. Get the main heading (h2)\n        Element heading = doc.select(\"h2\").first();\n        System.out.println(\"Heading: \" + heading.text());\n\n        // 3. Find the form and get its 'action' attribute\n        Element form = doc.select(\"form\").first();\n        String formAction = form.attr(\"action\");\n        System.out.println(\"Form Action URL: \" + formAction);\n        \n        // 4. Find the username input field by its ID\n        Element usernameInput = doc.select(\"#username\").first();\n        String usernameNameAttr = usernameInput.attr(\"name\");\n        System.out.println(\"Username input 'name' attribute: \" + usernameNameAttr);\n        \n        // 5. Find all labels and print their text\n        Elements labels = doc.select(\"label\");\n        System.out.println(\"\\nFound Labels:\");\n        for (Element label : labels) {\n            System.out.println(\"- \" + label.text());\n        }\n    }\n}\n```\n\nPlease provide the specific HTML you are working with or clarify your goal, and I can give you a more precise and tailored solution."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "I don't like this."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm sorry to hear that. To help me understand and assist you better, could you please tell me what you don't like?\n\nKnowing more details will allow me to provide the best possible support or solution."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Hold on And."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Okay, I'm holding on. Please let me know when you're ready or what you'd like to do next."
       ]
     }
   ],
