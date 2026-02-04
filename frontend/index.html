@@ -78,27 +78,28 @@
             const [inputValue, setInputValue] = useState("");
             const [isGenerating, setIsGenerating] = useState(false);
             const [isVoiceMode, setVoiceMode] = useState(false);
-            // --- 🔽 PASTE THIS RIGHT AFTER YOUR useState LINES 🔽 ---
-React.useEffect(() => {
+  // --- 🔽 PASTE THIS BRIDGE CODE HERE 🔽 ---
+  React.useEffect(() => {
+    // 1. Connect to local Python backend
     const ws = new WebSocket("ws://localhost:8000/ws");
 
-    ws.onopen = () => console.log("🟢 Connected to Brain");
-    
+    ws.onopen = () => console.log("🟢 Connected to Miro Brain");
+
     ws.onmessage = (event) => {
-        if (event.data === "WAKE_UP") {
-            console.log("⚡ Wake Word Detected!");
-            
-            // This switches your screen to the "Listening" mode automatically!
-            setVoiceMode(true); 
-            
-            // Optional: If you have a specific function to start recording, call it here too
-            // startRecording();
-        }
+      // 2. Listen for the "WAKE_UP" signal
+      if (event.data === "WAKE_UP") {
+        console.log("⚡ Wake Word Received!");
+
+        // 3. TRIGGER THE UI
+        // This variable 'setVoiceMode' is what switches your screen 
+        // to the "Listening..." bubble animation.
+        setVoiceMode(true); 
+      }
     };
 
     return () => ws.close();
-}, []);
-// --- 🔼 END PASTE 🔼 ---
+  }, []);
+  // --- 🔼 END OF BRIDGE CODE 🔼 ---
             const [visionActive, setVisionActive] = useState(false);
             const [wsStatus, setWsStatus] = useState("Connecting...");
             const [liveTranscript, setLiveTranscript] = useState("");

@@ -7,11 +7,11 @@ import numpy as np
 import pyautogui
 import uvicorn
 import os
-import speech_recognition as sr
-import asyncio
 import zipfile
 import webbrowser  
-import pyttsx3     
+import asyncio
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 # --- DEPENDENCIES CHECK ---
@@ -27,16 +27,44 @@ except ImportError:
 
 sys.path.append(".")
 
-# --- IMPORT AGENT ---
-try:
-    from agent.assistant import VoiceAssistant, set_system_state_callback, app
-    AGENT_AVAILABLE = True
-except ImportError as e:
-    print(f"❌ Agent Import Error: {e}")
-    AGENT_AVAILABLE = False
-    app = None
+# ==========================================
+# 🆕 NEW: WEBSOCKET SERVER (THE BRIDGE)
+# ==========================================
+app = FastAPI()
 
-# --- GLOBAL STATE MANAGER ---
+# Allow your Vercel app to connect to this Localhost server
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Store connected website clients
+connected_clients = []
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients.append(websocket)
+    print("🟢 Website Connected to Brain!")
+    try:
+        while True:
+            await websocket.receive_text() # Keep connection alive
+    except:
+        connected_clients.remove(websocket)
+        print("🔴 Website Disconnected")
+
+# Helper to send signal to website
+async def broadcast_wake_signal():
+    for client in connected_clients:
+        try: await client.send_text("WAKE_UP")
+        except: pass
+
+# ==========================================
+# 🔄 EXISTING: GLOBAL STATE MANAGER
+# ==========================================
 class SystemState:
     def __init__(self):
         self.camera_active = False
@@ -48,33 +76,7 @@ class SystemState:
 STATE = SystemState()
 
 # ==========================================
-# 0. IMPROVED TEXT TO SPEECH ENGINE
-# ==========================================
-def speak(text):
-    """Makes the AI speak out loud"""
-    try:
-        engine = pyttsx3.init()
-        
-        # --- VOICE SELECTION ---
-        voices = engine.getProperty('voices')
-        # Windows usually has: [0] David (Male), [1] Zira (Female)
-        # We try to set it to [1] for a better assistant voice.
-        try:
-            engine.setProperty('voice', voices[1].id) 
-        except:
-            engine.setProperty('voice', voices[0].id)
-
-        engine.setProperty('rate', 160) # Slightly slower for clarity
-        engine.setProperty('volume', 1.0)
-        
-        engine.say(text)
-        engine.runAndWait()
-        del engine
-    except Exception as e:
-        print(f"❌ TTS Error: {e}")
-
-# ==========================================
-# 1. VIRTUAL MOUSE LOGIC
+# 🖱️ EXISTING: VIRTUAL MOUSE LOGIC (UNCHANGED)
 # ==========================================
 class VirtualMouse:
     def __init__(self):
@@ -115,7 +117,7 @@ class VirtualMouse:
         return img
 
 # ==========================================
-# 2. SIGN DETECTOR LOGIC
+# ✋ EXISTING: SIGN DETECTOR LOGIC (UNCHANGED)
 # ==========================================
 class SignDetector:
     def __init__(self):
@@ -156,7 +158,7 @@ class SignDetector:
             return img, None
 
 # ==========================================
-# 3. WAKE WORD ENGINE
+# 👂 EXISTING: WAKE WORD ENGINE (UNCHANGED)
 # ==========================================
 class WakeWordListener:
     def __init__(self):
@@ -217,71 +219,37 @@ class WakeWordListener:
         if self.porcupine: self.porcupine.delete()
 
 # ==========================================
-# 4. VOICE RECOGNITION LOOP
+# 🆕 MODIFIED: SILENT TRIGGER LOOP
 # ==========================================
-def listen_for_command():
-    recognizer = sr.Recognizer()
-    microphone = sr.Microphone()
-    with microphone as source:
-        print("🎤 Listening for command...")
-        try:
-            recognizer.adjust_for_ambient_noise(source, duration=0.5)
-            audio = recognizer.listen(source, timeout=5)
-            print("Processing...")
-            command = recognizer.recognize_google(audio)
-            print(f"🗣️ You said: {command}")
-            return command
-        except sr.WaitTimeoutError: return None
-        except: return None
+# I removed the old 'listen_for_command' and 'speak' functions 
+# because you want the WEBSITE to handle that, not Python.
 
-def voice_loop_thread():
-    if not AGENT_AVAILABLE: return
+def voice_loop_thread(loop):
     wake = WakeWordListener()
     if not wake.start(): return
-
-    # --- PRINT AVAILABLE VOICES ON STARTUP ---
-    try:
-        engine = pyttsx3.init()
-        voices = engine.getProperty('voices')
-        print("--- 🗣️ AVAILABLE VOICES ---")
-        for i, v in enumerate(voices):
-            print(f"[{i}] {v.name}")
-        print("---------------------------")
-        del engine
-    except: pass
-    
-    ai_logic = VoiceAssistant()
-    active_word = "Hey Miro" if wake.miro_path else "Jarvis"
-    print(f"👂 Voice System Online. Say '{active_word}' to wake me up.")
+    print("👂 Silent Bridge Online. Waiting for 'Hey Miro'...")
 
     while not STATE.stop_event.is_set():
         if STATE.listening_for_wake_word:
             if wake.listen():
-                print(f"⚡ WAKE WORD DETECTED: {active_word}!")
-                STATE.listening_for_wake_word = False
+                print("⚡ WAKE WORD DETECTED! Signaling Website...")
                 
-                # --- AUTO-NAVIGATE TO VERCEL ---
+                # 1. SEND SIGNAL TO WEBSITE (This makes your site wake up!)
+                asyncio.run_coroutine_threadsafe(broadcast_wake_signal(), loop)
+
+                # 2. OPEN BROWSER (If not already open)
                 if not STATE.browser_opened:
                      webbrowser.open("https://miro-ai-agent.vercel.app/") 
                      STATE.browser_opened = True
-
-                speak("I'm listening.")
                 
-                cmd = listen_for_command()
-                if cmd:
-                    print(f"🤖 Processing: {cmd}")
-                    resp = asyncio.run(ai_logic.process_message(cmd))
-                    print(f"🤖 AI: {resp}")
-                    speak(resp)
-                
-                print("💤 Returning to sleep...")
-                STATE.listening_for_wake_word = True
+                # 3. SLEEP (Do not speak. Just wait.)
+                time.sleep(1) 
         else:
             time.sleep(0.1)
     wake.close()
 
 # ==========================================
-# 5. MAIN LOGIC
+# ⚙️ EXISTING: MAIN LOGIC (UNCHANGED)
 # ==========================================
 def handle_command(command: str):
     command = command.lower()
@@ -316,18 +284,26 @@ def camera_loop():
             if cap: cap.release(); cap = None; cv2.destroyAllWindows()
             time.sleep(0.5)
 
-def main():
-    print("--- 🚀 MIRO SYSTEM INITIALIZING ---")
-    vt = threading.Thread(target=voice_loop_thread, daemon=True)
+# ==========================================
+# 🚀 MAIN ENTRY POINT
+# ==========================================
+if __name__ == "__main__":
+    print("--- 🚀 MIRO SILENT BRIDGE INITIALIZING ---")
+    
+    # Create Async Loop for the Server
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # Start Voice Thread (Passing the loop so it can signal the server)
+    vt = threading.Thread(target=voice_loop_thread, args=(loop,), daemon=True)
     vt.start()
+
+    # Start Camera Thread
     ct = threading.Thread(target=camera_loop, daemon=True)
     ct.start()
-    if AGENT_AVAILABLE and app:
-        print("🔗 Linking Agent...")
-        set_system_state_callback(handle_command)
-        uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
-    else: print("❌ Critical: Agent not loaded.")
-
-if __name__ == "__main__":
-    try: main()
-    except KeyboardInterrupt: STATE.stop_event.set(); sys.exit(0)
+    
+    # Start the Server (This listens for the Website connection)
+    # 0.0.0.0 allows connections from local network, localhost is fine too.
+    config = uvicorn.Config(app=app, host="0.0.0.0", port=8000, loop="asyncio")
+    server = uvicorn.Server(config)
+    loop.run_until_complete(server.serve())

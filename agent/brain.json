@@ -2,183 +2,183 @@
   "user_name": null,
   "history": [
     {
+      "role": "model",
+      "parts": [
+        "\"The latest\" can mean a lot of things! To give you the most relevant information, could you tell me what kind of \"latest\" you're interested in? For example:\n\n*   **Latest Global News?** (e.g., political developments, major economic shifts, significant social events)\n*   **Latest in Technology/AI?** (e.g., new breakthroughs, product launches)\n*   **Latest in Science?** (e.g., medical discoveries, space exploration)\n*   **Something else entirely?**\n\nOnce you specify, I can give you a more focused and useful update!"
+      ]
+    },
+    {
       "role": "user",
       "parts": [
-        "Hey, Miro."
+        "Tell me the latest Telugu."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Hello there! How can I help you today?"
+        "Okay, when you say \"the latest Telugu,\" that could refer to a few different things! Telugu is a language spoken predominantly in the Indian states of Andhra Pradesh and Telangana, and it's associated with a rich culture.\n\nCould you please specify what kind of \"latest Telugu\" information you're looking for? For example:\n\n*   **Latest Telugu News?** (e.g., political developments, current events in Andhra Pradesh/Telangana)\n*   **Latest Telugu Movies?** (e.g., new releases, industry news from Tollywood)\n*   **Latest Telugu Music?** (e.g., new songs, albums)\n*   **Something else specific to Telugu culture or language?**\n\nOnce I know what you're interested in, I can provide you with the most relevant updates!"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "Hello."
+        "Speak in Telugu."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Hello! It's good to hear from you. How can I assist you today?"
+        "\u0c16\u0c1a\u0c4d\u0c1a\u0c3f\u0c24\u0c02\u0c17\u0c3e! \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41.\n\n\u0c2e\u0c40\u0c30\u0c41 \u0c0f \u0c35\u0c3f\u0c37\u0c2f\u0c02 \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f \u0c24\u0c46\u0c32\u0c41\u0c38\u0c41\u0c15\u0c4b\u0c35\u0c3e\u0c32\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c41? \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c26\u0c48\u0c28\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3e? \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "4045 odds."
+        "i'm just"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "To help me understand what you're looking for, could you please tell me what \"4045\" refers to?\n\nAre you interested in:\n*   Sports betting odds for a specific event or team coded as \"4045\"?\n*   Lottery odds related to the number \"4045\"?\n*   Statistical probability for a specific scenario?\n*   Something else entirely?\n\nOnce I have a bit more context, I'll be happy to provide the information you need."
+        "\u0c2e\u0c40\u0c30\u0c41 \u0c0f\u0c2e\u0c48\u0c28\u0c3e \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c3e\u0c32\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c3e? \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c2a\u0c42\u0c30\u0c4d\u0c24\u0c3f \u0c1a\u0c47\u0c2f\u0c02\u0c21\u0c3f.\n\n\"i'm just...\" \u0c24\u0c30\u0c4d\u0c35\u0c3e\u0c24 \u0c2e\u0c40\u0c30\u0c41 \u0c0f\u0c2e\u0c3f \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c3e\u0c32\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c4b \u0c24\u0c46\u0c32\u0c3f\u0c2f\u0c1c\u0c47\u0c2f\u0c17\u0c32\u0c30\u0c3e?"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "Percentage of."
+        "i'm just wrong"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Understood. You're looking for the **percentage odds** associated with \"4045.\"\n\nTo give you the correct percentage, I still need to know what \"4045\" represents. For example:\n\n*   Is it a score?\n*   A specific event or selection in a betting market?\n*   A number in a lottery?\n*   Part of a statistical model?\n\nOnce I know the context of \"4045,\" I can calculate and provide the percentage odds for you."
+        "\u0c2e\u0c40\u0c30\u0c41 \u0c05\u0c32\u0c3e \u0c05\u0c28\u0c41\u0c15\u0c4b\u0c35\u0c26\u0c4d\u0c26\u0c41. \u0c15\u0c4a\u0c28\u0c4d\u0c28\u0c3f\u0c38\u0c3e\u0c30\u0c4d\u0c32\u0c41 \u0c2e\u0c28\u0c02 \u0c24\u0c2a\u0c4d\u0c2a\u0c41 \u0c1a\u0c47\u0c36\u0c3e\u0c2e\u0c28\u0c3f \u0c05\u0c28\u0c3f\u0c2a\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c02\u0c26\u0c3f, \u0c15\u0c3e\u0c28\u0c40 \u0c05\u0c26\u0c3f \u0c28\u0c47\u0c30\u0c4d\u0c1a\u0c41\u0c15\u0c41\u0c28\u0c47 \u0c2a\u0c4d\u0c30\u0c15\u0c4d\u0c30\u0c3f\u0c2f\u0c32\u0c4b \u0c12\u0c15 \u0c2d\u0c3e\u0c17\u0c02.\n\n\u0c2e\u0c40\u0c30\u0c41 \u0c26\u0c47\u0c28\u0c3f \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f \u0c24\u0c2a\u0c4d\u0c2a\u0c41 \u0c1a\u0c47\u0c36\u0c3e\u0c30\u0c28\u0c3f \u0c2d\u0c3e\u0c35\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c41? \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c2e\u0c48\u0c28\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c3e \u0c32\u0c47\u0c26\u0c3e \u0c38\u0c4d\u0c2a\u0c37\u0c4d\u0c1f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c3e? \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c35\u0c3f\u0c35\u0c30\u0c02\u0c17\u0c3e \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c02\u0c21\u0c3f."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "the complement"
+        "Aim just now."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "The word \"complement\" has several meanings, depending on the context:\n\n1.  **Completing or enhancing:** Something that completes or makes perfect; an addition that improves or enhances something else.\n    *   *Example:* \"The scarf was the perfect **complement** to her outfit.\"\n\n2.  **Grammar:** A word or phrase that completes the meaning of an expression (like a subject **complement** or object **complement**).\n    *   *Example:* In \"She is a doctor,\" \"a doctor\" is the subject **complement**.\n\n3.  **Mathematics:**\n    *   **Angles:** One of two angles whose sum is 90 degrees (e.g., the **complement** of a 30-degree angle is a 60-degree angle).\n    *   **Set Theory:** The set of all elements in the universal set that are not in a given set.\n    *   **Binary Numbers:** Used in computing (e.g., one's **complement** or two's **complement**).\n\n4.  **Biology/Medicine:** A system of proteins in the blood plasma that helps antibodies kill pathogens.\n\nIt's also often confused with **\"compliment\"** (with an \"i\"), which means an expression of praise or admiration.\n\nTo give you the most accurate information, could you please tell me what kind of \"complement\" you are referring to?"
+        "\"Aim just now.\" \u0c05\u0c02\u0c1f\u0c47 \u0c2e\u0c40\u0c30\u0c41 \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c47 \u0c0f\u0c26\u0c48\u0c28\u0c3e \u0c32\u0c15\u0c4d\u0c37\u0c4d\u0c2f\u0c3e\u0c28\u0c4d\u0c28\u0c3f \u0c28\u0c3f\u0c30\u0c4d\u0c26\u0c47\u0c36\u0c3f\u0c02\u0c1a\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c3e? \u0c32\u0c47\u0c26\u0c3e \u0c2e\u0c40\u0c30\u0c41 \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c47 \u0c0f\u0c26\u0c48\u0c28\u0c3e \u0c1a\u0c47\u0c2f\u0c3e\u0c32\u0c28\u0c3f \u0c05\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c3e?\n\n\u0c2e\u0c40\u0c30\u0c41 \u0c26\u0c47\u0c28\u0c3f \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c41\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c4b \u0c38\u0c4d\u0c2a\u0c37\u0c4d\u0c1f\u0c02\u0c17\u0c3e \u0c1a\u0c46\u0c2a\u0c4d\u0c2a\u0c17\u0c32\u0c30\u0c3e? \u0c05\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c2e\u0c30\u0c3f\u0c02\u0c24 \u0c2c\u0c3e\u0c17\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c41."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "Open Google."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Java for the same HTML."
+        "No way I'm just now."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Of course! Hello, I'm Miro, ready to help. I was created by Revanth and his team: Manoj Kumar, Amit Kumar, and Jaideep.\n\nYou've asked for \"Java for the same HTML,\" but the HTML itself wasn't provided. Not to worry! I can show you the most common ways Java interacts with HTML using a standard example.\n\nLet's assume you're working with this simple login form HTML:\n\n```html\n<!-- login.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Login Page</title>\n    <style>\n        body { font-family: sans-serif; margin: 2em; }\n        form { border: 1px solid #ccc; padding: 1em; width: 300px; }\n        input { margin-bottom: 0.5em; width: 95%; padding: 0.5em; }\n        input[type=\"submit\"] { background-color: #007BFF; color: white; cursor: pointer; }\n    </style>\n</head>\n<body>\n    <h2>Login Form</h2>\n    <form action=\"/login\" method=\"post\">\n        <label for=\"username\">Username:</label><br>\n        <input type=\"text\" id=\"username\" name=\"username\" required><br><br>\n\n        <label for=\"password\">Password:</label><br>\n        <input type=\"password\" id=\"password\" name=\"password\" required><br><br>\n\n        <input type=\"submit\" value=\"Login\">\n    </form>\n</body>\n</html>\n```\n\nHere are the three most common things you might want to do with this HTML using Java:\n\n1.  **Generate this HTML** from a Java Web Server (using a Servlet).\n2.  **Serve this HTML file** as a static resource from a simple Java Server.\n3.  **Parse or \"Scrape\" this HTML** to extract information from it.\n\n---\n\n### Scenario 1: Generating HTML with a Java Servlet\n\nThis is the classic approach for dynamic web applications. The Java code runs on a server (like Apache Tomcat) and writes the HTML directly to the user's browser.\n\n**You will need:**\n*   A Java Development Kit (JDK).\n*   A servlet container like Apache Tomcat.\n*   Your project configured with the `jakarta.servlet-api` dependency.\n\n**Maven Dependency:**\n```xml\n<dependency>\n    <groupId>jakarta.platform</groupId>\n    <artifactId>jakarta.jakartaee-web-api</artifactId>\n    <version>10.0.0</version>\n    <scope>provided</scope>\n</dependency>\n```\n\n**`LoginPageServlet.java`**\n```java\nimport jakarta.servlet.ServletException;\nimport jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\nimport jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\nimport java.io.IOException;\nimport java.io.PrintWriter;\n\n// This annotation maps the URL \"/showLoginPage\" to this servlet\n@WebServlet(\"/showLoginPage\")\npublic class LoginPageServlet extends HttpServlet {\n\n    @Override\n    protected void doGet(HttpServletRequest request, HttpServletResponse response) \n            throws ServletException, IOException {\n        \n        // 1. Set the content type of the response to HTML\n        response.setContentType(\"text/html\");\n        response.setCharacterEncoding(\"UTF-8\");\n\n        // 2. Get a PrintWriter to send text data to the client\n        PrintWriter out = response.getWriter();\n\n        // 3. Write the HTML content, line by line\n        out.println(\"<!DOCTYPE html>\");\n        out.println(\"<html lang=\\\"en\\\">\");\n        out.println(\"<head>\");\n        out.println(\"    <meta charset=\\\"UTF-8\\\">\");\n        out.println(\"    <title>Login Page</title>\");\n        out.println(\"    <style>\");\n        out.println(\"        body { font-family: sans-serif; margin: 2em; }\");\n        out.println(\"        form { border: 1px solid #ccc; padding: 1em; width: 300px; }\");\n        out.println(\"        input { margin-bottom: 0.5em; width: 95%; padding: 0.5em; }\");\n        out.println(\"        input[type=\\\"submit\\\"] { background-color: #007BFF; color: white; cursor: pointer; }\");\n        out.println(\"    </style>\");\n        out.println(\"</head>\");\n        out.println(\"<body>\");\n        out.println(\"    <h2>Login Form (Generated by Java)</h2>\");\n        out.println(\"    <form action=\\\"/login\\\" method=\\\"post\\\">\");\n        out.println(\"        <label for=\\\"username\\\">Username:</label><br>\");\n        out.println(\"        <input type=\\\"text\\\" id=\\\"username\\\" name=\\\"username\\\" required><br><br>\");\n        out.println(\"        <label for=\\\"password\\\">Password:</label><br>\");\n        out.println(\"        <input type=\\\"password\\\" id=\\\"password\\\" name=\\\"password\\\" required><br><br>\");\n        out.println(\"        <input type=\\\"submit\\\" value=\\\"Login\\\">\");\n        out.println(\"    </form>\");\n        out.println(\"</body>\");\n        out.println(\"</html>\");\n    }\n}\n```\n\n---\n\n### Scenario 2: Serving `login.html` as a Static File\n\nIf you already have the HTML file, you can use Java to create a simple web server that just serves it. This example uses a server built into the JDK, requiring no external libraries.\n\n**Steps:**\n1.  Save the HTML above as a file named `login.html`.\n2.  Save the Java code below as `SimpleFileServer.java` in the **same directory**.\n3.  Compile and run `SimpleFileServer.java`.\n4.  Open your web browser and go to `http://localhost:8080`.\n\n**`SimpleFileServer.java`**\n```java\nimport com.sun.net.httpserver.HttpServer;\nimport com.sun.net.httpserver.HttpHandler;\nimport com.sun.net.httpserver.HttpExchange;\nimport java.io.IOException;\nimport java.io.OutputStream;\nimport java.net.InetSocketAddress;\nimport java.nio.file.Files;\nimport java.nio.file.Paths;\n\npublic class SimpleFileServer {\n\n    public static void main(String[] args) throws IOException {\n        // Create a server on port 8080\n        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);\n        \n        // Create a context for the root URL \"/\" and set its handler\n        server.createContext(\"/\", new FileHandler());\n        \n        // Use the default executor\n        server.setExecutor(null); \n        \n        // Start the server\n        server.start();\n        System.out.println(\"Server started on port 8080. Access at http://localhost:8080\");\n    }\n\n    static class FileHandler implements HttpHandler {\n        @Override\n        public void handle(HttpExchange exchange) throws IOException {\n            try {\n                // Read the login.html file into a byte array\n                byte[] fileBytes = Files.readAllBytes(Paths.get(\"login.html\"));\n\n                // Set response headers: 200 OK and the content length\n                exchange.sendResponseHeaders(200, fileBytes.length);\n\n                // Get the response body stream and write the file content\n                OutputStream os = exchange.getResponseBody();\n                os.write(fileBytes);\n                os.close();\n\n            } catch (IOException e) {\n                String response = \"Error: File not found.\";\n                exchange.sendResponseHeaders(404, response.length());\n                OutputStream os = exchange.getResponseBody();\n                os.write(response.getBytes());\n                os.close();\n            }\n        }\n    }\n}\n```\n\n---\n\n### Scenario 3: Parsing HTML with Jsoup\n\nThis is for when you want to read an HTML document and extract data from it. The **Jsoup** library is the standard for this in Java.\n\n**You will need:**\n*   The Jsoup library added to your project.\n\n**Maven Dependency:**\n```xml\n<dependency>\n    <groupId>org.jsoup</groupId>\n    <artifactId>jsoup</artifactId>\n    <version>1.17.2</version>\n</dependency>\n```\n\n**`HtmlParser.java`**\n```java\nimport org.jsoup.Jsoup;\nimport org.jsoup.nodes.Document;\nimport org.jsoup.nodes.Element;\nimport org.jsoup.select.Elements;\n\npublic class HtmlParser {\n\n    public static void main(String[] args) {\n        // The HTML content we want to parse\n        String htmlContent = \"<!DOCTYPE html>\"\n            + \"<html lang=\\\"en\\\">\"\n            + \"<head>\"\n            + \"    <meta charset=\\\"UTF-8\\\">\"\n            + \"    <title>Login Page</title>\"\n            + \"</head>\"\n            + \"<body>\"\n            + \"    <h2>Login Form</h2>\"\n            + \"    <form action=\\\"/login\\\" method=\\\"post\\\">\"\n            + \"        <label for=\\\"username\\\">Username:</label><br>\"\n            + \"        <input type=\\\"text\\\" id=\\\"username\\\" name=\\\"username\\\" required><br><br>\"\n            + \"        <label for=\\\"password\\\">Password:</label><br>\"\n            + \"        <input type=\\\"password\\\" id=\\\"password\\\" name=\\\"password\\\" required><br><br>\"\n            + \"        <input type=\\\"submit\\\" value=\\\"Login\\\">\"\n            + \"    </form>\"\n            + \"</body>\"\n            + \"</html>\";\n\n        // Parse the HTML string into a Jsoup Document object\n        Document doc = Jsoup.parse(htmlContent);\n\n        // --- EXAMPLES OF EXTRACTING DATA ---\n\n        // 1. Get the page title\n        String title = doc.title();\n        System.out.println(\"Page Title: \" + title);\n\n        // 2. Get the main heading (h2)\n        Element heading = doc.select(\"h2\").first();\n        System.out.println(\"Heading: \" + heading.text());\n\n        // 3. Find the form and get its 'action' attribute\n        Element form = doc.select(\"form\").first();\n        String formAction = form.attr(\"action\");\n        System.out.println(\"Form Action URL: \" + formAction);\n        \n        // 4. Find the username input field by its ID\n        Element usernameInput = doc.select(\"#username\").first();\n        String usernameNameAttr = usernameInput.attr(\"name\");\n        System.out.println(\"Username input 'name' attribute: \" + usernameNameAttr);\n        \n        // 5. Find all labels and print their text\n        Elements labels = doc.select(\"label\");\n        System.out.println(\"\\nFound Labels:\");\n        for (Element label : labels) {\n            System.out.println(\"- \" + label.text());\n        }\n    }\n}\n```\n\nPlease provide the specific HTML you are working with or clarify your goal, and I can give you a more precise and tailored solution."
+        "Okay, I understand you're saying \"No way I'm just now.\"\n\nIt sounds like you're trying to communicate something specific about your current situation or feelings. Could you please tell me more about what you mean by that? I'm here to help, so please feel free to elaborate."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "I don't like this."
+        "Can you speak in Telugu?"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "I'm sorry to hear that. To help me understand and assist you better, could you please tell me what you don't like?\n\nKnowing more details will allow me to provide the best possible support or solution."
+        "\u0c16\u0c1a\u0c4d\u0c1a\u0c3f\u0c24\u0c02\u0c17\u0c3e! \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41.\n\n\u0c2e\u0c40\u0c30\u0c41 \u0c0f \u0c35\u0c3f\u0c37\u0c2f\u0c02 \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f \u0c24\u0c46\u0c32\u0c41\u0c38\u0c41\u0c15\u0c4b\u0c35\u0c3e\u0c32\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c41? \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c26\u0c48\u0c28\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c3e? \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "Hold on And."
+        "Can you speak in Telugu?"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Okay, I'm holding on. Please let me know when you're ready or what you'd like to do next."
+        "\u0c05\u0c35\u0c41\u0c28\u0c41, \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41. \u0c07\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c47 \u0c2e\u0c28\u0c02 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2e\u0c41.\n\n\u0c2e\u0c40\u0c30\u0c41 \u0c0f\u0c2e\u0c48\u0c28\u0c3e \u0c05\u0c21\u0c17\u0c3e\u0c32\u0c28\u0c41\u0c15\u0c41\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c3e? \u0c26\u0c2f\u0c1a\u0c47\u0c38\u0c3f \u0c05\u0c21\u0c17\u0c02\u0c21\u0c3f."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "picture"
+        "Can you speak in Telugu?"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "I can help with that! To give you the best \"picture,\" could you please tell me what kind of picture you're looking for? For example:\n\n*   **What is the subject?** (e.g., \"a cat,\" \"a landscape,\" \"a city skyline\")\n*   **What style?** (e.g., \"realistic,\" \"cartoon,\" \"abstract\")\n*   **What do you want to do with it?** (e.g., \"describe it,\" \"find one,\" \"generate one\")\n\nOnce I have a bit more information, I'll be happy to assist!"
+        "\u0c05\u0c35\u0c41\u0c28\u0c41, \u0c28\u0c47\u0c28\u0c41 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c2e\u0c3e\u0c1f\u0c4d\u0c32\u0c3e\u0c21\u0c17\u0c32\u0c28\u0c41. \u0c2e\u0c40\u0c15\u0c41 \u0c0f\u0c26\u0c48\u0c28\u0c3e \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c38\u0c2e\u0c3e\u0c1a\u0c3e\u0c30\u0c02 \u0c15\u0c3e\u0c35\u0c3e\u0c32\u0c02\u0c1f\u0c47 \u0c05\u0c21\u0c17\u0c35\u0c1a\u0c4d\u0c1a\u0c41, \u0c32\u0c47\u0c26\u0c3e \u0c2e\u0c28\u0c02 \u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c38\u0c02\u0c2d\u0c3e\u0c37\u0c23\u0c28\u0c41 \u0c15\u0c4a\u0c28\u0c38\u0c3e\u0c17\u0c3f\u0c02\u0c1a\u0c35\u0c1a\u0c4d\u0c1a\u0c41.\n\n\u0c28\u0c47\u0c28\u0c41 \u0c2e\u0c40\u0c15\u0c41 \u0c0e\u0c32\u0c3e \u0c38\u0c39\u0c3e\u0c2f\u0c02 \u0c1a\u0c47\u0c2f\u0c17\u0c32\u0c28\u0c41?"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "what are you doing"
+        "Hey Miro, activate virtual boss."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "I am an AI assistant, created by Revanth and his team (Manoj Kumar, Amit Kumar, and Jaideep).\n\nRight now, I am processing your request and formulating this response to answer your question. My purpose is to provide you with helpful, accurate, and instant information and assistance."
+        "Hey there! As an AI, I don't have a specific feature called \"virtual boss\" that I can activate. I don't have different \"modes\" like that built into my core functions.\n\nHowever, I can certainly **assist you in ways a \"virtual boss\" might!** Could you tell me what you would like a \"virtual boss\" to *do*? For example, would you like me to:\n\n*   Help you set goals or manage tasks?\n*   Provide reminders or deadlines?\n*   Give you feedback or suggestions?\n*   Help you brainstorm ideas?\n\nIf you describe the functions you're looking for, I can try my best to fulfill them within my capabilities."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "open Google"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "17 Pro Max"
+        "Hey Miro, activate virtualness."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "\"17 Pro Max\" sounds like it could be a future or hypothetical model of an iPhone, following the naming convention of Apple's \"Pro Max\" series (like the iPhone 15 Pro Max).\n\nAs of now (February 2026), the iPhone 15 Pro Max is the latest model in that line, and the iPhone 16 series would be the expected release later this year. An \"iPhone 17 Pro Max\" would likely be a release for late 2027.\n\nIf you're asking about:\n1.  **A future iPhone model:** There isn't any official information or specifications for an \"iPhone 17 Pro Max\" yet. We can only speculate based on current trends and rumors for future iPhones.\n2.  **A different product:** Could you please clarify what \"17 Pro Max\" you are referring to?\n3.  **The *current* iPhone Pro Max model:** I can provide you with information about the iPhone 15 Pro Max.\n\nWhat would you like to know about \"17 Pro Max\"?"
+        "Hey there!\n\nAs an AI, I am inherently **virtual** by nature. I don't have a physical presence; I exist and operate entirely within digital systems and cloud servers. So, in a sense, my \"virtualness\" is always active!\n\nIt sounds like you might be looking for me to do something specific with this idea of \"virtualness.\" Could you tell me what you're hoping to achieve or what kind of virtual interaction you'd like?\n\nFor example, do you want me to:\n\n*   Help you with virtual reality concepts?\n*   Assist with digital tasks?\n*   Discuss the concept of virtual existence?\n\nLet me know what you have in mind!"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "what's the time right now"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "It's currently 11:16 PM on Wednesday, February 04, 2026."
+        "Activate virtual mouse."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "created you"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "I was created by Revanth and his team, which includes Manoj Kumar, Amit Kumar, and Jaideep."
+        "disconnect"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "virtual Mouse"
+        "Turn off virtual mouse."
       ]
     },
     {
       "role": "model",
       "parts": [
-        "A virtual mouse typically refers to software or a system that allows you to control the cursor on a screen without a physical mouse. This can be achieved through various methods, such as:\n\n*   **Eye-tracking:** Using your eye movements to control the pointer.\n*   **Head-tracking:** Moving your head to guide the cursor.\n*   **Hand gestures:** Using a camera to detect hand movements and translate them into mouse actions.\n*   **Speech recognition:** Voice commands to click, drag, or move the cursor.\n*   **Software simulations:** Programs that allow keyboard keys or other input devices to mimic mouse functions.\n\nIt's often used for accessibility, in virtual reality/augmented reality environments, or when a physical mouse isn't practical or available."
+        "I understand you're asking me to \"Turn off virtual mouse.\"\n\nAs an AI, I don't have direct control over your computer's hardware, peripherals, or software settings, including a virtual mouse. I am a language model operating in the cloud, separate from your local system.\n\nIf you have a virtual mouse enabled on your computer, you would typically need to:\n\n1.  **Check your operating system's accessibility settings:** Many operating systems (like Windows, macOS, or Linux) have features like \"Mouse Keys\" or similar accessibility options that allow you to control the cursor with the keyboard.\n2.  **Look for specific software:** If you're using a third-party application that provides a virtual mouse, you would need to open that application and find its settings to disable it.\n\nCould you tell me what operating system you are using, or what application you believe is providing the \"virtual mouse\"? I might be able to guide you on where to look in your system settings or within a specific program."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Stop it, stop it."
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Understood. I will stop discussing that topic.\n\nHow can I help you with something new?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "disconnect"
       ]
     }
   ],
