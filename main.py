@@ -9,7 +9,9 @@ import uvicorn
 import os
 import speech_recognition as sr
 import asyncio
-import zipfile  # <--- ADDED: To auto-extract your file
+import zipfile
+import webbrowser  # <--- ADDED: To open your Interface
+import pyttsx3     # <--- ADDED: To make Miro speak
 from fastapi.staticfiles import StaticFiles
 
 # --- DEPENDENCIES CHECK ---
@@ -20,7 +22,7 @@ try:
     import pyaudio
 except ImportError:
     print("❌ CRITICAL: Missing libraries.") 
-    print("👉 Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition")
+    print("👉 Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition pyttsx3")
     sys.exit()
 
 # Add current path
@@ -46,59 +48,61 @@ class SystemState:
 STATE = SystemState()
 
 # ==========================================
+# 0. TEXT TO SPEECH ENGINE (NEW)
+# ==========================================
+def speak(text):
+    """Makes the AI speak out loud"""
+    try:
+        engine = pyttsx3.init()
+        # Optional: Adjust Rate (Speed) and Volume
+        engine.setProperty('rate', 170) 
+        engine.setProperty('volume', 1.0)
+        engine.say(text)
+        engine.runAndWait()
+    except Exception as e:
+        print(f"❌ TTS Error: {e}")
+
+# ==========================================
 # 1. OPTIMIZED VIRTUAL MOUSE LOGIC
 # ==========================================
 class VirtualMouse:
     def __init__(self):
         pyautogui.FAILSAFE = False 
         self.wScr, self.hScr = pyautogui.size()
-        self.frameR = 100        # Box size
-        self.smoothening = 5     # 3-5 is optimal
+        self.frameR = 100
+        self.smoothening = 5
         self.plocX, self.plocY = 0, 0
         self.clocX, self.clocY = 0, 0
         self.last_click_time = 0 
 
     def process(self, img, hands, detector):
         if not hands: return img
-        
         hand = hands[0]
         lmList = hand['lmList']
         fingers = detector.fingersUp(hand)
-        
-        # Draw Boundary Box
         h, w, _ = img.shape
         cv2.rectangle(img, (self.frameR, self.frameR), (w - self.frameR, h - self.frameR), (255, 0, 255), 2)
 
-        # 1. Moving Mode: Index Finger Up Only
+        # Move
         if fingers[1] == 1 and fingers[2] == 0:
             x1, y1 = lmList[8][0], lmList[8][1]
-            
-            # Convert Coordinates
             x3 = np.interp(x1, (self.frameR, w - self.frameR), (0, self.wScr))
             y3 = np.interp(y1, (self.frameR, h - self.frameR), (0, self.hScr))
-
-            # Smoothening
             self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
             self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
-
-            # Move Mouse
             try: pyautogui.moveTo(self.wScr - self.clocX, self.clocY)
             except: pass
-            
             cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
             self.plocX, self.plocY = self.clocX, self.clocY
 
-        # 2. Clicking Mode: Index + Middle Fingers Up
+        # Click
         if fingers[1] == 1 and fingers[2] == 1:
             length, info, img = detector.findDistance(lmList[8][0:2], lmList[12][0:2], img)
-            
             if length < 40:
                 cv2.circle(img, (info[4], info[5]), 15, (0, 255, 0), cv2.FILLED)
-                # Non-blocking click
                 if time.time() - self.last_click_time > 0.5: 
                     pyautogui.click()
                     self.last_click_time = time.time()
-                
         return img
 
 # ==========================================
@@ -112,17 +116,14 @@ class SignDetector:
             self.classifier = Classifier("sign_detection/Model/keras_model.h5", "sign_detection/Model/labels.txt")
             print("✅ Sign Model Loaded.")
         except:
-            print("⚠️ Sign Model not found. Check paths.")
+            print("⚠️ Sign Model not found.")
 
     def process(self, img, hands):
         if not self.classifier or not hands: return img, None
-        
         hand = hands[0]
         x, y, w, h = hand['bbox']
-
         imgWhite = np.ones((300, 300, 3), np.uint8) * 255
         imgCrop = img[y - 20:y + h + 20, x - 20:x + w + 20]
-
         try:
             aspectRatio = h / w
             if aspectRatio > 1:
@@ -137,19 +138,16 @@ class SignDetector:
                 imgResize = cv2.resize(imgCrop, (300, hCal))
                 hGap = math.ceil((300 - hCal) / 2)
                 imgWhite[hGap:hCal + hGap, :] = imgResize
-
             prediction, index = self.classifier.getPrediction(imgWhite, draw=False)
             label = self.classifier.labels[index]
-            
             cv2.rectangle(img, (x - 20, y - 20), (x + w + 20, y + h + 20), (255, 0, 255), 4)
             cv2.putText(img, label, (x, y - 26), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
-            
             return img, label
         except: 
             return img, None
 
 # ==========================================
-# 3. WAKE WORD ENGINE (SMART AUTO-EXTRACTOR)
+# 3. WAKE WORD ENGINE
 # ==========================================
 class WakeWordListener:
     def __init__(self):
@@ -161,63 +159,37 @@ class WakeWordListener:
             self.porcupine = None
             return
 
-        # --- SMART LOAD LOGIC ---
         self.miro_path = self._find_or_extract_model()
         
         try:
             if self.miro_path:
                 print(f"✅ Found Custom Wake Word: {self.miro_path}")
-                self.porcupine = pvporcupine.create(
-                    access_key=self.access_key,
-                    keyword_paths=[self.miro_path]
-                )
+                self.porcupine = pvporcupine.create(access_key=self.access_key, keyword_paths=[self.miro_path])
             else:
-                print("⚠️ No .ppn file found. Defaulting to 'Jarvis'.")
-                self.porcupine = pvporcupine.create(
-                    access_key=self.access_key,
-                    keywords=['jarvis']
-                )
+                print("⚠️ Using Default 'Jarvis'.")
+                self.porcupine = pvporcupine.create(access_key=self.access_key, keywords=['jarvis'])
         except Exception as e:
             print(f"❌ Porcupine Error: {e}")
-            print("👉 TIP: If you downloaded a V4 model, make sure 'pip install pvporcupine' is up to date.")
             self.porcupine = None
-
+        
         self.pa = pyaudio.PyAudio()
         self.audio_stream = None
 
     def _find_or_extract_model(self):
-        """Looks for .ppn file. If only .zip exists, it extracts it."""
-        # 1. Search for existing .ppn
         for file in os.listdir("."):
-            if file.lower().endswith(".ppn") and "hey" in file.lower():
-                return file
-
-        # 2. Search for .zip and extract
+            if file.lower().endswith(".ppn") and "hey" in file.lower(): return file
         for file in os.listdir("."):
             if file.lower().endswith(".zip") and "hey" in file.lower():
-                print(f"📦 Found ZIP file '{file}'. Extracting...")
                 try:
-                    with zipfile.ZipFile(file, 'r') as zip_ref:
-                        zip_ref.extractall(".")
-                    print("✅ Extraction complete. Searching again...")
-                    # 3. Search again after extraction
+                    with zipfile.ZipFile(file, 'r') as zip_ref: zip_ref.extractall(".")
                     for f in os.listdir("."):
-                        if f.lower().endswith(".ppn") and "hey" in f.lower():
-                            return f
-                except Exception as e:
-                    print(f"❌ Failed to extract zip: {e}")
-        
+                        if f.lower().endswith(".ppn") and "hey" in f.lower(): return f
+                except: pass
         return None
 
     def start(self):
         if not self.porcupine: return False
-        self.audio_stream = self.pa.open(
-            rate=self.porcupine.sample_rate,
-            channels=1,
-            format=pyaudio.paInt16,
-            input=True,
-            frames_per_buffer=self.porcupine.frame_length
-        )
+        self.audio_stream = self.pa.open(rate=self.porcupine.sample_rate, channels=1, format=pyaudio.paInt16, input=True, frames_per_buffer=self.porcupine.frame_length)
         return True
 
     def listen(self):
@@ -241,31 +213,24 @@ class WakeWordListener:
 def listen_for_command():
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
-    
     with microphone as source:
         print("🎤 Listening for command...")
         try:
-            # Short timeout for snappy response
             recognizer.adjust_for_ambient_noise(source, duration=0.5)
             audio = recognizer.listen(source, timeout=5)
             print("Processing...")
             command = recognizer.recognize_google(audio)
             print(f"🗣️ You said: {command}")
             return command
-        except sr.WaitTimeoutError:
-            print("...Silence...")
-            return None
-        except:
-            return None
+        except sr.WaitTimeoutError: return None
+        except: return None
 
 def voice_loop_thread():
     if not AGENT_AVAILABLE: return
-    
     wake = WakeWordListener()
     if not wake.start(): return
 
     ai_logic = VoiceAssistant()
-    
     active_word = "Hey Miro" if wake.miro_path else "Jarvis"
     print(f"👂 Voice System Online. Say '{active_word}' to wake me up.")
 
@@ -275,106 +240,80 @@ def voice_loop_thread():
                 print(f"⚡ WAKE WORD DETECTED: {active_word}!")
                 STATE.listening_for_wake_word = False
                 
+                # --- 1. NAVIGATE TO INTERFACE ---
+                # Opens the browser to your Agent's UI
+                webbrowser.open("http://localhost:8000")
+                
+                # --- 2. SPEAK ACKNOWLEDGEMENT ---
+                speak("I'm listening.")
+                
+                # --- 3. LISTEN FOR COMMAND ---
                 cmd = listen_for_command()
                 if cmd:
                     print(f"🤖 Processing: {cmd}")
                     resp = asyncio.run(ai_logic.process_message(cmd))
+                    
+                    # --- 4. SPEAK THE ANSWER (DO ALL WORDS) ---
                     print(f"🤖 AI: {resp}")
+                    speak(resp)
                 
                 print("💤 Returning to sleep...")
                 STATE.listening_for_wake_word = True
         else:
             time.sleep(0.1)
-    
     wake.close()
 
 # ==========================================
-# 5. MAIN CORE LOGIC
+# 5. MAIN LOGIC
 # ==========================================
-
 def handle_command(command: str):
-    """Callback from AI Agent"""
     command = command.lower()
     print(f"⚙️ Hardware Command: {command}")
-    
-    if "stop" in command or "disconnect" in command:
-        STATE.mode = "IDLE"
-        STATE.camera_active = False
-        
-    elif "mouse" in command:
-        STATE.mode = "MOUSE"
-        STATE.camera_active = True
-        
-    elif "sign" in command or "vision" in command:
-        STATE.mode = "SIGN"
-        STATE.camera_active = True
+    if "stop" in command: STATE.mode = "IDLE"; STATE.camera_active = False
+    elif "mouse" in command: STATE.mode = "MOUSE"; STATE.camera_active = True
+    elif "sign" in command: STATE.mode = "SIGN"; STATE.camera_active = True
 
 def camera_loop():
     cap = None
     detector = HandDetector(maxHands=1)
     mouse_engine = VirtualMouse()
     sign_engine = SignDetector()
-    
     while not STATE.stop_event.is_set():
         if STATE.camera_active:
             if cap is None or not cap.isOpened():
                 cap = cv2.VideoCapture(0)
                 cap.set(3, 640)
                 cap.set(4, 480)
-            
             success, img = cap.read()
             if success:
-                # Don't flip img for mouse logic to feel natural
                 hands, img = detector.findHands(img, flipType=False)
-                
                 if STATE.mode == "MOUSE":
                     img = mouse_engine.process(img, hands, detector)
                     cv2.putText(img, "MODE: MOUSE", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-                    
                 elif STATE.mode == "SIGN":
                     img, label = sign_engine.process(img, hands)
                     cv2.putText(img, f"MODE: SIGN ({label if label else ''})", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-
                 cv2.imshow("Miro Vision", img)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    handle_command("stop")
+                if cv2.waitKey(1) & 0xFF == ord('q'): handle_command("stop")
         else:
-            if cap:
-                cap.release()
-                cap = None
-                cv2.destroyAllWindows()
+            if cap: cap.release(); cap = None; cv2.destroyAllWindows()
             time.sleep(0.5)
 
-# ==========================================
-# 6. MAIN ENTRY POINT
-# ==========================================
 def main():
     print("--- 🚀 MIRO SYSTEM INITIALIZING ---")
-    
-    # 1. Start Voice Thread
     vt = threading.Thread(target=voice_loop_thread, daemon=True)
     vt.start()
-
-    # 2. Start Camera Thread
     ct = threading.Thread(target=camera_loop, daemon=True)
     ct.start()
-
-    # 3. Start Server
     if AGENT_AVAILABLE and app:
-        print("🔗 Linking Agent to Hardware...")
+        print("🔗 Linking Agent...")
         set_system_state_callback(handle_command)
-        
         if os.path.exists("frontend"):
             print("🌍 Hosting Frontend at http://localhost:8000")
             app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-            
         uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
-    else:
-        print("❌ Critical: Agent not loaded.")
+    else: print("❌ Critical: Agent not loaded.")
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        STATE.stop_event.set()
-        sys.exit(0)
+    try: main()
+    except KeyboardInterrupt: STATE.stop_event.set(); sys.exit(0)
