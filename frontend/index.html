@@ -78,10 +78,32 @@
             const [inputValue, setInputValue] = useState("");
             const [isGenerating, setIsGenerating] = useState(false);
             const [isVoiceMode, setVoiceMode] = useState(false);
+            // --- 🔽 PASTE THIS RIGHT AFTER YOUR useState LINES 🔽 ---
+React.useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8000/ws");
+
+    ws.onopen = () => console.log("🟢 Connected to Brain");
+    
+    ws.onmessage = (event) => {
+        if (event.data === "WAKE_UP") {
+            console.log("⚡ Wake Word Detected!");
+            
+            // This switches your screen to the "Listening" mode automatically!
+            setVoiceMode(true); 
+            
+            // Optional: If you have a specific function to start recording, call it here too
+            // startRecording();
+        }
+    };
+
+    return () => ws.close();
+}, []);
+// --- 🔼 END PASTE 🔼 ---
             const [visionActive, setVisionActive] = useState(false);
             const [wsStatus, setWsStatus] = useState("Connecting...");
             const [liveTranscript, setLiveTranscript] = useState("");
             const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
+            
 
             // Logic Refs
             const ws = useRef(null);

@@ -1,0 +1,55 @@
+{
+  "id": "98b5d93c",
+  "title": "New Chat",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:16 PM, Date: Wednesday, February 04, 2026 | USER: None]\nUser: what's the time right now\nTool Result: 11:16 PM, Wednesday February 04\nSummarize naturally."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "It's currently 11:16 PM on Wednesday, February 04, 2026."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:16 PM, Date: Wednesday, February 04, 2026 | USER: None] created you"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I was created by Revanth and his team, which includes Manoj Kumar, Amit Kumar, and Jaideep."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 11:17 PM, Date: Wednesday, February 04, 2026 | USER: None] virtual Mouse"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "A virtual mouse typically refers to software or a system that allows you to control the cursor on a screen without a physical mouse. This can be achieved through various methods, such as:\n\n*   **Eye-tracking:** Using your eye movements to control the pointer.\n*   **Head-tracking:** Moving your head to guide the cursor.\n*   **Hand gestures:** Using a camera to detect hand movements and translate them into mouse actions.\n*   **Speech recognition:** Voice commands to click, drag, or move the cursor.\n*   **Software simulations:** Programs that allow keyboard keys or other input devices to mimic mouse functions.\n\nIt's often used for accessibility, in virtual reality/augmented reality environments, or when a physical mouse isn't practical or available."
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-02-04 23:17:29.839076"
+}

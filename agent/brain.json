@@ -4,42 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "send mail"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Certainly! I can help you send an email.\n\nTo whom should I send it, and what would be the subject and body of the email?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "2411cs020023@mallareddyuniversity.ac.in\n\nsubject:hello message:Revanth"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Okay, I have the details for your email:\n\n*   **To:** 2411cs020023@mallareddyuniversity.ac.in\n*   **Subject:** hello\n*   **Body:** Revanth\n\nPlease confirm if this is correct, and I will proceed with sending it."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "yes"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Excellent! Your email has been sent successfully to **2411cs020023@mallareddyuniversity.ac.in** with the subject **\"hello\"** and the body **\"Revanth\"**.\n\nIs there anything else I can help you with?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "Hey, Miro."
       ]
     },
@@ -179,6 +143,42 @@
       "role": "model",
       "parts": [
         "\"17 Pro Max\" sounds like it could be a future or hypothetical model of an iPhone, following the naming convention of Apple's \"Pro Max\" series (like the iPhone 15 Pro Max).\n\nAs of now (February 2026), the iPhone 15 Pro Max is the latest model in that line, and the iPhone 16 series would be the expected release later this year. An \"iPhone 17 Pro Max\" would likely be a release for late 2027.\n\nIf you're asking about:\n1.  **A future iPhone model:** There isn't any official information or specifications for an \"iPhone 17 Pro Max\" yet. We can only speculate based on current trends and rumors for future iPhones.\n2.  **A different product:** Could you please clarify what \"17 Pro Max\" you are referring to?\n3.  **The *current* iPhone Pro Max model:** I can provide you with information about the iPhone 15 Pro Max.\n\nWhat would you like to know about \"17 Pro Max\"?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what's the time right now"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "It's currently 11:16 PM on Wednesday, February 04, 2026."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "created you"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I was created by Revanth and his team, which includes Manoj Kumar, Amit Kumar, and Jaideep."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "virtual Mouse"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "A virtual mouse typically refers to software or a system that allows you to control the cursor on a screen without a physical mouse. This can be achieved through various methods, such as:\n\n*   **Eye-tracking:** Using your eye movements to control the pointer.\n*   **Head-tracking:** Moving your head to guide the cursor.\n*   **Hand gestures:** Using a camera to detect hand movements and translate them into mouse actions.\n*   **Speech recognition:** Voice commands to click, drag, or move the cursor.\n*   **Software simulations:** Programs that allow keyboard keys or other input devices to mimic mouse functions.\n\nIt's often used for accessibility, in virtual reality/augmented reality environments, or when a physical mouse isn't practical or available."
       ]
     }
   ],
