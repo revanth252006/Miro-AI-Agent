@@ -116,9 +116,10 @@ async def send_email(
             smtp_server = "smtp.gmail.com"
             smtp_port = 587
             
-            # Get credentials
+            # Get credentials & CLEAN them
             gmail_user = os.getenv("GMAIL_USER")
-            gmail_password = os.getenv("GMAIL_APP_PASSWORD")
+            # Remove spaces from the app password just in case
+            gmail_password = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
             
             if not gmail_user or not gmail_password:
                 print("❌ Error: GMAIL_USER or GMAIL_APP_PASSWORD missing.")
@@ -139,7 +140,7 @@ async def send_email(
             
             # Connect using STARTTLS (Port 587)
             server = smtplib.SMTP(smtp_server, smtp_port)
-            server.set_debuglevel(1) # Show debug info in console
+            # server.set_debuglevel(1) # Uncomment if you want to see deep server logs
             server.starttls()  # Enable Security
             server.login(gmail_user, gmail_password)
             
