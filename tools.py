@@ -109,7 +109,7 @@ async def send_email(
     """
     print(f"\n📨 Sending email to {to_email}...")
     
-    # 1. Define the Blocking Function (smtplib is not async by default)
+    # 1. Define the Blocking Function
     def _send_blocking():
         try:
             # Gmail SMTP configuration
@@ -139,6 +139,7 @@ async def send_email(
             
             # Connect using STARTTLS (Port 587)
             server = smtplib.SMTP(smtp_server, smtp_port)
+            server.set_debuglevel(1) # Show debug info in console
             server.starttls()  # Enable Security
             server.login(gmail_user, gmail_password)
             
@@ -154,7 +155,7 @@ async def send_email(
             print(f"❌ Email Error: {e}")
             return f"Email failed: {str(e)}"
 
-    # 2. Run in Background (So the Agent doesn't freeze)
+    # 2. Run in Background
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _send_blocking)
 
