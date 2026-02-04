@@ -9,16 +9,18 @@ import uvicorn
 import os
 import speech_recognition as sr
 import asyncio
+import zipfile  # <--- ADDED: To auto-extract your file
 from fastapi.staticfiles import StaticFiles
 
-# --- DEPENDENCIES ---
+# --- DEPENDENCIES CHECK ---
 try:
     from cvzone.HandTrackingModule import HandDetector
     from cvzone.ClassificationModule import Classifier
     import pvporcupine 
     import pyaudio
 except ImportError:
-    print("❌ CRITICAL: Missing libraries. Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition")
+    print("❌ CRITICAL: Missing libraries.") 
+    print("👉 Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition")
     sys.exit()
 
 # Add current path
@@ -33,7 +35,7 @@ except ImportError as e:
     AGENT_AVAILABLE = False
     app = None
 
-# --- GLOBAL STATE ---
+# --- GLOBAL STATE MANAGER ---
 class SystemState:
     def __init__(self):
         self.camera_active = False
@@ -92,6 +94,7 @@ class VirtualMouse:
             
             if length < 40:
                 cv2.circle(img, (info[4], info[5]), 15, (0, 255, 0), cv2.FILLED)
+                # Non-blocking click
                 if time.time() - self.last_click_time > 0.5: 
                     pyautogui.click()
                     self.last_click_time = time.time()
@@ -146,7 +149,7 @@ class SignDetector:
             return img, None
 
 # ==========================================
-# 3. WAKE WORD ENGINE
+# 3. WAKE WORD ENGINE (SMART AUTO-EXTRACTOR)
 # ==========================================
 class WakeWordListener:
     def __init__(self):
@@ -158,16 +161,53 @@ class WakeWordListener:
             self.porcupine = None
             return
 
+        # --- SMART LOAD LOGIC ---
+        self.miro_path = self._find_or_extract_model()
+        
         try:
-            # Using 'jarvis' as the default wake word because it's built-in.
-            self.porcupine = pvporcupine.create(access_key=self.access_key, keywords=['jarvis'])
-            print("✅ Wake Word Engine Ready (Keyword: 'Jarvis')")
+            if self.miro_path:
+                print(f"✅ Found Custom Wake Word: {self.miro_path}")
+                self.porcupine = pvporcupine.create(
+                    access_key=self.access_key,
+                    keyword_paths=[self.miro_path]
+                )
+            else:
+                print("⚠️ No .ppn file found. Defaulting to 'Jarvis'.")
+                self.porcupine = pvporcupine.create(
+                    access_key=self.access_key,
+                    keywords=['jarvis']
+                )
         except Exception as e:
             print(f"❌ Porcupine Error: {e}")
+            print("👉 TIP: If you downloaded a V4 model, make sure 'pip install pvporcupine' is up to date.")
             self.porcupine = None
 
         self.pa = pyaudio.PyAudio()
         self.audio_stream = None
+
+    def _find_or_extract_model(self):
+        """Looks for .ppn file. If only .zip exists, it extracts it."""
+        # 1. Search for existing .ppn
+        for file in os.listdir("."):
+            if file.lower().endswith(".ppn") and "hey" in file.lower():
+                return file
+
+        # 2. Search for .zip and extract
+        for file in os.listdir("."):
+            if file.lower().endswith(".zip") and "hey" in file.lower():
+                print(f"📦 Found ZIP file '{file}'. Extracting...")
+                try:
+                    with zipfile.ZipFile(file, 'r') as zip_ref:
+                        zip_ref.extractall(".")
+                    print("✅ Extraction complete. Searching again...")
+                    # 3. Search again after extraction
+                    for f in os.listdir("."):
+                        if f.lower().endswith(".ppn") and "hey" in f.lower():
+                            return f
+                except Exception as e:
+                    print(f"❌ Failed to extract zip: {e}")
+        
+        return None
 
     def start(self):
         if not self.porcupine: return False
@@ -204,8 +244,8 @@ def listen_for_command():
     
     with microphone as source:
         print("🎤 Listening for command...")
-        # Optional: Play a sound here to indicate listening
         try:
+            # Short timeout for snappy response
             recognizer.adjust_for_ambient_noise(source, duration=0.5)
             audio = recognizer.listen(source, timeout=5)
             print("Processing...")
@@ -225,20 +265,19 @@ def voice_loop_thread():
     if not wake.start(): return
 
     ai_logic = VoiceAssistant()
+    
+    active_word = "Hey Miro" if wake.miro_path else "Jarvis"
+    print(f"👂 Voice System Online. Say '{active_word}' to wake me up.")
 
     while not STATE.stop_event.is_set():
         if STATE.listening_for_wake_word:
-            # 1. Wait for Wake Word
             if wake.listen():
-                print("⚡ WAKE WORD DETECTED!")
+                print(f"⚡ WAKE WORD DETECTED: {active_word}!")
                 STATE.listening_for_wake_word = False
                 
-                # 2. Listen for Command
                 cmd = listen_for_command()
                 if cmd:
-                    # 3. Send to AI
                     print(f"🤖 Processing: {cmd}")
-                    # Run async function in this thread
                     resp = asyncio.run(ai_logic.process_message(cmd))
                     print(f"🤖 AI: {resp}")
                 
@@ -273,8 +312,6 @@ def handle_command(command: str):
 def camera_loop():
     cap = None
     detector = HandDetector(maxHands=1)
-    
-    # Initialize Engines
     mouse_engine = VirtualMouse()
     sign_engine = SignDetector()
     
