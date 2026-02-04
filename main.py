@@ -7,15 +7,18 @@ import numpy as np
 import pyautogui
 import uvicorn
 import os
+import speech_recognition as sr
+import asyncio
 from fastapi.staticfiles import StaticFiles
 
 # --- DEPENDENCIES ---
-# Run: pip install cvzone mediapipe pyautogui tensorflow
 try:
     from cvzone.HandTrackingModule import HandDetector
     from cvzone.ClassificationModule import Classifier
+    import pvporcupine 
+    import pyaudio
 except ImportError:
-    print("❌ CRITICAL: Missing libraries. Run: pip install cvzone mediapipe pyautogui tensorflow")
+    print("❌ CRITICAL: Missing libraries. Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition")
     sys.exit()
 
 # Add current path
@@ -35,26 +38,23 @@ class SystemState:
     def __init__(self):
         self.camera_active = False
         self.mode = "IDLE"  # IDLE, MOUSE, SIGN
+        self.listening_for_wake_word = True
         self.stop_event = threading.Event()
 
 STATE = SystemState()
 
 # ==========================================
-# 1. OPTIMIZED VIRTUAL MOUSE LOGIC (FIXED)
+# 1. OPTIMIZED VIRTUAL MOUSE LOGIC
 # ==========================================
 class VirtualMouse:
     def __init__(self):
-        # Safety: Prevents crash when mouse hits corner
         pyautogui.FAILSAFE = False 
         self.wScr, self.hScr = pyautogui.size()
-        
-        # TWEAK THESE FOR SMOOTHNESS
-        self.frameR = 100        # Box size (Lower = more sensitive)
-        self.smoothening = 5     # Lower (3-5) = Faster, Higher (7-10) = Smoother but slower
-        
+        self.frameR = 100        # Box size
+        self.smoothening = 5     # 3-5 is optimal
         self.plocX, self.plocY = 0, 0
         self.clocX, self.clocY = 0, 0
-        self.last_click_time = 0 # For non-blocking click
+        self.last_click_time = 0 
 
     def process(self, img, hands, detector):
         if not hands: return img
@@ -63,7 +63,7 @@ class VirtualMouse:
         lmList = hand['lmList']
         fingers = detector.fingersUp(hand)
         
-        # Draw Boundary Box (Move hand inside this box to cover full screen)
+        # Draw Boundary Box
         h, w, _ = img.shape
         cv2.rectangle(img, (self.frameR, self.frameR), (w - self.frameR, h - self.frameR), (255, 0, 255), 2)
 
@@ -71,15 +71,15 @@ class VirtualMouse:
         if fingers[1] == 1 and fingers[2] == 0:
             x1, y1 = lmList[8][0], lmList[8][1]
             
-            # Convert Coordinates (Webcam -> Screen)
+            # Convert Coordinates
             x3 = np.interp(x1, (self.frameR, w - self.frameR), (0, self.wScr))
             y3 = np.interp(y1, (self.frameR, h - self.frameR), (0, self.hScr))
 
-            # Smoothening Logic (Exponential Moving Average)
+            # Smoothening
             self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
             self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
 
-            # Move Mouse (Inverted X for natural mirror movement)
+            # Move Mouse
             try: pyautogui.moveTo(self.wScr - self.clocX, self.clocY)
             except: pass
             
@@ -90,12 +90,9 @@ class VirtualMouse:
         if fingers[1] == 1 and fingers[2] == 1:
             length, info, img = detector.findDistance(lmList[8][0:2], lmList[12][0:2], img)
             
-            # Click Threshold
             if length < 40:
                 cv2.circle(img, (info[4], info[5]), 15, (0, 255, 0), cv2.FILLED)
-                
-                # FIXED: Non-blocking timer instead of time.sleep()
-                if time.time() - self.last_click_time > 0.5: # 0.5s delay between clicks
+                if time.time() - self.last_click_time > 0.5: 
                     pyautogui.click()
                     self.last_click_time = time.time()
                 
@@ -109,11 +106,10 @@ class SignDetector:
         self.classifier = None
         self.labels = []
         try:
-            # Update these paths if your model is elsewhere
             self.classifier = Classifier("sign_detection/Model/keras_model.h5", "sign_detection/Model/labels.txt")
             print("✅ Sign Model Loaded.")
         except:
-            print("⚠️ Sign Model not found at 'sign_detection/Model/'. Check paths.")
+            print("⚠️ Sign Model not found. Check paths.")
 
     def process(self, img, hands):
         if not self.classifier or not hands: return img, None
@@ -150,7 +146,111 @@ class SignDetector:
             return img, None
 
 # ==========================================
-# 3. CORE LOGIC & HARDWARE LOOP
+# 3. WAKE WORD ENGINE
+# ==========================================
+class WakeWordListener:
+    def __init__(self):
+        from dotenv import load_dotenv
+        load_dotenv()
+        self.access_key = os.getenv("PICOVOICE_API_KEY")
+        if not self.access_key:
+            print("❌ Error: Missing PICOVOICE_API_KEY in .env")
+            self.porcupine = None
+            return
+
+        try:
+            # Using 'jarvis' as the default wake word because it's built-in.
+            self.porcupine = pvporcupine.create(access_key=self.access_key, keywords=['jarvis'])
+            print("✅ Wake Word Engine Ready (Keyword: 'Jarvis')")
+        except Exception as e:
+            print(f"❌ Porcupine Error: {e}")
+            self.porcupine = None
+
+        self.pa = pyaudio.PyAudio()
+        self.audio_stream = None
+
+    def start(self):
+        if not self.porcupine: return False
+        self.audio_stream = self.pa.open(
+            rate=self.porcupine.sample_rate,
+            channels=1,
+            format=pyaudio.paInt16,
+            input=True,
+            frames_per_buffer=self.porcupine.frame_length
+        )
+        return True
+
+    def listen(self):
+        if not self.audio_stream: return False
+        try:
+            pcm = self.audio_stream.read(self.porcupine.frame_length, exception_on_overflow=False)
+            pcm = np.frombuffer(pcm, dtype=np.int16)
+            keyword_index = self.porcupine.process(pcm)
+            if keyword_index >= 0: return True
+        except: pass
+        return False
+
+    def close(self):
+        if self.audio_stream: self.audio_stream.close()
+        if self.pa: self.pa.terminate()
+        if self.porcupine: self.porcupine.delete()
+
+# ==========================================
+# 4. VOICE RECOGNITION (COMMANDS)
+# ==========================================
+def listen_for_command():
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+    
+    with microphone as source:
+        print("🎤 Listening for command...")
+        # Optional: Play a sound here to indicate listening
+        try:
+            recognizer.adjust_for_ambient_noise(source, duration=0.5)
+            audio = recognizer.listen(source, timeout=5)
+            print("Processing...")
+            command = recognizer.recognize_google(audio)
+            print(f"🗣️ You said: {command}")
+            return command
+        except sr.WaitTimeoutError:
+            print("...Silence...")
+            return None
+        except:
+            return None
+
+def voice_loop_thread():
+    if not AGENT_AVAILABLE: return
+    
+    wake = WakeWordListener()
+    if not wake.start(): return
+
+    ai_logic = VoiceAssistant()
+
+    while not STATE.stop_event.is_set():
+        if STATE.listening_for_wake_word:
+            # 1. Wait for Wake Word
+            if wake.listen():
+                print("⚡ WAKE WORD DETECTED!")
+                STATE.listening_for_wake_word = False
+                
+                # 2. Listen for Command
+                cmd = listen_for_command()
+                if cmd:
+                    # 3. Send to AI
+                    print(f"🤖 Processing: {cmd}")
+                    # Run async function in this thread
+                    resp = asyncio.run(ai_logic.process_message(cmd))
+                    print(f"🤖 AI: {resp}")
+                
+                print("💤 Returning to sleep...")
+                STATE.listening_for_wake_word = True
+        else:
+            time.sleep(0.1)
+    
+    wake.close()
+
+# ==========================================
+# 5. MAIN CORE LOGIC
 # ==========================================
 
 def handle_command(command: str):
@@ -187,9 +287,7 @@ def camera_loop():
             
             success, img = cap.read()
             if success:
-                # IMPORTANT: Don't flip for mouse, otherwise left is right
-                # img = cv2.flip(img, 1) 
-                
+                # Don't flip img for mouse logic to feel natural
                 hands, img = detector.findHands(img, flipType=False)
                 
                 if STATE.mode == "MOUSE":
@@ -211,16 +309,20 @@ def camera_loop():
             time.sleep(0.5)
 
 # ==========================================
-# 4. MAIN ENTRY POINT
+# 6. MAIN ENTRY POINT
 # ==========================================
 def main():
     print("--- 🚀 MIRO SYSTEM INITIALIZING ---")
     
-    # 1. Start Camera Thread
-    t = threading.Thread(target=camera_loop, daemon=True)
-    t.start()
+    # 1. Start Voice Thread
+    vt = threading.Thread(target=voice_loop_thread, daemon=True)
+    vt.start()
 
-    # 2. Link & Start Server
+    # 2. Start Camera Thread
+    ct = threading.Thread(target=camera_loop, daemon=True)
+    ct.start()
+
+    # 3. Start Server
     if AGENT_AVAILABLE and app:
         print("🔗 Linking Agent to Hardware...")
         set_system_state_callback(handle_command)
