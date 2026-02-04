@@ -72,38 +72,50 @@
         ];
 
         // --- APP LOGIC ---
-        const App = () => {
-            const [sidebarOpen, setSidebarOpen] = useState(true);
-            const [messages, setMessages] = useState([]);
-            const [inputValue, setInputValue] = useState("");
-            const [isGenerating, setIsGenerating] = useState(false);
-            const [isVoiceMode, setVoiceMode] = useState(false);
-  // --- 🔽 PASTE THIS BRIDGE CODE HERE 🔽 ---
+      const App = () => {
+  // --- 1. STATE VARIABLES (Restored from your screenshots) ---
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isVoiceMode, setVoiceMode] = useState(false);
+  
+  // These were visible in your screenshots, so I included them to avoid errors:
+  const [visionActive, setVisionActive] = useState(false);
+  const [wsStatus, setWsStatus] = useState("Connecting...");
+  const [liveTranscript, setLiveTranscript] = useState("");
+  const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
+
+  // --- 2. THE BRIDGE CODE (Connects Website to Python) ---
   React.useEffect(() => {
-    // 1. Connect to local Python backend
+    // Connect to local Python backend
     const ws = new WebSocket("ws://localhost:8000/ws");
 
-    ws.onopen = () => console.log("🟢 Connected to Miro Brain");
+    ws.onopen = () => {
+      console.log("🟢 Connected to Miro Brain");
+      setWsStatus("Connected");
+    };
 
     ws.onmessage = (event) => {
-      // 2. Listen for the "WAKE_UP" signal
+      // Listen for the "WAKE_UP" signal from Python
       if (event.data === "WAKE_UP") {
         console.log("⚡ Wake Word Received!");
 
-        // 3. TRIGGER THE UI
-        // This variable 'setVoiceMode' is what switches your screen 
-        // to the "Listening..." bubble animation.
+        // TRIGGER THE UI
+        // This switches your screen to the "Listening..." bubble animation.
         setVoiceMode(true); 
       }
     };
 
+    ws.onerror = () => setWsStatus("Error");
+    
     return () => ws.close();
   }, []);
-  // --- 🔼 END OF BRIDGE CODE 🔼 ---
-            const [visionActive, setVisionActive] = useState(false);
-            const [wsStatus, setWsStatus] = useState("Connecting...");
-            const [liveTranscript, setLiveTranscript] = useState("");
-            const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
+
+  // --- 3. KEEP YOUR EXISTING FUNCTIONS BELOW THIS LINE ---
+  // (Do not delete your handleSend, toggleVoiceMode, or return() logic!)
+  
+  // ... rest of your code ...
             
 
             // Logic Refs
