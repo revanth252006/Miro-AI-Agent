@@ -1,0 +1,23 @@
+{
+  "id": "2a9bcda7",
+  "title": "hii",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "[SYSTEM: Current Time: 03:23 PM, Date: Saturday, January 31, 2026 | USER: None] hii"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Hii there! I'm Miro, an AI created by Revanth and his team to assist you. How can I help you today?"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-01-31 15:23:04.249087"
+}

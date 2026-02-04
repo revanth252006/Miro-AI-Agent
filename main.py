@@ -1,203 +1,226 @@
 import cv2
 import sys
 import time
+import math
 import threading
+import numpy as np
 import pyautogui
-import os
 import uvicorn
+import os
 from fastapi.staticfiles import StaticFiles
+
+# --- DEPENDENCIES ---
+# Run: pip install cvzone mediapipe pyautogui tensorflow
+try:
+    from cvzone.HandTrackingModule import HandDetector
+    from cvzone.ClassificationModule import Classifier
+except ImportError:
+    print("❌ CRITICAL: Missing libraries. Run: pip install cvzone mediapipe pyautogui tensorflow")
+    sys.exit()
 
 # Add current path
 sys.path.append(".")
 
-# --- 1. IMPORT VISION MODULES ---
-try:
-    from virtual_mouse.mouse_logic import VirtualMouse
-    MOUSE_AVAILABLE = True
-except ImportError:
-    print("⚠️ Virtual Mouse not found. Mouse mode disabled.")
-    MOUSE_AVAILABLE = False
-
-try:
-    from sign_detection.detector import SignDetector
-    SIGN_AVAILABLE = True
-except ImportError:
-    print("⚠️ Sign Detector not found. Sign mode disabled.")
-    SIGN_AVAILABLE = False
-
-# --- 2. IMPORT AGENT & SERVER ---
+# --- IMPORT AGENT ---
 try:
     from agent.assistant import VoiceAssistant, set_system_state_callback, app
     AGENT_AVAILABLE = True
 except ImportError as e:
+    print(f"❌ Agent Import Error: {e}")
     AGENT_AVAILABLE = False
     app = None
-    print(f"❌ Agent Import Error: {e}")
-    print("👉 HINT: Make sure you updated agent/assistant.py to use Lazy Imports!")
 
-# --- GLOBAL STATE MANAGER ---
+# --- GLOBAL STATE ---
 class SystemState:
     def __init__(self):
         self.camera_active = False
-        self.mode = "IDLE"  # Options: IDLE, MOUSE, SIGN, VISION
+        self.mode = "IDLE"  # IDLE, MOUSE, SIGN
         self.stop_event = threading.Event()
 
 STATE = SystemState()
 
-# --- COMMAND HANDLER ---
+# ==========================================
+# 1. EMBEDDED VIRTUAL MOUSE LOGIC
+# ==========================================
+class VirtualMouse:
+    def __init__(self):
+        self.wScr, self.hScr = pyautogui.size()
+        self.frameR = 100  # Frame Reduction
+        self.smoothening = 7
+        self.plocX, self.plocY = 0, 0
+        self.clocX, self.clocY = 0, 0
+
+    def process(self, img, hands, detector):
+        if not hands: return img
+        
+        hand = hands[0]
+        lmList = hand['lmList']
+        fingers = detector.fingersUp(hand)
+        
+        # Draw Boundary Box
+        h, w, _ = img.shape
+        cv2.rectangle(img, (self.frameR, self.frameR), (w - self.frameR, h - self.frameR), (255, 0, 255), 2)
+
+        # 1. Moving Mode: Index Finger Up Only
+        if fingers[1] == 1 and fingers[2] == 0:
+            x1, y1 = lmList[8][0], lmList[8][1]
+            
+            # Convert Coordinates
+            x3 = np.interp(x1, (self.frameR, w - self.frameR), (0, self.wScr))
+            y3 = np.interp(y1, (self.frameR, h - self.frameR), (0, self.hScr))
+
+            # Smoothening
+            self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
+            self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
+
+            # Move Mouse
+            try: pyautogui.moveTo(self.wScr - self.clocX, self.clocY)
+            except: pass
+            
+            cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
+            self.plocX, self.plocY = self.clocX, self.clocY
+
+        # 2. Clicking Mode: Index + Middle Fingers Up
+        if fingers[1] == 1 and fingers[2] == 1:
+            length, info, img = detector.findDistance(lmList[8][0:2], lmList[12][0:2], img)
+            if length < 40:
+                cv2.circle(img, (info[4], info[5]), 15, (0, 255, 0), cv2.FILLED)
+                pyautogui.click()
+                time.sleep(0.15) # Debounce
+                
+        return img
+
+# ==========================================
+# 2. EMBEDDED SIGN DETECTOR LOGIC
+# ==========================================
+class SignDetector:
+    def __init__(self):
+        self.classifier = None
+        self.labels = []
+        try:
+            # Update these paths if your model is elsewhere
+            self.classifier = Classifier("sign_detection/Model/keras_model.h5", "sign_detection/Model/labels.txt")
+            print("✅ Sign Model Loaded.")
+        except:
+            print("⚠️ Sign Model not found at 'sign_detection/Model/'. Check paths.")
+
+    def process(self, img, hands):
+        if not self.classifier or not hands: return img, None
+        
+        hand = hands[0]
+        x, y, w, h = hand['bbox']
+
+        imgWhite = np.ones((300, 300, 3), np.uint8) * 255
+        imgCrop = img[y - 20:y + h + 20, x - 20:x + w + 20]
+
+        try:
+            aspectRatio = h / w
+            if aspectRatio > 1:
+                k = 300 / h
+                wCal = math.ceil(k * w)
+                imgResize = cv2.resize(imgCrop, (wCal, 300))
+                wGap = math.ceil((300 - wCal) / 2)
+                imgWhite[:, wGap:wCal + wGap] = imgResize
+            else:
+                k = 300 / w
+                hCal = math.ceil(k * h)
+                imgResize = cv2.resize(imgCrop, (300, hCal))
+                hGap = math.ceil((300 - hCal) / 2)
+                imgWhite[hGap:hCal + hGap, :] = imgResize
+
+            prediction, index = self.classifier.getPrediction(imgWhite, draw=False)
+            label = self.classifier.labels[index]
+            
+            cv2.rectangle(img, (x - 20, y - 20), (x + w + 20, y + h + 20), (255, 0, 255), 4)
+            cv2.putText(img, label, (x, y - 26), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
+            
+            return img, label
+        except: 
+            return img, None
+
+# ==========================================
+# 3. CORE LOGIC & HARDWARE LOOP
+# ==========================================
+
 def handle_command(command: str):
-    """
-    Called by the AI Agent to switch hardware modes.
-    """
+    """Callback from AI Agent"""
     command = command.lower()
     print(f"⚙️ Hardware Command: {command}")
     
-    # 1. STOP / DISCONNECT
     if "stop" in command or "disconnect" in command:
         STATE.mode = "IDLE"
         STATE.camera_active = False
-        print("🛑 Hardware Stopped (Camera Released).")
-
-    # 2. MOUSE MODE
-    elif "mouse" in command:
-        if MOUSE_AVAILABLE:
-            STATE.mode = "MOUSE"
-            STATE.camera_active = True  # Python needs camera
-            print("🖱️ Mouse Mode Active")
-        else:
-            print("⚠️ Mouse module missing.")
-
-    # 3. SIGN MODE
-    elif "sign" in command:
-        if SIGN_AVAILABLE:
-            STATE.mode = "SIGN"
-            STATE.camera_active = True  # Python needs camera
-            print("✌️ Sign Mode Active")
-        else:
-            print("⚠️ Sign module missing.")
-
-    # 4. VISION MODE (THE FIX)
-    elif "vision" in command or "camera" in command:
-        STATE.mode = "VISION"
-        STATE.camera_active = False  # <--- FALSE: Release camera for Browser
-        print("👁️ Vision Mode: Camera released to Browser/Frontend.")
-
-# --- CAMERA THREAD ---
-def camera_loop():
-    """
-    Central loop that switches behavior based on STATE.mode
-    """
-    cap = None
-    mouse = None
-    sign_detector = None
-    
-    # Lazy Load Models
-    if MOUSE_AVAILABLE:
-        try: mouse = VirtualMouse()
-        except: pass
         
-    if SIGN_AVAILABLE:
-        try: 
-            sign_detector = SignDetector(
-                model_path="sign_detection/Model/keras_model.h5", 
-                labels_path="sign_detection/Model/labels.txt"
-            )
-        except: pass
+    elif "mouse" in command:
+        STATE.mode = "MOUSE"
+        STATE.camera_active = True
+        
+    elif "sign" in command or "vision" in command:
+        STATE.mode = "SIGN"
+        STATE.camera_active = True
 
-    last_key_time = 0
-    type_delay = 1.0
-
+def camera_loop():
+    cap = None
+    detector = HandDetector(maxHands=1)
+    
+    # Initialize Engines
+    mouse_engine = VirtualMouse()
+    sign_engine = SignDetector()
+    
     while not STATE.stop_event.is_set():
         if STATE.camera_active:
-            # Start Camera if needed
             if cap is None or not cap.isOpened():
                 cap = cv2.VideoCapture(0)
                 cap.set(3, 640)
                 cap.set(4, 480)
-
+            
             success, img = cap.read()
             if success:
-                # NOTE: We DO NOT flip the image here so the Mouse works naturally.
+                # IMPORTANT: Don't flip for mouse, otherwise left is right
                 # img = cv2.flip(img, 1) 
-
-                # --- A. MOUSE MODE ---
-                if STATE.mode == "MOUSE" and mouse:
-                    try: 
-                        img = mouse.process_frame(img)
-                    except: pass
                 
-                # --- B. SIGN MODE ---
-                elif STATE.mode == "SIGN" and sign_detector:
-                    try:
-                        result = sign_detector.predict(img)
-                        text = None
-                        conf = 1.0
-                        
-                        # Handle varied return types
-                        if isinstance(result, tuple):
-                            if len(result) == 3: text, conf, img = result
-                            elif len(result) == 2: text, img = result
-
-                        if text:
-                            # Display detected sign
-                            cv2.putText(img, f"Sign: {text}", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-                            
-                            # Typing Logic
-                            if conf > 0.8 and (time.time() - last_key_time > type_delay):
-                                key = text.lower().strip()
-                                print(f"⌨️ Typing: {key}")
-                                
-                                if key == "space": pyautogui.press("space")
-                                elif key == "enter": pyautogui.press("enter")
-                                elif key == "backspace" or key == "delete": pyautogui.press("backspace")
-                                elif len(key) == 1: pyautogui.write(key)
-                                
-                                last_key_time = time.time()
-
-                    except Exception as e: 
-                        print(f"Sign Error: {e}")
+                hands, img = detector.findHands(img, flipType=False)
                 
-                # --- C. VISION MODE (Placeholder) ---
-                elif STATE.mode == "VISION":
-                    # This block rarely runs because active=False, but good for safety
-                    cv2.putText(img, "Miro Vision Active", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
+                if STATE.mode == "MOUSE":
+                    img = mouse_engine.process(img, hands, detector)
+                    cv2.putText(img, "MODE: MOUSE", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+                    
+                elif STATE.mode == "SIGN":
+                    img, label = sign_engine.process(img, hands)
+                    cv2.putText(img, f"MODE: SIGN ({label if label else ''})", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
 
-                # Show Window
-                cv2.imshow("Miro AI Hardware", img)
-                
-                # Press 'q' to stop manually
+                cv2.imshow("Miro Vision", img)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     handle_command("stop")
         else:
-            # --- RELEASE CAMERA ---
-            if cap is not None:
+            if cap:
                 cap.release()
                 cap = None
                 cv2.destroyAllWindows()
             time.sleep(0.5)
 
-# --- MAIN EXECUTION ---
+# ==========================================
+# 4. MAIN ENTRY POINT
+# ==========================================
 def main():
     print("--- 🚀 MIRO SYSTEM INITIALIZING ---")
     
     # 1. Start Camera Thread
-    cam_thread = threading.Thread(target=camera_loop, daemon=True)
-    cam_thread.start()
+    t = threading.Thread(target=camera_loop, daemon=True)
+    t.start()
 
-    # 2. Start Server
+    # 2. Link & Start Server
     if AGENT_AVAILABLE and app:
         print("🔗 Linking Agent to Hardware...")
         set_system_state_callback(handle_command)
         
-        # Mount Frontend
         if os.path.exists("frontend"):
             print("🌍 Hosting Frontend at http://localhost:8000")
             app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-        
-        # Run Server
+            
         uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
     else:
-        print("❌ Critical Error: Could not start Agent.")
+        print("❌ Critical: Agent not loaded.")
 
 if __name__ == "__main__":
     try:

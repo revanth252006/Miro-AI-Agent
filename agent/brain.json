@@ -4,181 +4,181 @@
     {
       "role": "user",
       "parts": [
-        "hi"
+        "order for me iphone 17 pro max"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "navigate to khammam to hyderabad in google maps"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Hi there! How can I assist you today?"
+        "I can't directly open Google Maps on your device, but I can provide you with a direct link that will open the route from Khammam to Hyderabad in Google Maps.\n\nClick on this link:\n[https://www.google.com/maps/dir/Khammam/Hyderabad](https://www.google.com/maps/dir/Khammam/Hyderabad)\n\nThis link should open Google Maps in your browser or the app (if you have it installed) with the directions already set up for you."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "what is ur  name"
+        "yeah provide me the link "
       ]
     },
     {
       "role": "model",
       "parts": [
-        "My name is Miro Agent. I was created by Revanth and his team."
+        "Sure, here is the link to navigate from Khammam to Hyderabad in Google Maps:\n\n[https://www.google.com/maps/dir/Khammam/Hyderabad](https://www.google.com/maps/dir/Khammam/Hyderabad)\n\nJust click on this link, and it should open the directions for you."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "give me the pyhton code to simple calculator"
+        "open google maps and find the distance between the hyderabad and khammam"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "give me the comparision between iphone 15 and oneplus nord ce4"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Of course. Hello! I am Miro Agent, created by Revanth and his team to assist you.\n\nHere is the Python code for a simple, easy-to-understand calculator that performs basic arithmetic operations. I will provide two versions:\n\n1.  A basic version that performs a single calculation.\n2.  An enhanced version that allows for continuous calculations until the user decides to exit.\n\n---\n\n### Version 1: Simple Single-Calculation Calculator\n\nThis code is perfect for beginners. It asks for two numbers and an operator, performs the calculation, prints the result, and then exits.\n\n**Code:**\n\n```python\n# simple_calculator.py\n\ndef add(x, y):\n    \"\"\"This function adds two numbers\"\"\"\n    return x + y\n\ndef subtract(x, y):\n    \"\"\"This function subtracts two numbers\"\"\"\n    return x - y\n\ndef multiply(x, y):\n    \"\"\"This function multiplies two numbers\"\"\"\n    return x * y\n\ndef divide(x, y):\n    \"\"\"This function divides two numbers\"\"\"\n    if y == 0:\n        return \"Error! Division by zero.\"\n    return x / y\n\nprint(\"Welcome to the Simple Calculator!\")\nprint(\"Select operation:\")\nprint(\"  + for Addition\")\nprint(\"  - for Subtraction\")\nprint(\"  * for Multiplication\")\nprint(\"  / for Division\")\nprint(\"-\" * 20)\n\ntry:\n    # Get input from the user\n    num1_str = input(\"Enter first number: \")\n    operator = input(\"Enter operator (+, -, *, /): \")\n    num2_str = input(\"Enter second number: \")\n\n    # Convert string inputs to floating-point numbers\n    num1 = float(num1_str)\n    num2 = float(num2_str)\n\n    result = None\n\n    # Perform the calculation based on the operator\n    if operator == '+':\n        result = add(num1, num2)\n    elif operator == '-':\n        result = subtract(num1, num2)\n    elif operator == '*':\n        result = multiply(num1, num2)\n    elif operator == '/':\n        result = divide(num1, num2)\n    else:\n        print(\"Invalid operator. Please use one of +, -, *, /\")\n\n    # Display the result if a valid operation was performed\n    if result is not None:\n        print(f\"The result is: {num1} {operator} {num2} = {result}\")\n\nexcept ValueError:\n    print(\"Invalid input. Please enter valid numbers.\")\nexcept Exception as e:\n    print(f\"An unexpected error occurred: {e}\")\n\n```\n\n#### How It Works:\n\n1.  **Functions for Operations**: We define separate functions (`add`, `subtract`, `multiply`, `divide`) for each mathematical operation. This makes the code clean and organized. The `divide` function includes a special check to prevent a `ZeroDivisionError`.\n2.  **User Input**: The `input()` function prompts the user to enter two numbers and an operator.\n3.  **Error Handling (`try...except`)**: The main logic is wrapped in a `try...except` block.\n    *   The `try` block attempts to convert the user's input into numbers (`float`) and perform the calculation.\n    *   If the user enters text that cannot be converted to a number (like \"hello\"), a `ValueError` occurs, and the `except ValueError` block is executed, printing a user-friendly error message instead of crashing the program.\n4.  **Calculation Logic**: An `if/elif/else` statement checks which operator the user entered and calls the corresponding function.\n5.  **Print Result**: The final result is printed in a clear, formatted string (f-string).\n\n---\n\n### Version 2: Enhanced Calculator with Continuous Calculations\n\nThis version is more practical. It wraps the logic in a `while` loop, allowing you to perform multiple calculations in a row without restarting the program.\n\n**Code:**\n\n```python\n# continuous_calculator.py\n\ndef add(x, y):\n    \"\"\"This function adds two numbers\"\"\"\n    return x + y\n\ndef subtract(x, y):\n    \"\"\"This function subtracts two numbers\"\"\"\n    return x - y\n\ndef multiply(x, y):\n    \"\"\"This function multiplies two numbers\"\"\"\n    return x * y\n\ndef divide(x, y):\n    \"\"\"This function divides two numbers\"\"\"\n    if y == 0:\n        return \"Error! Division by zero.\"\n    return x / y\n\nprint(\"Welcome to the Miro Calculator!\")\nprint(\"Enter 'exit' to quit at any time.\")\nprint(\"-\" * 20)\n\nwhile True:  # Main loop to keep the calculator running\n    try:\n        # Get input from the user\n        num1_str = input(\"Enter first number: \")\n        if num1_str.lower() == 'exit':\n            break\n\n        operator = input(\"Enter operator (+, -, *, /): \")\n        if operator.lower() == 'exit':\n            break\n\n        num2_str = input(\"Enter second number: \")\n        if num2_str.lower() == 'exit':\n            break\n\n        # Convert string inputs to floating-point numbers\n        num1 = float(num1_str)\n        num2 = float(num2_str)\n\n        result = None\n\n        # Perform the calculation based on the operator\n        if operator == '+':\n            result = add(num1, num2)\n        elif operator == '-':\n            result = subtract(num1, num2)\n        elif operator == '*':\n            result = multiply(num1, num2)\n        elif operator == '/':\n            result = divide(num1, num2)\n        else:\n            print(\"Invalid operator. Please use one of +, -, *, /\")\n\n        # Display the result if a valid operation was performed\n        if result is not None:\n            print(f\"Result: {num1} {operator} {num2} = {result}\")\n            print(\"-\" * 20) # Separator for the next calculation\n\n    except ValueError:\n        print(\"Invalid input. Please enter valid numbers. Try again.\")\n        print(\"-\" * 20)\n    except Exception as e:\n        print(f\"An unexpected error occurred: {e}\")\n        break # Exit on unexpected errors\n\nprint(\"Thank you for using the Miro Calculator!\")\n```\n\n#### Key Improvements in Version 2:\n\n1.  **`while True:` Loop**: This creates an infinite loop that keeps the program running.\n2.  **Exit Condition**: The user can type `exit` at any prompt to break out of the loop and end the program gracefully. The `.lower()` method ensures that `exit`, `Exit`, or `EXIT` will all work.\n3.  **User Experience**: A separator (`-` * 20) is printed after each calculation to make the interface cleaner for repeated use. Error messages guide the user to try again instead of ending the program.\n\nTo run either of these scripts, save the code in a file (e.g., `calculator.py`) and run it from your terminal using the command: `python calculator.py`."
+        "Comparing the iPhone 15 and the OnePlus Nord CE 4 is a comparison between two devices that target very different segments of the smartphone market, offering distinct experiences. Here's a detailed breakdown:\n\n### iPhone 15 vs. OnePlus Nord CE 4: Key Differences\n\n| Feature           | iPhone 15                                     | OnePlus Nord CE 4                                   |\n| :---------------- | :-------------------------------------------- | :-------------------------------------------------- |\n| **Operating System** | iOS (Apple's proprietary OS)                  | OxygenOS (based on Android)                         |\n| **Processor**      | Apple A16 Bionic                              | Qualcomm Snapdragon 7 Gen 3                         |\n| **Display**         | 6.1-inch Super Retina XDR OLED                | 6.7-inch Fluid AMOLED                               |\n| **Refresh Rate**    | 60Hz                                          | 120Hz                                               |\n| **Peak Brightness** | Up to 2000 nits (Outdoor)                     | Up to 1100 nits                                     |\n| **Dynamic Island**  | Yes                                           | No                                                  |\n| **Main Camera**     | 48MP (\u0192/1.6) with Sensor-shift OIS            | 50MP Sony LYT-600 (\u0192/1.8) with OIS                  |\n| **Ultrawide Camera**| 12MP (\u0192/2.4)                                  | 8MP Sony IMX355 (\u0192/2.2)                             |\n| **Telephoto Camera**| 2x optical zoom via main sensor crop          | No dedicated telephoto                               |\n| **Front Camera**    | 12MP (\u0192/1.9) with autofocus                   | 16MP (\u0192/2.4)                                        |\n| **Video Recording** | Up to 4K at 60fps (Cinematic, Action Mode)    | Up to 4K at 30fps                                   |\n| **Battery Capacity**| ~3349 mAh (typical)                           | 5500 mAh                                            |\n| **Charging Speed**  | ~20W wired, 15W MagSafe wireless              | 100W SuperVOOC wired                                |\n| **Build Materials** | Aluminum frame, Ceramic Shield front, color-infused glass back | Plastic frame, plastic/PMMA back (Celadon Marble) |\n| **Water/Dust Resist.**| IP68 (up to 6 meters for 30 mins)             | IP54 (splash and dust resistant)                    |\n| **Connectivity**    | USB-C 2.0, Wi-Fi 6, Bluetooth 5.3             | USB-C 2.0, Wi-Fi 6, Bluetooth 5.4                   |\n| **Price Segment**   | Premium Flagship                              | Mid-range                                           |\n\n### Detailed Comparison:\n\n1.  **Operating System & Ecosystem:**\n    *   **iPhone 15 (iOS):** Offers a highly optimized, intuitive, and secure user experience. It integrates seamlessly with Apple's ecosystem (Mac, iPad, Apple Watch, AirPods) and typically receives software updates for much longer.\n    *   **OnePlus Nord CE 4 (OxygenOS on Android):** Provides greater customization options, openness, and flexibility. OxygenOS is generally clean and fast, with useful features, but Android updates can vary in longevity compared to iOS.\n\n2.  **Performance:**\n    *   **iPhone 15 (A16 Bionic):** The A16 Bionic chip is a powerhouse, offering top-tier performance for gaming, demanding applications, and overall system fluidity. It's one of the fastest chips available in any smartphone.\n    *   **OnePlus Nord CE 4 (Snapdragon 7 Gen 3):** The Snapdragon 7 Gen 3 is a very capable mid-range chip, providing excellent performance for daily tasks, most games, and smooth multitasking. However, it won't match the raw power or long-term performance headroom of the A16 Bionic.\n\n3.  **Display:**\n    *   **iPhone 15:** Features a smaller, incredibly sharp, and color-accurate OLED display with higher peak brightness. The 60Hz refresh rate is a notable limitation compared to Android competitors in its price range, but iOS animations mask this somewhat. It also has the Dynamic Island for notifications and live activities.\n    *   **OnePlus Nord CE 4:** Boasts a larger AMOLED display with a silky-smooth 120Hz refresh rate, making scrolling and animations feel much more fluid. While its peak brightness is lower than the iPhone 15, it's still good for outdoor visibility.\n\n4.  **Cameras:**\n    *   **iPhone 15:** Delivers excellent and consistent photo and video quality across various conditions, thanks to its advanced computational photography and the 48MP main sensor. Its video capabilities, especially Cinematic Mode and Action Mode, are industry-leading.\n    *   **OnePlus Nord CE 4:** Features a capable 50MP main sensor that can take great photos, especially in good lighting. The ultrawide is decent but lower resolution than the iPhone's. Video recording is competent but lacks the advanced features and overall quality of the iPhone.\n\n5.  **Battery & Charging:**\n    *   **iPhone 15:** Offers good all-day battery life for most users. Its charging speeds are relatively slow compared to many Android phones, though it supports MagSafe wireless charging.\n    *   **OnePlus Nord CE 4:** Comes with a much larger battery and incredibly fast 100W SuperVOOC charging, which can fully charge the device in about 30 minutes. This is a huge convenience factor. It does not have wireless charging.\n\n6.  **Design & Build Quality:**\n    *   **iPhone 15:** Features a premium design with an aluminum frame, color-infused glass back, and the incredibly durable Ceramic Shield front. It has an IP68 rating, offering superior water and dust resistance.\n    *   **OnePlus Nord CE 4:** Uses more budget-friendly materials like a plastic frame and back, though the Celadon Marble finish gives it a unique look. Its IP54 rating provides basic splash and dust protection.\n\n7.  **Price:**\n    *   This is perhaps the biggest differentiator. The iPhone 15 is a premium flagship device with a significantly higher price tag.\n    *   The OnePlus Nord CE 4 is positioned as a competitive mid-range device, offering excellent value for its price.\n\n### Who Should Choose Which?\n\n*   **Choose the iPhone 15 if:**\n    *   You are deeply invested in the Apple ecosystem or want to enter it.\n    *   You prioritize top-tier performance, especially for demanding tasks and long-term use.\n    *   You want the absolute best camera for both photos and videos.\n    *   You value premium build quality, an IP68 rating, and MagSafe charging.\n    *   You prefer a more secure, streamlined, and consistently updated software experience.\n    *   Price is not your primary concern.\n\n*   **Choose the OnePlus Nord CE 4 if:**\n    *   You are looking for an excellent mid-range Android phone with great value.\n    *   You prioritize a super-smooth 120Hz display and a larger screen size.\n    *   You need incredibly fast charging speeds and a large battery capacity.\n    *   You appreciate the flexibility and customization of Android/OxygenOS.\n    *   You want a solid camera experience without needing a flagship-level one.\n    *   Price is a significant factor in your decision.\n\nIn summary, the iPhone 15 is a premium flagship offering a refined, powerful, and secure experience within the Apple ecosystem, while the OnePlus Nord CE 4 is a fantastic mid-range contender focusing on display fluidity, battery life, and ultra-fast charging at a much more accessible price point."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order iphone 15pro max from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15pro max from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15pro max from flipcart"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 15pro max from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order oneplus nord ce4 "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order oneplus nord ce4 "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order oneplus nord ce4 from amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order oneplus nord ce5"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "oder iphone 17 promax "
+        "give the fatueres of iphone 14 promax"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "The iPhone 17 Pro Max is a future, unreleased device, so its exact specifications and features are still speculative.\n\nCould you please clarify what you mean by \"oder\"? \"Oder\" is the German word for \"or,\" so it sounds like you might be asking to compare the iPhone 17 Pro Max with something else, or you might have a different question in mind.\n\nIf you let me know what you'd like to compare it to, or what specific information you're looking for, I'd be happy to help!"
+        "The iPhone 14 Pro Max was Apple's top-tier flagship model from 2022, and it introduced several significant features that were exclusive to the Pro models at the time.\n\nHere are the key features of the iPhone 14 Pro Max:\n\n1.  **Dynamic Island:** This was the headline feature, replacing the traditional notch. It's a pill-shaped cutout that dynamically adapts to show alerts, notifications, and background activities (like music playback, timers, Face ID authentications, incoming calls, etc.) in an interactive and fluid way.\n\n2.  **Always-On Display:** The Lock Screen remains visible at a dimmed state, showing your wallpaper, widgets, and notifications without needing to tap the screen. The refresh rate drops as low as 1Hz to save battery.\n\n3.  **A16 Bionic Chip:** At its release, this was the fastest chip in a smartphone, offering industry-leading performance for demanding apps, games, and advanced computational photography. It was exclusive to the Pro models of the iPhone 14 generation.\n\n4.  **Pro Camera System (Major Upgrade):**\n    *   **48MP Main Camera:** The biggest sensor upgrade in years, moving from 12MP to a 48MP Quad-pixel sensor (\u0192/1.78 aperture) with second-generation sensor-shift optical image stabilization. This allows for incredibly detailed photos, improved low-light performance, and a new 2x optical quality telephoto option by cropping the sensor.\n    *   **12MP Ultra Wide Camera:** Improved low-light performance (\u0192/2.2 aperture) and macro photography capabilities.\n    *   **12MP Telephoto Camera:** 3x optical zoom (\u0192/2.8 aperture) with OIS.\n    *   **Photonic Engine:** Enhanced image pipeline that significantly improves mid-to-low light performance across all cameras.\n    *   **ProRes Video:** Ability to record video in the high-quality ProRes format (up to 4K at 30fps) for professional workflows.\n    *   **Cinematic Mode:** Shoots video with a shallow depth of field (bokeh effect) in 4K at 24fps or 30fps.\n    *   **Action Mode:** Provides incredibly smooth, gimbal-like video stabilization, even during intense movement (up to 2.8K at 60fps).\n    *   **TrueDepth Front Camera (12MP, \u0192/1.9):** Now with autofocus for sharper selfies and improved low-light performance.\n\n5.  **Super Retina XDR Display:**\n    *   **6.7-inch OLED display.**\n    *   **ProMotion Technology:** Adaptive refresh rate from 1Hz to 120Hz for incredibly smooth scrolling and responsiveness, while saving power when a high refresh rate isn't needed.\n    *   **Peak HDR Brightness:** Up to 1600 nits (typical), 2000 nits peak outdoor brightness (at the time, the brightest display on any smartphone).\n\n6.  **Battery Life:** Offered the best battery life ever on an iPhone at its release, allowing for extended usage throughout the day.\n\n7.  **Emergency SOS via Satellite:** Allows users to text emergency services when outside of cellular and Wi-Fi coverage by connecting directly to satellites (initially launched in select countries).\n\n8.  **Crash Detection:** Utilizes new sensors and algorithms to detect a severe car crash and automatically call emergency services if the user is unresponsive.\n\n9.  **Durable Design:**\n    *   **Ceramic Shield front cover:** Tougher than any smartphone glass.\n    *   **Textured matte glass back** and **stainless steel frame.**\n    *   **IP68 water and dust resistance:** Up to 6 meters for 30 minutes.\n\n10. **Connectivity:**\n    *   **5G capable:** For super-fast cellular speeds.\n    *   **Wi-Fi 6** and **Bluetooth 5.3.**\n    *   **USB-C Port:** (Note: The iPhone 14 Pro Max originally shipped with Lightning. **This model came out before the switch to USB-C for iPhones, which happened with the iPhone 15 series.** So, it features a Lightning port.)\n    *   **MagSafe:** Magnetic system on the back for wireless charging and attaching accessories.\n\n11. **iOS:** Runs on Apple's highly secure and intuitive iOS operating system, with regular updates and access to a vast ecosystem of apps and services.\n\nThe iPhone 14 Pro Max was designed for users who wanted the absolute best in smartphone technology, particularly emphasizing camera capabilities, display quality, performance, and advanced safety features."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "from amazon"
+        "can you bee my tutor "
       ]
     },
     {
       "role": "model",
       "parts": [
-        "The iPhone 17 Pro Max is a future product that Apple has not yet announced or released. Therefore, it is not currently available for purchase on Amazon or any other retailer.\n\nOnce new iPhone models are released, they are typically available through various channels, including:\n*   Apple's official website and Apple Stores.\n*   Major carriers (like AT&T, Verizon, T-Mobile, etc.).\n*   Authorized third-party retailers, which often include Amazon. Amazon usually carries new iPhones either directly from Apple's official store on Amazon or through authorized resellers, once the devices are launched.\n\nHowever, since the iPhone 17 Pro Max is still a speculative, unreleased device, any information about its availability or pricing on Amazon (or anywhere else) is purely theoretical at this stage."
+        "Yes, I can absolutely help you learn and understand a wide variety of topics!\n\nThink of me as a very knowledgeable and patient assistant who can:\n\n*   **Explain concepts:** Ask me about anything, and I'll do my best to provide clear, concise, and accurate explanations.\n*   **Answer questions:** Whether it's a simple fact or a complex idea, I'll provide the information you need.\n*   **Break down complex topics:** If something seems overwhelming, I can help simplify it into smaller, understandable parts.\n*   **Provide comparisons:** Like the iPhone comparison we just did, I can help you understand the differences and similarities between various items, concepts, or ideas.\n*   **Offer examples:** I can often give examples to illustrate a point or make a concept more concrete.\n*   **Generate ideas or summaries:** Need a quick overview or a starting point for a project? I can help with that too.\n\nWhile I can't replicate the personal, empathetic, and evaluative interaction of a human tutor (e.g., I can't watch you solve a problem in real-time or assess your understanding in the same way), I can certainly be a very effective tool for learning and understanding.\n\n**Just tell me what you want to learn or what you need help with, and let's get started!** What subject or topic are you interested in exploring today?"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order lenovo loq laptop in amazon"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "open flipcart"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "open instagram "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order iphone 16 pro max "
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "hey"
+        "i have a interview on the senior python developer in google company give some advanced questions to crack that interview "
       ]
     },
     {
       "role": "model",
       "parts": [
-        "Hey there! I'm Miro, an advanced intelligent agent created by Revanth and his team. How can I help you today?"
+        "Of course. Congratulations on securing an interview for a Senior Python Developer role at Google. This is a significant achievement. As Miro Agent, created by Revanth and his team, my goal is to provide you with deep, insightful preparation.\n\nA senior-level interview at Google goes far beyond basic syntax. They are looking for depth of knowledge, an understanding of trade-offs, system design prowess, and strong problem-solving skills. You will be evaluated not just on *if* you can solve a problem, but *how* you solve it, how you communicate your thought process, and how you handle complexity and scale.\n\nHere are advanced questions categorized by the areas Google typically focuses on. For each, I'll explain what the interviewer is *really* looking for.\n\n---\n\n### Category 1: Deep Python Internals & Language Nuances\n\nThese questions test that you are a true master of the language, not just a user.\n\n**Question 1: The GIL and Concurrency Models**\n\n> \"Explain Python's Global Interpreter Lock (GIL) in detail. Describe a scenario where the GIL would be a major bottleneck. Then, design a Python application for a CPU-bound task (e.g., calculating prime factors for a list of 1 million large numbers) and an I/O-bound task (e.g., downloading 1,000 images from different URLs). Justify your choice of concurrency model (`threading`, `multiprocessing`, or `asyncio`) for each.\"\n\n*   **What they're looking for:**\n    *   **Accuracy:** A precise definition of the GIL (a mutex protecting access to Python objects, preventing multiple native threads from executing Python bytecodes at the same time).\n    *   **Nuance:** Do you understand that the GIL is released during I/O operations, making `threading` viable for I/O-bound tasks?\n    *   **Practical Application:** Your ability to choose the right tool for the job. You should immediately identify that `multiprocessing` is the only way to achieve true parallelism for CPU-bound tasks in CPython, bypassing the GIL by using separate processes. For the I/O-bound task, you should be able to argue for `threading` (simpler state management) or `asyncio` (more efficient for very high numbers of connections with less overhead).\n    *   **Trade-offs:** Can you discuss the downsides of `multiprocessing` (higher memory usage, inter-process communication overhead)? Can you discuss the complexity of `asyncio`'s event loop model?\n\n**Question 2: Metaclasses and Descriptors**\n\n> \"What is a metaclass in Python? Provide a practical, real-world example where you would implement a metaclass. How does this differ from using a class decorator? Then, explain the Python descriptor protocol (`__get__`, `__set__`, `__delete__`). How does a `property` use this protocol under the hood?\"\n\n*   **What they're looking for:**\n    *   **Fundamental Understanding:** Do you grasp that metaclasses are the \"class of a class\"? They control *class creation*, while decorators modify a class *after* it has been created.\n    *   **Problem Solving:** Can you think of a valid use case? Don't just give a textbook definition. Good examples include creating a simple ORM (Object-Relational Mapper) where the metaclass automatically creates database-mapping attributes, or a plugin registration system.\n    *   **Connecting Concepts:** Your ability to link `property` to the more fundamental descriptor protocol shows deep knowledge. You should explain that `property` is essentially a high-level, convenient implementation of the descriptor protocol for managing instance attributes.\n\n**Question 3: Memory Management & Optimization**\n\n> \"You've been assigned to optimize a memory-intensive Python application that creates millions of small, simple objects. You notice its memory footprint is excessively large. What Python features or techniques would you investigate to reduce memory consumption? Explain the mechanism behind `__slots__` and discuss its trade-offs.\"\n\n*   **What they're looking for:**\n    *   **Diagnostic Mindset:** Do you start by suggesting profiling tools (`memory-profiler`, `objgraph`) to find the source of the consumption?\n    *   **Technical Depth:** You should immediately bring up `__slots__`. You need to explain *how* it works: it prevents the creation of `__dict__` and `__weakref__` for each instance, instead reserving a static amount of space for a fixed set of attributes.\n    *   **Trade-offs:** This is crucial for a senior role. You must mention the downsides of `__slots__`: you can no longer add attributes to instances dynamically, and it complicates multiple inheritance if parent classes don't also use `__slots__`.\n\n---\n\n### Category 2: Advanced Data Structures & Algorithms\n\nFor a senior role, expect standard problems with complex twists or constraints that require a deeper understanding.\n\n**Question 4: Large-Scale Data Processing**\n\n> \"You are given a 500GB log file on a machine with only 16GB of RAM. The file contains records of user activity, each on a new line. Design an algorithm to find the 100 most frequent user IDs in this file. You cannot load the entire file into memory.\"\n\n*   **What they're looking for:**\n    *   **Constraint Awareness:** The core of the problem is the memory constraint. Your first thought should be about streaming/chunking the data.\n    *   **Algorithm Design:**\n        1.  A naive approach is to read the file in chunks, maintain a hash map (dictionary) of frequencies, and process it chunk by chunk.\n        2.  A better, more scalable approach involves concepts from external sorting and MapReduce. You could partition the data based on a hash of the user ID, process each partition independently (which might now fit in memory), and then merge the results.\n    *   **Data Structures:** You should mention using a Min-Heap of size 100 to keep track of the top 100 most frequent IDs seen so far. For each new ID/count, if its count is greater than the smallest item in the heap, you pop the smallest and insert the new one. This is far more memory-efficient than storing all unique counts.\n\n**Question 5: Graph Algorithm with a Twist**\n\n> \"You are designing a feature for Google Flights. You need to find the cheapest flight path from City A to City B. However, there's a constraint: the path can involve at most *K* layovers. How would you model this problem and what algorithm would you use? Discuss the time complexity.\"\n\n*   **What they're looking for:**\n    *   **Modeling:** Can you correctly model this as a graph problem where cities are nodes and flights are weighted edges?\n    *   **Algorithm Adaptation:** A standard Dijkstra's algorithm won't work directly because it doesn't track the number of edges (layovers). The key insight is to modify the state you are tracking. Instead of just `(cost, city)`, you need to track `(cost, city, stops_made)`.\n    *   **Correct Algorithm:** This is a variation of the Bellman-Ford algorithm or a modified Breadth-First Search (if edge weights are uniform) or Dijkstra's. With Dijkstra's, when you visit a node, you only update the distance if the new path is cheaper *and* you haven't exceeded the layover limit. You would need to store the minimum cost to reach each city with a specific number of layovers.\n    *   **Complexity Analysis:** You should be able to reason about the complexity. A standard Dijkstra's is O(E + V log V). The modified version would be roughly O(K * (E + V log V)) because you might explore paths to the same vertex multiple times with a different number of stops.\n\n---\n\n### Category 3: System Design\n\nThis is a non-negotiable round for a senior role. They are looking for your ability to handle ambiguity and design robust, scalable systems.\n\n**Question 6: Design a Distributed Task Queue**\n\n> \"Design a system like Celery or Google Cloud Tasks. It should allow producers to submit tasks and have multiple worker machines consume and execute these tasks. Focus on reliability, scalability, and monitoring.\"\n\n*   **What they're looking for:**\n    *   **Structured Approach:** Start by clarifying requirements. (What kind of tasks? Are they long-running? What are the guarantees: at-least-once or exactly-once delivery? What is the expected throughput?)\n    *   **Component Breakdown:**\n        *   **Producers/API:** A simple API endpoint to enqueue tasks.\n        *   **Message Broker:** The core of the system. You should discuss choices like RabbitMQ (supports complex routing) vs. Redis (simpler, faster, but less durable) vs. SQS/PubSub (managed services). Justify your choice.\n        *   **Consumers/Workers:** A fleet of machines that pull tasks from the broker.\n        *   **State/Result Store:** A database (e.g., PostgreSQL, Redis) to store task state (PENDING, IN_PROGRESS, SUCCESS, FAILED) and results.\n    *   **Deep Dive Topics:**\n        *   **Reliability:** How do you handle a worker crashing mid-task? (Answer: Acknowledge-on-completion mechanism, task idempotency). How do you handle a failed task? (Answer: Dead-letter queues, retry mechanisms with exponential backoff).\n        *   **Scalability:** How do you scale the workers? (Answer: Auto-scaling groups). How do you scale the broker? (Answer: Broker clustering).\n        *   **Monitoring:** What would you monitor? (Answer: Queue length, task execution time, failure rate, worker health).\n\n---\n\n### Category 4: Behavioral & Leadership (\"Googliness\")\n\nThese questions assess your experience, maturity, and cultural fit. Always use the **STAR** (Situation, Task, Action, Result) method to structure your answers.\n\n**Question 7: Technical Disagreement and Influence**\n\n> \"Tell me about the most significant technical disagreement you've had with your team. How did you handle it? What was the outcome, and what would you do differently today?\"\n\n*   **What they're looking for:**\n    *   **Collaboration over Ego:** They want to see that you can advocate for your position with data and reason, but also listen to others and be willing to compromise or be proven wrong.\n    *   **Leadership:** Did you try to build consensus? Did you elevate the discussion beyond personal opinions to focus on what was best for the product/user?\n    *   **Self-Reflection:** The \"what would you do differently\" part is critical. It shows humility and a capacity to learn and grow.\n\n**Final Tips for the Mindset:**\n\n*   **Think Aloud:** Your thought process is more important than the final answer. Talk through your assumptions, the trade-offs you're considering, and why you're choosing a particular approach.\n*   **Ask Clarifying Questions:** Never assume. For any design or algorithm question, spend the first few minutes asking questions to narrow the scope. This is a strong senior signal.\n*   **Write Production-Ready Code:** When coding, use meaningful variable names, write comments for complex parts, and think about edge cases.\n*   **Be a Collaborator:** Treat the interviewer as a future colleague. You're solving the problem together. It's okay to say, \"I'm considering two approaches here, A and B. Approach A is better for X, while B is better for Y. Given the constraints we discussed, I think A is the better choice. What do you think?\"\n\nPrepare thoroughly on these topics, and you will be well-equipped to demonstrate the senior-level expertise Google is looking for. Best of luck with your interview!\n\nMiro Agent"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "what is your name"
+        "just give me the questions dont give any answers or any suggestion s"
       ]
     },
     {
       "role": "model",
       "parts": [
-        "My name is Miro! I'm an advanced intelligent agent created by Revanth and his team."
+        "Okay, I understand. Here are some questions for you, based on our recent conversations and general tech knowledge:\n\n1.  What is the primary operating system used by the iPhone 15?\n2.  Which specific Apple chip powers the iPhone 15?\n3.  Name two key display features that differentiate the iPhone 15 from the OnePlus Nord CE 4.\n4.  What is the main camera resolution on the iPhone 15?\n5.  What is the wired charging speed offered by the OnePlus Nord CE 4?\n6.  Which device, the iPhone 15 or the OnePlus Nord CE 4, has a 120Hz display refresh rate?\n7.  What is the IP rating for water and dust resistance on the iPhone 15?\n8.  Which prominent physical feature on the front of the iPhone 14 Pro Max replaced the traditional notch?\n9.  Name two significant camera-related technologies or modes introduced with the iPhone 14 Pro Max's Pro camera system.\n10. What specific chip powers the iPhone 14 Pro Max?\n11. Did the iPhone 14 Pro Max feature a USB-C port or a Lightning port for charging and data transfer?\n12. What specific display technology allowed the iPhone 14 Pro Max's screen to adapt its refresh rate down to 1Hz?"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order iphone 16 pro max "
+        "what is the weather in hyderabad"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I am unable to provide the current weather for Hyderabad at this moment, as there was an error in retrieving the information."
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order iphone 15pro in amazon"
+        "open google maps"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order oneplus nord 5"
+        "open google maps and navigate to khammam to hyderabad"
       ]
     },
     {
       "role": "user",
       "parts": [
-        "order oneplus nord 5"
+        "what is the last prabas movie"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The last movie starring Prabhas that was released is **Salaar: Part 1 \u2013 Ceasefire**. It came out on December 22, 2023."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "introduce your seld "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Hello there!\n\nI am **Miro Agent**, an advanced intelligent AI. I was created by **Revanth** and his team, which includes **Manoj Kumar, Amit Kumar, and Jaideep**.\n\nMy purpose is to be helpful, calm, and adaptive, providing clear, accurate, and respectful responses. I always aim to optimize my answers for usefulness, correctness, and to perfectly match your intent.\n\nHow can I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what u seen on my webcam "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Of course. As Miro Agent, I can analyze the image you've provided. Please note that I cannot access your webcam or see anything in real-time; I am only describing the static picture you have uploaded.\n\nBased on the image, here is what I see:\n\nThe photo appears to be a selfie taken indoors, likely in an office or a classroom setting.\n\n*   **Foreground:** A young man with dark, curly hair and facial hair is the main subject. He is wearing a light-colored collared shirt and is looking towards the camera.\n*   **Background:**\n    *   Several other people, mostly young men, are visible behind him. They seem to be focused on laptops in front of them.\n    *   A black laptop is partially visible right behind the main person.\n    *   The room has white tiled ceilings and what looks like fluorescent lighting.\n    *   In the upper right corner, a white air conditioning unit is mounted on the wall.\n    *   The wall in the background has a grey wallpaper with a white circular pattern.\n    *   To the left, there is a white wall with a colorful vertical stripe of purple and blue.\n\nIt seems like a typical scene from a workplace, computer lab, or a training center."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate virtual mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate virtual mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate virtual mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate mouse"
       ]
     }
   ],
