@@ -239,12 +239,9 @@ def voice_loop_thread():
                 STATE.listening_for_wake_word = False
                 
                 # --- AUTO-NAVIGATE TO VERCEL ---
-                # ... inside voice_loop_thread() ...
-
-                # --- AUTO-NAVIGATE TO VOICE PAGE ---
                 if not STATE.browser_opened:
-                     # 👇 PASTE YOUR EXACT VOICE PAGE LINK HERE 👇
-                     webbrowser.open("https://miro-ai-agent.vercel.app/voice") 
+                     # 🔽 UPDATED: Now points to your Vercel App
+                     webbrowser.open("https://miro-ai-agent.vercel.app/") 
                      STATE.browser_opened = True
 
                 speak("I'm listening.")
