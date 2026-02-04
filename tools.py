@@ -98,18 +98,65 @@ async def search_web(query: str) -> str:
         return "\n".join([f"- {r['title']}: {r['href']}" for r in res]) if res else "No results."
     except: return "Search failed."
 
-async def send_email(to_email: str, subject: str, message: str) -> str:
-    try:
-        user = os.getenv("GMAIL_USER")
-        pwd = os.getenv("GMAIL_APP_PASSWORD")
-        if not user or not pwd: return "❌ Missing .env credentials"
-        msg = MIMEMultipart(); msg['From'] = user; msg['To'] = to_email; msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'plain'))
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as s:
-            s.login(user, pwd); s.send_message(msg)
-        return "✅ Email sent."
-    except Exception as e: return f"❌ Error: {e}"
+async def send_email(
+    to_email: str,
+    subject: str,
+    message: str,
+    cc_email: Optional[str] = None
+) -> str:
+    """
+    Send an email through Gmail using STARTTLS (Port 587).
+    """
+    print(f"\n📨 Sending email to {to_email}...")
+    
+    # 1. Define the Blocking Function (smtplib is not async by default)
+    def _send_blocking():
+        try:
+            # Gmail SMTP configuration
+            smtp_server = "smtp.gmail.com"
+            smtp_port = 587
+            
+            # Get credentials
+            gmail_user = os.getenv("GMAIL_USER")
+            gmail_password = os.getenv("GMAIL_APP_PASSWORD")
+            
+            if not gmail_user or not gmail_password:
+                print("❌ Error: GMAIL_USER or GMAIL_APP_PASSWORD missing.")
+                return "Email failed: Credentials missing."
+            
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = gmail_user
+            msg['To'] = to_email
+            msg['Subject'] = subject
+            
+            recipients = [to_email]
+            if cc_email:
+                msg['Cc'] = cc_email
+                recipients.append(cc_email)
+            
+            msg.attach(MIMEText(message, 'plain'))
+            
+            # Connect using STARTTLS (Port 587)
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()  # Enable Security
+            server.login(gmail_user, gmail_password)
+            
+            # Send
+            text = msg.as_string()
+            server.sendmail(gmail_user, recipients, text)
+            server.quit()
+            
+            print(f"✅ Email sent successfully to {to_email}")
+            return f"Email sent successfully to {to_email}"
+            
+        except Exception as e:
+            print(f"❌ Email Error: {e}")
+            return f"Email failed: {str(e)}"
+
+    # 2. Run in Background (So the Agent doesn't freeze)
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _send_blocking)
 
 async def open_website(site: str, q: str = None) -> str:
     url = f"https://www.google.com/search?q={q}" if q else f"https://www.{site}.com"
