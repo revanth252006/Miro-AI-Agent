@@ -262,7 +262,7 @@ def voice_loop_thread():
                 
                 # --- AUTO-NAVIGATE TO VERCEL ---
                 if not STATE.browser_opened:
-                     webbrowser.open("https://miro-ai-agent.vercel.app/voice") 
+                     webbrowser.open("https://miro-ai-agent.vercel.app/") 
                      STATE.browser_opened = True
 
                 speak("I'm listening.")
