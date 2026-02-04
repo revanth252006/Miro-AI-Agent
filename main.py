@@ -21,7 +21,6 @@ try:
     import pvporcupine 
     import pyaudio
 except ImportError:
-    # Keeps window open for 5 seconds to see error if running from .bat
     print("❌ CRITICAL: Missing libraries.") 
     time.sleep(5)
     sys.exit()
@@ -54,7 +53,6 @@ STATE = SystemState()
 def speak(text):
     """Makes the AI speak out loud"""
     try:
-        # Re-init engine every time to prevent thread locking in background mode
         engine = pyttsx3.init()
         engine.setProperty('rate', 170) 
         engine.setProperty('volume', 1.0)
@@ -240,10 +238,10 @@ def voice_loop_thread():
                 print(f"⚡ WAKE WORD DETECTED: {active_word}!")
                 STATE.listening_for_wake_word = False
                 
-                # --- AUTO-NAVIGATE ---
-                # Checks if interface is already open to prevent spam
+                # --- AUTO-NAVIGATE TO VERCEL ---
                 if not STATE.browser_opened:
-                     webbrowser.open("http://localhost:8000/voice.html") 
+                     # 🔽 UPDATED: Now points to your Vercel App
+                     webbrowser.open("https://miro-ai-agent.vercel.app/") 
                      STATE.browser_opened = True
 
                 speak("I'm listening.")
@@ -306,9 +304,8 @@ def main():
     if AGENT_AVAILABLE and app:
         print("🔗 Linking Agent...")
         set_system_state_callback(handle_command)
-        if os.path.exists("frontend"):
-            print("🌍 Hosting Frontend at http://localhost:8000")
-            app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+        # Hosting local is optional now since you use Vercel, 
+        # but we keep it running for the backend API
         uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
     else: print("❌ Critical: Agent not loaded.")
 
