@@ -2,18 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        "order for me iphone 17 pro max"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "navigate to khammam to hyderabad in google maps"
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         "I can't directly open Google Maps on your device, but I can provide you with a direct link that will open the route from Khammam to Hyderabad in Google Maps.\n\nClick on this link:\n[https://www.google.com/maps/dir/Khammam/Hyderabad](https://www.google.com/maps/dir/Khammam/Hyderabad)\n\nThis link should open Google Maps in your browser or the app (if you have it installed) with the directions already set up for you."
@@ -179,6 +167,18 @@
       "role": "user",
       "parts": [
         "activate mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "activate virtual mouse"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "disconnect"
       ]
     }
   ],

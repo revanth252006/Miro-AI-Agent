@@ -40,15 +40,21 @@ class SystemState:
 STATE = SystemState()
 
 # ==========================================
-# 1. EMBEDDED VIRTUAL MOUSE LOGIC
+# 1. OPTIMIZED VIRTUAL MOUSE LOGIC (FIXED)
 # ==========================================
 class VirtualMouse:
     def __init__(self):
+        # Safety: Prevents crash when mouse hits corner
+        pyautogui.FAILSAFE = False 
         self.wScr, self.hScr = pyautogui.size()
-        self.frameR = 100  # Frame Reduction
-        self.smoothening = 7
+        
+        # TWEAK THESE FOR SMOOTHNESS
+        self.frameR = 100        # Box size (Lower = more sensitive)
+        self.smoothening = 5     # Lower (3-5) = Faster, Higher (7-10) = Smoother but slower
+        
         self.plocX, self.plocY = 0, 0
         self.clocX, self.clocY = 0, 0
+        self.last_click_time = 0 # For non-blocking click
 
     def process(self, img, hands, detector):
         if not hands: return img
@@ -57,7 +63,7 @@ class VirtualMouse:
         lmList = hand['lmList']
         fingers = detector.fingersUp(hand)
         
-        # Draw Boundary Box
+        # Draw Boundary Box (Move hand inside this box to cover full screen)
         h, w, _ = img.shape
         cv2.rectangle(img, (self.frameR, self.frameR), (w - self.frameR, h - self.frameR), (255, 0, 255), 2)
 
@@ -65,15 +71,15 @@ class VirtualMouse:
         if fingers[1] == 1 and fingers[2] == 0:
             x1, y1 = lmList[8][0], lmList[8][1]
             
-            # Convert Coordinates
+            # Convert Coordinates (Webcam -> Screen)
             x3 = np.interp(x1, (self.frameR, w - self.frameR), (0, self.wScr))
             y3 = np.interp(y1, (self.frameR, h - self.frameR), (0, self.hScr))
 
-            # Smoothening
+            # Smoothening Logic (Exponential Moving Average)
             self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
             self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
 
-            # Move Mouse
+            # Move Mouse (Inverted X for natural mirror movement)
             try: pyautogui.moveTo(self.wScr - self.clocX, self.clocY)
             except: pass
             
@@ -83,10 +89,15 @@ class VirtualMouse:
         # 2. Clicking Mode: Index + Middle Fingers Up
         if fingers[1] == 1 and fingers[2] == 1:
             length, info, img = detector.findDistance(lmList[8][0:2], lmList[12][0:2], img)
+            
+            # Click Threshold
             if length < 40:
                 cv2.circle(img, (info[4], info[5]), 15, (0, 255, 0), cv2.FILLED)
-                pyautogui.click()
-                time.sleep(0.15) # Debounce
+                
+                # FIXED: Non-blocking timer instead of time.sleep()
+                if time.time() - self.last_click_time > 0.5: # 0.5s delay between clicks
+                    pyautogui.click()
+                    self.last_click_time = time.time()
                 
         return img
 
