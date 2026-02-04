@@ -21,8 +21,9 @@ try:
     import pvporcupine 
     import pyaudio
 except ImportError:
+    # Keeps window open for 5 seconds to see error if running from .bat
     print("❌ CRITICAL: Missing libraries.") 
-    print("👉 Run: pip install cvzone mediapipe pyautogui tensorflow pvporcupine pyaudio SpeechRecognition pyttsx3")
+    time.sleep(5)
     sys.exit()
 
 sys.path.append(".")
@@ -42,6 +43,7 @@ class SystemState:
         self.camera_active = False
         self.mode = "IDLE" 
         self.listening_for_wake_word = True
+        self.browser_opened = False 
         self.stop_event = threading.Event()
 
 STATE = SystemState()
@@ -52,11 +54,13 @@ STATE = SystemState()
 def speak(text):
     """Makes the AI speak out loud"""
     try:
+        # Re-init engine every time to prevent thread locking in background mode
         engine = pyttsx3.init()
         engine.setProperty('rate', 170) 
         engine.setProperty('volume', 1.0)
         engine.say(text)
         engine.runAndWait()
+        del engine
     except Exception as e:
         print(f"❌ TTS Error: {e}")
 
@@ -204,7 +208,7 @@ class WakeWordListener:
         if self.porcupine: self.porcupine.delete()
 
 # ==========================================
-# 4. VOICE RECOGNITION (COMMANDS)
+# 4. VOICE RECOGNITION LOOP
 # ==========================================
 def listen_for_command():
     recognizer = sr.Recognizer()
@@ -236,21 +240,20 @@ def voice_loop_thread():
                 print(f"⚡ WAKE WORD DETECTED: {active_word}!")
                 STATE.listening_for_wake_word = False
                 
-                # ========================================================
-                # 🔽 CHANGED: Point this to your specific Voice HTML file!
-                # If your file is named "agent.html", change this to "/agent.html"
-                # ========================================================
-                webbrowser.open("http://localhost:8000/voice.html") 
-                
+                # --- AUTO-NAVIGATE ---
+                # Checks if interface is already open to prevent spam
+                if not STATE.browser_opened:
+                     webbrowser.open("http://localhost:8000/voice.html") 
+                     STATE.browser_opened = True
+
                 speak("I'm listening.")
                 
                 cmd = listen_for_command()
                 if cmd:
                     print(f"🤖 Processing: {cmd}")
                     resp = asyncio.run(ai_logic.process_message(cmd))
-                    
                     print(f"🤖 AI: {resp}")
-                    speak(resp) # Speak the answer
+                    speak(resp)
                 
                 print("💤 Returning to sleep...")
                 STATE.listening_for_wake_word = True
