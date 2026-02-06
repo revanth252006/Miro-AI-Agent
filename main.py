@@ -231,33 +231,52 @@ def camera_loop():
 class UserMessage(BaseModel):
     message: str
 
+# ==========================================
+# 🧠 REAL-TIME SEARCH CHAT ENDPOINT
+# ==========================================
+# ==========================================
+# 🧠 AGGRESSIVE SEARCH CHAT ENDPOINT
+# ==========================================
 @app.post("/chat")
 async def chat_endpoint(data: UserMessage):
     print(f"📩 RECEIVED: {data.message}") 
 
     try:
-        # 1. SEARCH THE WEB (DuckDuckGo)
-        search_context = ""
-        print("🔍 Searching web...")
-        try:
-            # Search specifically for the user's query
-            results = DDGS().text(data.message, max_results=3)
-            if results:
-                search_context = f"\n\nReal-Time Web Search Results:\n{str(results)}\n"
-        except Exception as e:
-            print(f"⚠️ Search skipped: {e}")
+        if not GEMINI_API_KEY:
+            return {"response": "❌ Error: Missing GEMINI_API_KEY in .env"}
 
-        # 2. CREATE SMART PROMPT
+        # 1. FORCE SEARCH FOR EVERYTHING (To test connection)
+        search_context = ""
+        print("🔍 Attempting Web Search...")
+        
+        try:
+            # We search for the exact user message
+            results = DDGS().text(data.message, max_results=3)
+            
+            if results:
+                print("✅ WEB RESULTS FOUND!")
+                # Format results clearly for the AI
+                formatted_results = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+                search_context = f"\n\n[LIVE WEB SEARCH DATA - USE THIS]:\n{formatted_results}\n"
+            else:
+                print("⚠️ No results found on DuckDuckGo.")
+        except Exception as e:
+            print(f"⚠️ Search skipped due to error: {e}")
+
+        # 2. SYSTEM INSTRUCTION (Overriding the "I am an AI" safety)
         system_instruction = """
-        You are Miro, an AI assistant with real-time web access.
-        - If 'Real-Time Web Search Results' are provided below, USE THEM to answer accurately.
-        - If the user asks about current events (stock prices, sports, news), trust the search results.
-        - Be concise and friendly.
+        You are Miro, Revanth's intelligent agent.
+        CRITICAL INSTRUCTION: You have access to Real-Time Web Search Data provided below.
+        - IGNORE your internal training cutoff.
+        - If the '[LIVE WEB SEARCH DATA]' section is present, you MUST use that information to answer.
+        - Do not say "I don't have real-time access". The access is provided to you in the prompt.
+        - Always prioritize the web search data for current events, facts, or information that may have changed since your training.
+        
         """
         
-        final_prompt = f"{system_instruction}\n\nUser: {data.message}{search_context}"
+        final_prompt = f"{system_instruction}\n\nUser Question: {data.message}{search_context}"
 
-        # 3. GET ANSWER FROM GEMINI
+        # 3. GENERATE ANSWER
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(final_prompt)
         
@@ -265,7 +284,7 @@ async def chat_endpoint(data: UserMessage):
 
     except Exception as e:
         print(f"❌ Error: {e}")
-        return {"response": "I'm having trouble connecting to the internet right now."}
+        return {"response": "I encountered an error processing that request."}
 # ==========================================
 # 4. MAIN ENTRY POINT
 # ==========================================
