@@ -12,7 +12,6 @@ import webbrowser
 import PyPDF2
 from PIL import Image
 from dotenv import load_dotenv
-from duckduckgo_search import DDGS  # <--- Add this import
 
 # --- SETUP PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -82,8 +81,8 @@ You are helpful, Advanced intelligent, calm, and adaptive.
 You respond clearly, accurately, and respectfully.
 You optimize responses for usefulness, correctness, and user intent.
 your are created bt the  Revanth and his team. and his team members are Manoj Kumar, Amit Kumar, jaideep.
-your boss is Revanth. you are his personal agent.
-your are not a ai Assistant you are agentic ai .
+your boss is Revanth. you are his personal assistant. you will help him in his daily tasks and make his life easier.
+your are not a ai Assistant you are ai agent.
 """,
 
     # 🔹 CORE INTELLIGENCE
@@ -510,40 +509,35 @@ class VoiceAssistant:
                 return clean_resp
 
             # Tool Checks (Fallback for complex tools like weather)
-            # --- UPDATED SMART TOOL HANDLER ---
-            
-            # 1. TIME
-            if "time" in clean_text: 
-                from datetime import datetime
-                tool_result = f"Current time is {datetime.now().strftime('%I:%M %p')}"
-            
-            # 2. WEATHER & SEARCH (Combined Logic)
-            # Triggers: explicit "search" OR questions about price/news/who/what
-            elif any(x in clean_text for x in ["search", "price", "stock", "news", "who won", "weather", "current"]):
-                query = clean_text.replace("search", "").replace("for", "").strip()
-                print(f"🔍 Smart-Search Triggered for: {query}")
-                
-                try:
-                    # Run search
-                    results = DDGS().text(query, max_results=2)
-                    if results:
-                        tool_result = f"LIVE WEB FINDINGS: {str(results)}"
-                    else:
-                        tool_result = "No live info found."
-                except Exception as e:
-                    tool_result = f"Search Error: {e}"
+            if "time" in clean_text: tool_result = await get_system_time()
+            elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
+            elif "search" in clean_text:
+                query = clean_text.replace("search","").replace("for","").strip()
+                tool_result = await search_web(query)
 
-            # 3. INJECT RESULT (If any tool ran)
             if tool_result:
-                print(f"💡 Injecting Tool Result: {tool_result[:50]}...") # Debug print
-                
-                # We feed the tool result back to the chat model as "System Info"
-                response = selected_chat.send_message(
-                    f"{context_header}\nUser Query: {user_text}\n\n[SYSTEM UPDATE]: {tool_result}\n\nInstruction: Answer the user using the [SYSTEM UPDATE] info above. Do not mention you are an AI without internet."
-                )
+                response = selected_chat.send_message(f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
+            
+            # --- NORMAL CHAT ---
+            response = selected_chat.send_message(context_header + " " + user_text)
+            
+            # CRITICAL LOGIC: If mode is smart (code), DO NOT CLEAN aggressively.
+            if mode == "smart":
+                clean_resp = response.text # Keep formatting for code
+            else:
+                clean_resp = self.clean_response(response.text) # Clean for voice
+            
+            self.memory.add_message("model", clean_resp)
+            
+            # --- AUTO SAVE ---
+            hist_data = [{"role": t.role, "parts": [{"text": t.parts[0].text}]} for t in selected_chat.history]
+            title = user_text[:30] if len(hist_data) <= 2 else None
+            self.session_manager.save_session(self.current_session_id, hist_data, title)
+
+            return clean_resp
 
         except Exception as e: return f"Error: {str(e)}"
 
