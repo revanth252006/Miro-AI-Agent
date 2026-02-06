@@ -293,17 +293,22 @@ def camera_loop():
 class UserMessage(BaseModel):
     message: str
 
-# 2. The Chat Mailbox (Receives text from React)
+# ==========================================
+# 📨 CHAT ENDPOINT (Paste this into main.py)
+# ==========================================
+from pydantic import BaseModel
+
+class UserMessage(BaseModel):
+    message: str
+
 @app.post("/chat")
 async def chat_endpoint(data: UserMessage):
-    user_text = data.message
-    print(f"📩 RECEIVED MESSAGE: {user_text}")
-
-    # --- 🧠 SIMPLE AI LOGIC (Restore your AI here later) ---
-    ai_response = f"I heard you say: {user_text}"
+    print(f"📩 RECEIVED MESSAGE: {data.message}") # Check terminal for this!
     
-    # Example: If you want to integrate a real AI later, you would put it here.
-    # For now, this just proves the connection works.
+    # --- SIMULATED AI RESPONSE ---
+    # We'll use a simple echo first to GUARANTEE it works.
+    # Once you see this working, we can uncomment the real AI code.
+    ai_response = f"I received: {data.message}" 
 
     return {"response": ai_response}
 
