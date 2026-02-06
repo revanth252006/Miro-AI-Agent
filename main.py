@@ -13,6 +13,7 @@ from duckduckgo_search import DDGS # <--- Add this
 import google.generativeai as genai
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from duckduckgo_search import DDGS  # <--- Ensure this is here
 
 # --- SETUP API KEYS ---
 load_dotenv()

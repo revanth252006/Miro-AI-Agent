@@ -12,6 +12,7 @@ import webbrowser
 import PyPDF2
 from PIL import Image
 from dotenv import load_dotenv
+from duckduckgo_search import DDGS  # <--- Add this import
 
 # --- SETUP PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -509,14 +510,31 @@ class VoiceAssistant:
                 return clean_resp
 
             # Tool Checks (Fallback for complex tools like weather)
-            if "time" in clean_text: tool_result = await get_system_time()
-            elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
+            # --- UPDATED TOOL CHECKS (WITH DUCKDUCKGO) ---
+            if "time" in clean_text: 
+                from datetime import datetime
+                tool_result = f"Current time is {datetime.now().strftime('%I:%M %p')}"
+            
+            elif "weather" in clean_text: 
+                # Simple fallback if tools.py is missing
+                tool_result = "Please check a weather website, I cannot fetch live weather yet."
+            
             elif "search" in clean_text:
-                query = clean_text.replace("search","").replace("for","").strip()
-                tool_result = await search_web(query)
+                # 🔍 REAL-TIME SEARCH LOGIC
+                query = clean_text.replace("search", "").replace("for", "").strip()
+                print(f"🔍 Searching web for: {query}")
+                try:
+                    results = DDGS().text(query, max_results=3)
+                    if results:
+                        tool_result = f"Web Search Results: {str(results)}"
+                    else:
+                        tool_result = "No search results found."
+                except Exception as e:
+                    tool_result = f"Search Error: {e}"
 
             if tool_result:
-                response = selected_chat.send_message(f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
+                # Inject the search result into the chat
+                response = selected_chat.send_message(f"{context_header}\nUser Query: {user_text}\n\nExternal Info Provided: {tool_result}\n\nInstruction: Answer the user using the External Info.")
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
