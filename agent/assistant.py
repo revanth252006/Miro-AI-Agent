@@ -510,52 +510,40 @@ class VoiceAssistant:
                 return clean_resp
 
             # Tool Checks (Fallback for complex tools like weather)
-            # --- UPDATED TOOL CHECKS (WITH DUCKDUCKGO) ---
+            # --- UPDATED SMART TOOL HANDLER ---
+            
+            # 1. TIME
             if "time" in clean_text: 
                 from datetime import datetime
                 tool_result = f"Current time is {datetime.now().strftime('%I:%M %p')}"
             
-            elif "weather" in clean_text: 
-                # Simple fallback if tools.py is missing
-                tool_result = "Please check a weather website, I cannot fetch live weather yet."
-            
-            elif "search" in clean_text:
-                # 🔍 REAL-TIME SEARCH LOGIC
+            # 2. WEATHER & SEARCH (Combined Logic)
+            # Triggers: explicit "search" OR questions about price/news/who/what
+            elif any(x in clean_text for x in ["search", "price", "stock", "news", "who won", "weather", "current"]):
                 query = clean_text.replace("search", "").replace("for", "").strip()
-                print(f"🔍 Searching web for: {query}")
+                print(f"🔍 Smart-Search Triggered for: {query}")
+                
                 try:
-                    results = DDGS().text(query, max_results=3)
+                    # Run search
+                    results = DDGS().text(query, max_results=2)
                     if results:
-                        tool_result = f"Web Search Results: {str(results)}"
+                        tool_result = f"LIVE WEB FINDINGS: {str(results)}"
                     else:
-                        tool_result = "No search results found."
+                        tool_result = "No live info found."
                 except Exception as e:
                     tool_result = f"Search Error: {e}"
 
+            # 3. INJECT RESULT (If any tool ran)
             if tool_result:
-                # Inject the search result into the chat
-                response = selected_chat.send_message(f"{context_header}\nUser Query: {user_text}\n\nExternal Info Provided: {tool_result}\n\nInstruction: Answer the user using the External Info.")
+                print(f"💡 Injecting Tool Result: {tool_result[:50]}...") # Debug print
+                
+                # We feed the tool result back to the chat model as "System Info"
+                response = selected_chat.send_message(
+                    f"{context_header}\nUser Query: {user_text}\n\n[SYSTEM UPDATE]: {tool_result}\n\nInstruction: Answer the user using the [SYSTEM UPDATE] info above. Do not mention you are an AI without internet."
+                )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
-            
-            # --- NORMAL CHAT ---
-            response = selected_chat.send_message(context_header + " " + user_text)
-            
-            # CRITICAL LOGIC: If mode is smart (code), DO NOT CLEAN aggressively.
-            if mode == "smart":
-                clean_resp = response.text # Keep formatting for code
-            else:
-                clean_resp = self.clean_response(response.text) # Clean for voice
-            
-            self.memory.add_message("model", clean_resp)
-            
-            # --- AUTO SAVE ---
-            hist_data = [{"role": t.role, "parts": [{"text": t.parts[0].text}]} for t in selected_chat.history]
-            title = user_text[:30] if len(hist_data) <= 2 else None
-            self.session_manager.save_session(self.current_session_id, hist_data, title)
-
-            return clean_resp
 
         except Exception as e: return f"Error: {str(e)}"
 
