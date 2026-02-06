@@ -13,10 +13,12 @@ import asyncio
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel  # <--- ADD THIS
+from pydantic import BaseModel
 import google.generativeai as genai
 from dotenv import load_dotenv
-load_dotenv() # Load the API Key immediately
+
+# --- LOAD SECRETS ---
+load_dotenv() 
 
 # --- DEPENDENCIES CHECK ---
 try:
@@ -32,11 +34,11 @@ except ImportError:
 sys.path.append(".")
 
 # ==========================================
-# 🆕 NEW: WEBSOCKET SERVER (THE BRIDGE)
+# 🆕 WEBSOCKET SERVER (THE BRIDGE)
 # ==========================================
 app = FastAPI()
 
-# Allow your Vercel app to connect to this Localhost server
+# Allow your Vercel/React app to connect
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -57,7 +59,8 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             await websocket.receive_text() # Keep connection alive
     except:
-        connected_clients.remove(websocket)
+        if websocket in connected_clients:
+            connected_clients.remove(websocket)
         print("🔴 Website Disconnected")
 
 # Helper to send signal to website
@@ -67,7 +70,7 @@ async def broadcast_wake_signal():
         except: pass
 
 # ==========================================
-# 🔄 EXISTING: GLOBAL STATE MANAGER
+# 🔄 GLOBAL STATE MANAGER
 # ==========================================
 class SystemState:
     def __init__(self):
@@ -80,7 +83,7 @@ class SystemState:
 STATE = SystemState()
 
 # ==========================================
-# 🖱️ EXISTING: VIRTUAL MOUSE LOGIC (UNCHANGED)
+# 🖱️ VIRTUAL MOUSE LOGIC
 # ==========================================
 class VirtualMouse:
     def __init__(self):
@@ -121,7 +124,7 @@ class VirtualMouse:
         return img
 
 # ==========================================
-# ✋ EXISTING: SIGN DETECTOR LOGIC (UNCHANGED)
+# ✋ SIGN DETECTOR LOGIC
 # ==========================================
 class SignDetector:
     def __init__(self):
@@ -162,12 +165,10 @@ class SignDetector:
             return img, None
 
 # ==========================================
-# 👂 EXISTING: WAKE WORD ENGINE (UNCHANGED)
+# 👂 WAKE WORD ENGINE
 # ==========================================
 class WakeWordListener:
     def __init__(self):
-        from dotenv import load_dotenv
-        load_dotenv()
         self.access_key = os.getenv("PICOVOICE_API_KEY")
         if not self.access_key:
             print("❌ Error: Missing PICOVOICE_API_KEY in .env")
@@ -223,13 +224,8 @@ class WakeWordListener:
         if self.porcupine: self.porcupine.delete()
 
 # ==========================================
-# 🆕 MODIFIED: SILENT TRIGGER LOOP
+# 🎤 VOICE THREAD
 # ==========================================
-# I removed the old 'listen_for_command' and 'speak' functions 
-# because you want the WEBSITE to handle that, not Python.
-
-# --- 🆕 UPDATED: POPUP WINDOW LAUNCHER ---
-# --- 🆕 UPDATED: POPUP WINDOW LAUNCHER ---
 def voice_loop_thread(loop):
     wake = WakeWordListener()
     if not wake.start(): return
@@ -240,21 +236,16 @@ def voice_loop_thread(loop):
             if wake.listen():
                 print("⚡ WAKE WORD DETECTED! Signaling Widget...")
                 
-                # ✅ ONLY Send the Signal 
-                # The Electron Window is already open, so we just tell it to wake up.
+                # Signal the frontend
                 asyncio.run_coroutine_threadsafe(broadcast_wake_signal(), loop)
 
-                # ❌ REMOVED: The code that launched Chrome
-                # ❌ REMOVED: STATE.browser_opened logic (not needed anymore)
-
-                # Wait a moment so it doesn't trigger twice instantly
                 time.sleep(1) 
         else:
             time.sleep(0.1)
     wake.close()
 
 # ==========================================
-# ⚙️ EXISTING: MAIN LOGIC (UNCHANGED)
+# 📸 CAMERA THREAD
 # ==========================================
 def handle_command(command: str):
     command = command.lower()
@@ -288,13 +279,9 @@ def camera_loop():
         else:
             if cap: cap.release(); cap = None; cv2.destroyAllWindows()
             time.sleep(0.5)
-    # ==========================================
-# 📨 NEW: CHAT ENDPOINT (The Missing Part)
-# ==========================================
 
-# 1. Define the Message Format
 # ==========================================
-# 🧠 SMART AI CHAT ENDPOINT
+# 🧠 SMART AI CHAT ENDPOINT (FIXED)
 # ==========================================
 class UserMessage(BaseModel):
     message: str
@@ -322,7 +309,6 @@ async def chat_endpoint(data: UserMessage):
     except Exception as e:
         print(f"❌ AI Error: {e}")
         return {"response": "I'm having trouble connecting to my brain right now."}
-    return {"response": ai_response}
 
 # ==========================================
 # 🚀 MAIN ENTRY POINT
@@ -334,7 +320,7 @@ if __name__ == "__main__":
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    # Start Voice Thread (Passing the loop so it can signal the server)
+    # Start Voice Thread
     vt = threading.Thread(target=voice_loop_thread, args=(loop,), daemon=True)
     vt.start()
 
@@ -342,8 +328,7 @@ if __name__ == "__main__":
     ct = threading.Thread(target=camera_loop, daemon=True)
     ct.start()
     
-    # Start the Server (This listens for the Website connection)
-    # 0.0.0.0 allows connections from local network, localhost is fine too.
+    # Start the Server
     config = uvicorn.Config(app=app, host="0.0.0.0", port=8000, loop="asyncio")
     server = uvicorn.Server(config)
     loop.run_until_complete(server.serve())
