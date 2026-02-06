@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from duckduckgo_search import DDGS  # <--- CRITICAL IMPORT
+from duckduckgo_search import DDGS  # <--- REAL-TIME SEARCH TOOL
 
 # --- 1. SETUP & SECRETS ---
 load_dotenv()
