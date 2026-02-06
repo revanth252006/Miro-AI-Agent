@@ -14,6 +14,9 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel  # <--- ADD THIS
+import google.generativeai as genai
+from dotenv import load_dotenv
+load_dotenv() # Load the API Key immediately
 
 # --- DEPENDENCIES CHECK ---
 try:
@@ -290,26 +293,35 @@ def camera_loop():
 # ==========================================
 
 # 1. Define the Message Format
-class UserMessage(BaseModel):
-    message: str
-
 # ==========================================
-# 📨 CHAT ENDPOINT (Paste this into main.py)
+# 🧠 SMART AI CHAT ENDPOINT
 # ==========================================
-from pydantic import BaseModel
-
 class UserMessage(BaseModel):
     message: str
 
 @app.post("/chat")
 async def chat_endpoint(data: UserMessage):
-    print(f"📩 RECEIVED MESSAGE: {data.message}") # Check terminal for this!
-    
-    # --- SIMULATED AI RESPONSE ---
-    # We'll use a simple echo first to GUARANTEE it works.
-    # Once you see this working, we can uncomment the real AI code.
-    ai_response = f"I received: {data.message}" 
+    print(f"📩 RECEIVED: {data.message}") 
 
+    try:
+        # 1. Get API Key
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return {"response": "❌ Error: GEMINI_API_KEY is missing in .env file."}
+
+        # 2. Configure Gemini
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-pro')
+        
+        # 3. Generate Response
+        response = model.generate_content(data.message)
+        ai_text = response.text
+        
+        return {"response": ai_text}
+
+    except Exception as e:
+        print(f"❌ AI Error: {e}")
+        return {"response": "I'm having trouble connecting to my brain right now."}
     return {"response": ai_response}
 
 # ==========================================
