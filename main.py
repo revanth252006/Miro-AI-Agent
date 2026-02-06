@@ -13,6 +13,7 @@ import asyncio
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel  # <--- ADD THIS
 
 # --- DEPENDENCIES CHECK ---
 try:
@@ -234,25 +235,16 @@ def voice_loop_thread(loop):
     while not STATE.stop_event.is_set():
         if STATE.listening_for_wake_word:
             if wake.listen():
-                print("⚡ WAKE WORD DETECTED! Launching Widget...")
+                print("⚡ WAKE WORD DETECTED! Signaling Widget...")
                 
-                # 1. Send Signal (In case window is already open)
+                # ✅ ONLY Send the Signal 
+                # The Electron Window is already open, so we just tell it to wake up.
                 asyncio.run_coroutine_threadsafe(broadcast_wake_signal(), loop)
 
-                # 2. OPEN "MAC-STYLE" POPUP WINDOW
-                # This command forces Chrome to open as a tiny floating app in the bottom-right corner.
-                # Adjust 'window-size' and 'window-position' to fit your screen perfectly.
-                if not STATE.browser_opened:
-                     import subprocess
-                     # URL: Points to your voice page
-                     url = "https://miro-ai-agent.vercel.app/" 
-                     
-                     # COMMAND: Launches Chrome in "App Mode" (No bars, no tabs)
-                     # Position 1500,500 puts it roughly bottom-right on 1080p screens.
-                     subprocess.Popen(f'start chrome --app={url} --window-size=400,600 --window-position=1400,400', shell=True)
-                     
-                     STATE.browser_opened = True
-                
+                # ❌ REMOVED: The code that launched Chrome
+                # ❌ REMOVED: STATE.browser_opened logic (not needed anymore)
+
+                # Wait a moment so it doesn't trigger twice instantly
                 time.sleep(1) 
         else:
             time.sleep(0.1)
@@ -293,6 +285,27 @@ def camera_loop():
         else:
             if cap: cap.release(); cap = None; cv2.destroyAllWindows()
             time.sleep(0.5)
+    # ==========================================
+# 📨 NEW: CHAT ENDPOINT (The Missing Part)
+# ==========================================
+
+# 1. Define the Message Format
+class UserMessage(BaseModel):
+    message: str
+
+# 2. The Chat Mailbox (Receives text from React)
+@app.post("/chat")
+async def chat_endpoint(data: UserMessage):
+    user_text = data.message
+    print(f"📩 RECEIVED MESSAGE: {user_text}")
+
+    # --- 🧠 SIMPLE AI LOGIC (Restore your AI here later) ---
+    ai_response = f"I heard you say: {user_text}"
+    
+    # Example: If you want to integrate a real AI later, you would put it here.
+    # For now, this just proves the connection works.
+
+    return {"response": ai_response}
 
 # ==========================================
 # 🚀 MAIN ENTRY POINT
