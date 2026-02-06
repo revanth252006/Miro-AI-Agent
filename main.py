@@ -8,6 +8,21 @@ import pyautogui
 import uvicorn
 import os
 from fastapi.staticfiles import StaticFiles
+from duckduckgo_search import DDGS # <--- Add this
+# --- ADD THESE TO YOUR IMPORTS ---
+import google.generativeai as genai
+from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# --- SETUP API KEYS ---
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Configure Gemini immediately
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+else:
+    print("⚠️ WARNING: GEMINI_API_KEY missing in .env")
 
 # --- DEPENDENCIES ---
 # Run: pip install cvzone mediapipe pyautogui tensorflow
@@ -209,7 +224,47 @@ def camera_loop():
                 cap = None
                 cv2.destroyAllWindows()
             time.sleep(0.5)
+# ==========================================
+# 🧠 REAL-TIME SEARCH CHAT (Adds to your App)
+# ==========================================
+class UserMessage(BaseModel):
+    message: str
 
+@app.post("/chat")
+async def chat_endpoint(data: UserMessage):
+    print(f"📩 RECEIVED: {data.message}") 
+
+    try:
+        # 1. SEARCH THE WEB (DuckDuckGo)
+        search_context = ""
+        print("🔍 Searching web...")
+        try:
+            # Search specifically for the user's query
+            results = DDGS().text(data.message, max_results=3)
+            if results:
+                search_context = f"\n\nReal-Time Web Search Results:\n{str(results)}\n"
+        except Exception as e:
+            print(f"⚠️ Search skipped: {e}")
+
+        # 2. CREATE SMART PROMPT
+        system_instruction = """
+        You are Miro, an AI assistant with real-time web access.
+        - If 'Real-Time Web Search Results' are provided below, USE THEM to answer accurately.
+        - If the user asks about current events (stock prices, sports, news), trust the search results.
+        - Be concise and friendly.
+        """
+        
+        final_prompt = f"{system_instruction}\n\nUser: {data.message}{search_context}"
+
+        # 3. GET ANSWER FROM GEMINI
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(final_prompt)
+        
+        return {"response": response.text}
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return {"response": "I'm having trouble connecting to the internet right now."}
 # ==========================================
 # 4. MAIN ENTRY POINT
 # ==========================================
