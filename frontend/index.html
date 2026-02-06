@@ -87,35 +87,28 @@
   const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
 
   // --- 2. THE BRIDGE CODE (Connects Website to Python) ---
+  // --- START OF CONNECTION CODE ---
+  // --- 🔴 PASTE THIS BRIDGE CODE HERE 🔴 ---
   React.useEffect(() => {
-    // Connect to local Python backend
+    // 1. Connect to your local Python "Ears"
     const ws = new WebSocket("ws://localhost:8000/ws");
 
-    ws.onopen = () => {
-      console.log("🟢 Connected to Miro Brain");
-      setWsStatus("Connected");
-    };
+    ws.onopen = () => console.log("🟢 Connected to Miro Brain");
 
     ws.onmessage = (event) => {
-      // Listen for the "WAKE_UP" signal from Python
+      // 2. Listen for the magic word "WAKE_UP"
       if (event.data === "WAKE_UP") {
         console.log("⚡ Wake Word Received!");
 
-        // TRIGGER THE UI
-        // This switches your screen to the "Listening..." bubble animation.
+        // 3. WAKE UP THE WEBSITE
+        // This triggers your existing "Listening..." animation
         setVoiceMode(true); 
       }
     };
 
-    ws.onerror = () => setWsStatus("Error");
-    
     return () => ws.close();
   }, []);
-
-  // --- 3. KEEP YOUR EXISTING FUNCTIONS BELOW THIS LINE ---
-  // (Do not delete your handleSend, toggleVoiceMode, or return() logic!)
-  
-  // ... rest of your code ...
+  // --- 🔴 END OF CODE 🔴 ---
             
 
             // Logic Refs

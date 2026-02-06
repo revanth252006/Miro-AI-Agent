@@ -224,6 +224,8 @@ class WakeWordListener:
 # I removed the old 'listen_for_command' and 'speak' functions 
 # because you want the WEBSITE to handle that, not Python.
 
+# --- 🆕 UPDATED: POPUP WINDOW LAUNCHER ---
+# --- 🆕 UPDATED: POPUP WINDOW LAUNCHER ---
 def voice_loop_thread(loop):
     wake = WakeWordListener()
     if not wake.start(): return
@@ -232,17 +234,25 @@ def voice_loop_thread(loop):
     while not STATE.stop_event.is_set():
         if STATE.listening_for_wake_word:
             if wake.listen():
-                print("⚡ WAKE WORD DETECTED! Signaling Website...")
+                print("⚡ WAKE WORD DETECTED! Launching Widget...")
                 
-                # 1. SEND SIGNAL TO WEBSITE (This makes your site wake up!)
+                # 1. Send Signal (In case window is already open)
                 asyncio.run_coroutine_threadsafe(broadcast_wake_signal(), loop)
 
-                # 2. OPEN BROWSER (If not already open)
+                # 2. OPEN "MAC-STYLE" POPUP WINDOW
+                # This command forces Chrome to open as a tiny floating app in the bottom-right corner.
+                # Adjust 'window-size' and 'window-position' to fit your screen perfectly.
                 if not STATE.browser_opened:
-                     webbrowser.open("https://miro-ai-agent.vercel.app/") 
+                     import subprocess
+                     # URL: Points to your voice page
+                     url = "https://miro-ai-agent.vercel.app/" 
+                     
+                     # COMMAND: Launches Chrome in "App Mode" (No bars, no tabs)
+                     # Position 1500,500 puts it roughly bottom-right on 1080p screens.
+                     subprocess.Popen(f'start chrome --app={url} --window-size=400,600 --window-position=1400,400', shell=True)
+                     
                      STATE.browser_opened = True
                 
-                # 3. SLEEP (Do not speak. Just wait.)
                 time.sleep(1) 
         else:
             time.sleep(0.1)
