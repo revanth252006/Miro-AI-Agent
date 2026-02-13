@@ -7,6 +7,9 @@ import numpy as np
 import pyautogui
 import uvicorn
 import os
+import io
+import yfinance as yf
+import matplotlib.pyplot as plt
 from fastapi.staticfiles import StaticFiles
 
 # --- DEPENDENCIES ---
@@ -35,6 +38,7 @@ class SystemState:
     def __init__(self):
         self.camera_active = False
         self.mode = "IDLE"  # IDLE, MOUSE, SIGN
+        self.active_chart = None
         self.stop_event = threading.Event()
 
 STATE = SystemState()
@@ -148,10 +152,57 @@ class SignDetector:
             return img, label
         except Exception: 
             return img, None
+        # ==========================================
+# 2.5 FINANCE ENGINE LOGIC
+# ==========================================
+class FinanceEngine:
+    def __init__(self):
+        self.tickers = {
+            "tata motors": "TATAMOTORS.NS",
+            "reliance": "RELIANCE.NS",
+            "apple": "AAPL",
+            "google": "GOOGL"
+        }
+
+    def get_intraday_chart(self, company_name):
+        ticker_symbol = self.tickers.get(company_name.lower())
+        if not ticker_symbol:
+            return None
+            
+        try:
+            print(f"📈 Fetching intraday data for {ticker_symbol}...")
+            data = yf.download(ticker_symbol, period="1d", interval="5m", progress=False)
+            if data.empty: return None
+
+            plt.figure(figsize=(7, 4))
+            plt.plot(data.index, data['Close'], color='#00ff00', linewidth=2)
+            plt.title(f"{ticker_symbol} Intraday", color='white')
+            plt.axis('off') # Hides the axis for a clean, futuristic look
+            plt.tight_layout()
+
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', facecolor='#1e1e1e', edgecolor='none')
+            buf.seek(0)
+            img_arr = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+            img = cv2.imdecode(img_arr, 1)
+            plt.close() 
+            return img
+        except Exception as e:
+            print(f"Finance Error: {e}")
+            return None
 
 # ==========================================
 # 3. CORE LOGIC & HARDWARE LOOP
 # ==========================================
+
+finance_engine = FinanceEngine() # Initialize the engine
+
+def close_chart():
+    """Timer function to close the chart automatically"""
+    if STATE.mode == "FINANCE":
+        STATE.mode = "IDLE"
+        STATE.camera_active = False
+        STATE.active_chart = None
 
 def handle_command(command: str):
     """Callback from AI Agent"""
@@ -169,6 +220,20 @@ def handle_command(command: str):
     elif "sign" in command or "vision" in command:
         STATE.mode = "SIGN"
         STATE.camera_active = True
+        
+    # --- NEW: FINANCE COMMAND ---
+    elif "stock" in command or "finance" in command:
+        # Tries to extract the company name from the command
+        company = command.replace("stock", "").replace("finance", "").strip()
+        if not company: company = "tata motors" # Default
+        
+        chart_img = finance_engine.get_intraday_chart(company)
+        if chart_img is not None:
+            STATE.active_chart = chart_img
+            STATE.mode = "FINANCE"
+            STATE.camera_active = True
+            threading.Timer(10.0, close_chart).start() # Auto-close after 10s
+    
 
 def camera_loop():
     cap = None
@@ -180,6 +245,14 @@ def camera_loop():
     
     while not STATE.stop_event.is_set():
         if STATE.camera_active:
+            # --- NEW: Show Finance Chart ---
+            if STATE.mode == "FINANCE" and STATE.active_chart is not None:
+                cv2.imshow("Miro Vision", STATE.active_chart)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    handle_command("stop")
+                continue # Skip the webcam code below while chart is open
+                
+            # --- EXISTING WEBCAM CODE ---
             if cap is None or not cap.isOpened():
                 cap = cv2.VideoCapture(0)
                 cap.set(3, 640)
@@ -187,9 +260,6 @@ def camera_loop():
             
             success, img = cap.read()
             if success:
-                # IMPORTANT: Don't flip for mouse, otherwise left is right
-                # img = cv2.flip(img, 1) 
-                
                 hands, img = detector.findHands(img, flipType=False)
                 
                 if STATE.mode == "MOUSE":
