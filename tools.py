@@ -28,7 +28,8 @@ logger = logging.getLogger("Tools")
 
 # Global In-Memory state
 class GlobalStore:
-    cart: List[Dict] = []
+    def __init__(self):
+        self.cart: List[Dict] = []
     
 STORE = GlobalStore()
 
@@ -48,7 +49,7 @@ async def set_volume(level: str) -> str:
             pyautogui.press("volumemute")
             return "Muted."
         return "Unchanged."
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _perform_volume)
 
 async def take_screenshot() -> str:
@@ -57,12 +58,12 @@ async def take_screenshot() -> str:
         fn = f"screenshot_{ts}.png"
         pyautogui.screenshot(fn)
         return fn
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     fn = await loop.run_in_executor(None, _perform_screenshot)
     return f"Saved: {fn}"
 
 async def minimize_windows() -> str:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, lambda: pyautogui.hotkey('win', 'd'))
     return "Desktop visible."
 
@@ -75,7 +76,7 @@ async def open_application(app_name: str) -> str:
             return f"Opened {app_name}"
         pyautogui.press("win"); time.sleep(0.2); pyautogui.write(app_name); time.sleep(0.2); pyautogui.press("enter")
         return f"Launched {app_name}"
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _perform_open)
 
 # ==========================================
@@ -89,14 +90,14 @@ async def get_weather(city: str) -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://wttr.in/{city}?format=3", timeout=5) as resp:
                 return (await resp.text()).strip() if resp.status == 200 else "Weather unavailable."
-    except: return "Weather Error."
+    except Exception: return "Weather Error."
 
 async def search_web(query: str) -> str:
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         res = await loop.run_in_executor(None, lambda: list(DDGS().text(query, max_results=3)))
         return "\n".join([f"- {r['title']}: {r['href']}" for r in res]) if res else "No results."
-    except: return "Search failed."
+    except Exception: return "Search failed."
 
 async def send_email(
     to_email: str,
@@ -157,7 +158,7 @@ async def send_email(
             return f"Email failed: {str(e)}"
 
     # 2. Run in Background
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _send_blocking)
 
 async def open_website(site: str, q: str = None) -> str:
@@ -184,7 +185,7 @@ class PersonalShopper:
             try: 
                 self.driver.current_url
                 return self.driver
-            except: self.driver = None
+            except Exception: self.driver = None
 
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
@@ -329,7 +330,7 @@ class PersonalShopper:
 shopper = PersonalShopper()
 
 async def shop_online(product_query: str, platform: str) -> str:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, shopper.execute_shopping, product_query, platform)
 
 AVAILABLE_TOOLS = {

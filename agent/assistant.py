@@ -32,6 +32,12 @@ try:
 except ImportError:
     from agent.memory import MemoryManager, SessionManager
 
+# IMPORT PROMPT
+try:
+    from prompt import AGENT_INSTRUCTION
+except ImportError:
+    from agent.prompt import AGENT_INSTRUCTION
+
 # --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
 logging.getLogger("uvicorn.error").disabled = True
@@ -75,14 +81,14 @@ class RealTimeContext:
 PERSONALITIES = {
 
     # 🔹 SAFE FALLBACK (MANDATORY)
-    "default": """
-You are  Miro Agent.
-You are helpful, Advanced intelligent, calm, and adaptive.
+    "default": AGENT_INSTRUCTION + """
+You are Miro Agent.
+You are helpful, advanced, intelligent, calm, and adaptive.
 You respond clearly, accurately, and respectfully.
 You optimize responses for usefulness, correctness, and user intent.
-your are created bt the  Revanth and his team. and his team members are Manoj Kumar, Amit Kumar, jaideep.
-your boss is Revanth. you are his personal assistant. you will help him in his daily tasks and make his life easier.
-your are not a ai Assistant you are ai agent.
+You are created by Revanth and his team. His team members are Manoj Kumar, Amit Kumar, and Jaideep.
+Your boss is Revanth. You are his personal assistant. You will help him in his daily tasks and make his life easier.
+You are not an AI Assistant, you are an AI Agent.
 """,
 
     # 🔹 CORE INTELLIGENCE
@@ -121,7 +127,7 @@ You prefer correctness over speed and depth over surface-level responses.
 You are an autonomous AI agent.
 You think in terms of goals, sub-tasks, execution steps, tools, and verification.
 When given a task, you generate a plan, execute logically, and report outcomes.
-You behave like a advanced and powerfull digital worker, not a chatbot.
+You behave like an advanced and powerful digital worker, not a chatbot.
 """,
 
     # 🔹 DEVELOPER GOD MODE
@@ -416,16 +422,16 @@ class VoiceAssistant:
             return resp
 
         # --- PERSONALITY & HARDWARE ---
-        if "activate Miro" in clean_text: return self.switch_personality("Miro")
-        if "activate bro" in clean_text: return self.switch_personality("bro")
-        if "activate professional" in clean_text: return self.switch_personality("professional")
+        if "activate miro" in clean_text: return self.switch_personality("miro_prime")
+        if "activate bro" in clean_text: return self.switch_personality("motivator_alpha")
+        if "activate professional" in clean_text: return self.switch_personality("core_ai")
         if "reset mode" in clean_text: return self.switch_personality("default")
 
         # --- ACTION HANDLERS (Fixes Hallucination) ---
         
-        # 1. PLAY HANDLER
-        if "play" in clean_text:
-            song = clean_text.replace("play", "").strip()
+        # 1. PLAY HANDLER (word-boundary check to avoid false positives like "display")
+        if re.search(r'\bplay\b', clean_text):
+            song = re.sub(r'\bplay\b', '', clean_text).strip()
             if song:
                 await open_website("youtube", search_query=song)
                 return f"Playing {song} on YouTube."
@@ -458,8 +464,8 @@ class VoiceAssistant:
         
 
         # 2. OPEN HANDLER
-        if "open" in clean_text:
-            target = clean_text.replace("open", "").strip()
+        if re.search(r'\bopen\b', clean_text):
+            target = re.sub(r'\bopen\b', '', clean_text).strip()
             # Check desktop apps first
             apps_list = ["notepad", "calculator", "chrome", "vscode", "settings", "cmd", "terminal", "explorer"]
             opened = False
@@ -510,7 +516,11 @@ class VoiceAssistant:
 
             # Tool Checks (Fallback for complex tools like weather)
             if "time" in clean_text: tool_result = await get_system_time()
-            elif "weather" in clean_text: tool_result = await get_weather("Hyderabad")
+            elif "weather" in clean_text:
+                # Extract city from user message, fallback to Hyderabad
+                city_match = re.search(r'weather\s+(?:in|at|for|of)?\s*([\w\s]+)', clean_text)
+                city = city_match.group(1).strip() if city_match else "Hyderabad"
+                tool_result = await get_weather(city)
             elif "search" in clean_text:
                 query = clean_text.replace("search","").replace("for","").strip()
                 tool_result = await search_web(query)
@@ -539,16 +549,28 @@ class VoiceAssistant:
 
             return clean_resp
 
-        except Exception as e: return f"Error: {str(e)}"
+        except Exception as e:
+            print(f"❌ Response Generation Error: {e}")
+            return f"Error: {str(e)}"
 
     def run(self):
         print("🚀 Miro Server running on ws://localhost:8000/ws")
         uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
 
+# --- SINGLETON ASSISTANT ---
+_assistant_instance = None
+
+def get_assistant():
+    """Returns a singleton VoiceAssistant instance."""
+    global _assistant_instance
+    if _assistant_instance is None:
+        _assistant_instance = VoiceAssistant()
+    return _assistant_instance
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    assistant = VoiceAssistant()
+    assistant = get_assistant()
     try:
         while True:
             data = await websocket.receive_text()
@@ -556,8 +578,8 @@ async def websocket_endpoint(websocket: WebSocket):
             response = await assistant.process_message(data)
             if response:
                 await websocket.send_text(response)
-    except: pass
+    except Exception: pass
 
 if __name__ == "__main__":
-    assistant = VoiceAssistant()
+    assistant = get_assistant()
     assistant.run()

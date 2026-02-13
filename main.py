@@ -81,7 +81,7 @@ class VirtualMouse:
 
             # Move Mouse (Inverted X for natural mirror movement)
             try: pyautogui.moveTo(self.wScr - self.clocX, self.clocY)
-            except: pass
+            except Exception: pass
             
             cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
             self.plocX, self.plocY = self.clocX, self.clocY
@@ -112,7 +112,7 @@ class SignDetector:
             # Update these paths if your model is elsewhere
             self.classifier = Classifier("sign_detection/Model/keras_model.h5", "sign_detection/Model/labels.txt")
             print("✅ Sign Model Loaded.")
-        except:
+        except Exception:
             print("⚠️ Sign Model not found at 'sign_detection/Model/'. Check paths.")
 
     def process(self, img, hands):
@@ -146,7 +146,7 @@ class SignDetector:
             cv2.putText(img, label, (x, y - 26), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
             
             return img, label
-        except: 
+        except Exception: 
             return img, None
 
 # ==========================================

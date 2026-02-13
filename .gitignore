@@ -1,8 +1,15 @@
 venv/
 __pycache__/
+*.pyc
 .env
 .DS_Store
 sign_detection/Model/keras_model.h5
 bot_profile/
 *.log
 node_modules
+package-lock.json
+ngrok.exe
+*.jpg
+sessions/
+agent/sessions/
+agent/brain.json

@@ -12,13 +12,21 @@ class WakeWordListener:
         if not self.access_key:
             raise ValueError("❌ Missing PICOVOICE_API_KEY in .env file")
 
-        # Initialize Porcupine with "Jarvis" (Built-in)
-        # You can change keywords=['picovoice'] or ['computer'] if you prefer.
+        # Initialize Porcupine with custom "Hey Miro" model if available, else fallback to "Jarvis"
         try:
-            self.porcupine = pvporcupine.create(
-                access_key=self.access_key,
-                keywords=['jarvis'] 
-            )
+            custom_ppn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Hey-miro_en_windows_v4_0_0.ppn")
+            if os.path.exists(custom_ppn):
+                self.porcupine = pvporcupine.create(
+                    access_key=self.access_key,
+                    keyword_paths=[custom_ppn]
+                )
+                print("✅ Wake word loaded: Hey Miro (custom model)")
+            else:
+                self.porcupine = pvporcupine.create(
+                    access_key=self.access_key,
+                    keywords=['jarvis']
+                )
+                print("⚠️ Custom wake word not found, using built-in 'Jarvis'")
         except Exception as e:
             print(f"❌ Porcupine Error: {e}")
             raise

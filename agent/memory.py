@@ -3,6 +3,7 @@ import os
 import glob
 import uuid
 import datetime
+import threading
 
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +17,7 @@ if not os.path.exists(SESSIONS_DIR):
 class MemoryManager:
     """Manages the global 'brain.json' for user facts and long-term history."""
     def __init__(self):
+        self._lock = threading.Lock()
         self.data = self._load()
         if "profile" not in self.data:
             self.data["profile"] = {"facts": [], "preferences": {}}
@@ -30,8 +32,9 @@ class MemoryManager:
         return {"user_name": None, "history": [], "profile": {"facts": []}}
 
     def save(self):
-        with open(MEMORY_FILE, "w") as f:
-            json.dump(self.data, f, indent=2)
+        with self._lock:
+            with open(MEMORY_FILE, "w") as f:
+                json.dump(self.data, f, indent=2)
 
     def set_name(self, name):
         self.data["user_name"] = name
