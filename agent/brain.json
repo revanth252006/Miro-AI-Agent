@@ -2,114 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        "Indeed, Sir. Still here. How can I assist you today?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "order me iphone 17 promax"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "activate virtual mouse"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "disconnect"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "who is the president of usa"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "The current President of the USA is Joe Biden, Sir. A rather well-known individual, I must say."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "tell me hardware  related projects for the hackthon compition it should be unique if should for the aiml branch in the engineering"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Ah, a hackathon! A splendid opportunity for innovation. For the AI/ML branch, combining hardware offers some truly unique avenues. Consider these, Sir:\n\n1.  **\"Cognitive Dustbin\"**: A smart waste sorting system using embedded vision and machine learning to automatically identify and separate recyclables right at the source.\n2.  **\"Personalized Bio-Feedback Loop\"**: A wearable device that analyzes biometric data on-device using AI to provide real-time, tailored interventions for stress reduction or performance enhancement.\n3.  **\"Adaptive Acoustic Environment Optimizer\"**: A system with a microphone array and embedded AI that analyzes room acoustics and environmental noise to actively create an optimal soundscape for focus or relaxation.\n\nAny of those pique your interest, Sir?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "give some more projects which are more advanced than these "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Indeed, Sir, to truly push the envelope. Consider these for a more advanced flair:\n\n1.  **Adaptive Haptic Prosthetic Interface**: A prosthetic limb prototype utilizing embedded AI to learn user intent and environmental feedback, providing nuanced haptic responses for a more natural interaction.\n2.  **Edge-AI Powered Swarm Robotics for Dynamic Environmental Mapping**: A collaborative fleet of miniature robots, each with on-board AI, performing real-time object detection and intelligent pathfinding to collectively map complex, changing environments without central control.\n3.  **\"Sentient\" Drone for Real-time Anomaly Detection**: A drone equipped with a Jetson Nano or similar, processing video feeds with AI on-the-fly to identify unusual patterns or objects in restricted zones, complete with autonomous decision-making for alerts or further investigation.\n\nThese should provide a considerable challenge and showcase profound engineering prowess."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "does iphone 17 promax is released in the indian market"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "One moment, Sir, let me consult the digital oracle for such pressing consumer inquiries.\nI am searching the web for information on the iPhone 17 Pro Max release in the Indian market.\nI am unable to find any information regarding the release of an 'iPhone 17 Pro Max' in the Indian market, or globally for that matter, as the latest model is currently the iPhone 15 series. Perhaps you're looking a bit too far into the future, Sir?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "when is the release date for that"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Given that the iPhone 17 Pro Max hasn't even been announced, let alone released, there is no official release date available, Sir. Apple tends to keep such future devices under wraps until much closer to their launch."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "sent a time for 10 seconds"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "It is precisely 02:37 PM on Friday, February 13th, Sir. Were you intending to set a timer, or simply inquiring about the current temporal coordinates?"
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "how will me the 2026 year for me "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Ah, Sir, while I excel at managing your digital life, predicting the intricacies of your personal future is, regrettably, beyond my current programming. I am an AI, not a soothsayer. However, I can assure you that with my assistance, your tasks will certainly be handled with utmost efficiency in 2026."
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         "what are the featuers you dont have when we compare you with google gemini live and chatgpt paltforms"
@@ -179,6 +71,114 @@
       "role": "model",
       "parts": [
         "Ah, an \"upload,\" Sir. While I appreciate the sentiment, I'm afraid I cannot directly interact with files mentioned in our conversation, nor can I process a PDF through this interface. Was there something specific you wished me to *do* with this assignment, perhaps search for information related to it online?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is the stock for Tata Motors"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey mri "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Ah, good afternoon, Sir. It's Miro, actually, not MRI. How may I be of assistance this fine Friday?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what is the stock for Tata Motors"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Miro, what is the current weather in Hyderabad?\""
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "My apologies, Sir. It appears I'm having a slight spot of bother retrieving the weather for Hyderabad at the moment. Is there anything else I can assist you with?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Miro, show me finance for Apple"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Right away, Sir. Searching the web for \"Apple Inc. financial performance.\""
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "tell me "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm still fetching those details for you, Sir. Do give me a moment to gather the data."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Miro, switch to sign vision"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "I'm afraid \"sign vision\" isn't a function I'm equipped with, Sir. Perhaps you're thinking of a different digital assistant? Is there something else I can help you see, or perhaps, *do*?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Miro, activate mouse control"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Miro, switch to sign vision"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "As I mentioned, Sir, \"sign vision\" isn't in my repertoire. Is there another way I can assist you, perhaps with something within my capabilities?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "disconnect"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Uploaded: oose assingment 1 2411cs020023.pdf"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "File received, Sir. However, I'm afraid I don't currently possess the ocular functions to 'see' or process document uploads directly. Is there something specific you'd like me to do with 'oose assingment 1 2411cs020023.pdf' in text form?"
       ]
     }
   ],

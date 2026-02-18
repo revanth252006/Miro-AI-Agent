@@ -10,6 +10,7 @@ import re
 import datetime
 import webbrowser
 import PyPDF2
+from duckduckgo_search import DDGS # <--- NEW IMPORT
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -238,6 +239,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# --- NEW: REAL-TIME SEARCH HELPER ---
+def get_realtime_data(query):
+    """Fetches live data using DuckDuckGo to prevent hallucinations."""
+    try:
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        search_query = query
+        triggers = ["price", "stock", "score", "match", "weather", "vs", "news", "latest", "current"]
+        
+        if any(kw in query.lower() for kw in triggers):
+            search_query += f" current status {datetime.datetime.now().year}"
+
+        print(f"🌍 Searching Live Data: {search_query}")
+        results = DDGS().text(search_query, region='wt-wt', max_results=3)
+
+        if not results: return None
+
+        formatted = [f"[{current_time}] {r['title']}: {r['body']}" for r in results]
+        return "\n".join(formatted)
+    except Exception as e:
+        print(f"Search Error: {e}")
+        return None
 
 class VoiceAssistant:
     def __init__(self):
@@ -349,25 +371,48 @@ class VoiceAssistant:
         
         return self.fast_chat, "fast"
 
-    async def process_file(self, file_data, filename):
-        try:
-            print(f"📂 Processing file: {filename}")
-            decoded = base64.b64decode(file_data.split(",")[1])
-            text = ""
-            if filename.lower().endswith(".pdf"):
-                reader = PyPDF2.PdfReader(io.BytesIO(decoded))
-                for page in reader.pages: text += page.extract_text() + "\n"
-            else:
-                text = decoded.decode("utf-8")
-            
-            self.knowledge_base = text
-            self.smart_chat.send_message(f"SYSTEM: User uploaded {filename}. Content:\n{text[:10000]}...")
-            
-            resp = f"I have read '{filename}'. You can now ask me questions about it!"
-            self.memory.add_message("model", resp)
-            return resp
-        except Exception as e:
-            return f"❌ Error reading file: {str(e)}"
+async def process_file(self, file_data, filename):
+    try:
+        print(f"📂 Processing file: {filename}")
+
+        # Decode base64 safely
+        if "," not in file_data:
+            return "❌ Invalid file format."
+
+        decoded = base64.b64decode(file_data.split(",")[1])
+        text = ""
+
+        # Extract PDF text
+        if filename.lower().endswith(".pdf"):
+            reader = PyPDF2.PdfReader(io.BytesIO(decoded))
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+        else:
+            text = decoded.decode("utf-8")
+
+        if not text.strip():
+            return "❌ No readable text found in file."
+
+        # Store in knowledge base
+        self.knowledge_base = text
+
+        # 🔥 VERY IMPORTANT: inject into active chat session
+        await self.smart_chat.send_message(
+            f"The user has uploaded a file named '{filename}'. "
+            f"Here is the full content of the file:\n\n{text}\n\n"
+            f"You must use this content to answer any questions about the file."
+        )
+
+        response = f"✅ I have successfully read '{filename}'. You can now ask questions about it."
+        self.memory.add_message("model", response)
+
+        return response
+
+    except Exception as e:
+        print("File Processing Error:", e)
+        return f"❌ Error reading file: {str(e)}"
 
     async def process_message(self, data: str):
         global SYSTEM_CALLBACK
@@ -405,6 +450,22 @@ class VoiceAssistant:
             user_text = data
 
         clean_text = user_text.lower().strip()
+        # ... (after clean_text = user_text.lower().strip()) ...
+
+        # --- A. FINANCE BYPASS (HARDWARE DIRECT) ---
+        if "stock" in clean_text or "trend for" in clean_text or "finance" in clean_text:
+            if SYSTEM_CALLBACK:
+                SYSTEM_CALLBACK(clean_text) # Sends to main.py to open chart
+            return "Opening financial terminal."
+
+        # --- B. REAL-TIME DATA INJECTION ---
+        real_time_context = ""
+        live_triggers = ["score", "match", "price", "news", "latest", "who is", "what is"]
+        # Only search if it looks like a query, not a command like "open"
+        if any(t in clean_text for t in live_triggers) and "open" not in clean_text:
+            live_info = get_realtime_data(clean_text)
+            if live_info:
+                real_time_context = f"\n\n[REAL-TIME INTERNET DATA]:\n{live_info}\n"
         if not clean_text and not user_image: return "" 
 
         # --- SAFETY & LEARNING ---
@@ -509,7 +570,8 @@ class VoiceAssistant:
             
             if user_image:
                 print("📸 Processing Image...")
-                response = selected_chat.send_message([context_header + user_text, user_image])
+                # Inject the live data if we found any
+                response = selected_chat.send_message(context_header + real_time_context + " " + user_text,user_image)
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
