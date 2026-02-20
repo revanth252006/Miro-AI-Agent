@@ -736,14 +736,20 @@ class VoiceAssistant:
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
-            # --- NORMAL CHAT (with optional file context anchor) ---
+            # --- NORMAL CHAT (with file content embedded in-context) ---
             if self.knowledge_base:
-                # Re-anchor file context on every turn so Gemini doesn't forget
-                # Keep the snippet short to save tokens, but remind it of the source
+                # Embed the FULL extracted file text in every Q&A prompt.
+                # This is the only reliable approach — Gemini has no disk access and
+                # will refuse to answer if content is only referenced by name.
+                # Cap at 30k chars in the per-message prompt (leave room for the answer).
+                kb_snippet = self.knowledge_base[:30_000]
                 prompt = (
-                    f"{context_header}\n"
-                    f"[ACTIVE FILE: '{self.knowledge_base_name}' — answer questions using this file]\n"
-                    f"User question: {user_text}"
+                    f"{context_header}\n\n"
+                    f"=== FILE: '{self.knowledge_base_name}' ===\n"
+                    f"{kb_snippet}\n"
+                    f"=== END OF FILE ===\n\n"
+                    f"Using ONLY the file content above, answer this question:\n"
+                    f"{user_text}"
                 )
             else:
                 prompt = context_header + " " + user_text
