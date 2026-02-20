@@ -90,14 +90,14 @@ async def get_weather(city: str) -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://wttr.in/{city}?format=3", timeout=5) as resp:
                 return (await resp.text()).strip() if resp.status == 200 else "Weather unavailable."
-    except Exception: return "Weather Error."
+    except Exception as e: return f"Weather Error: {e}"
 
 async def search_web(query: str) -> str:
     try:
         loop = asyncio.get_running_loop()
         res = await loop.run_in_executor(None, lambda: list(DDGS().text(query, max_results=3)))
         return "\n".join([f"- {r['title']}: {r['href']}" for r in res]) if res else "No results."
-    except Exception: return "Search failed."
+    except Exception as e: return f"Search failed: {e}"
 
 async def send_email(
     to_email: str,
@@ -182,10 +182,11 @@ class PersonalShopper:
 
     def _get_driver(self):
         if self.driver:
-            try: 
+            try:
                 self.driver.current_url
                 return self.driver
-            except Exception: self.driver = None
+            except Exception:
+                self.driver = None
 
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
@@ -197,16 +198,18 @@ class PersonalShopper:
         path = os.path.join(os.getcwd(), "bot_profile")
         options.add_argument(f"user-data-dir={path}")
 
-        try: self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        except: self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        try:
+            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        except Exception:
+            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         return self.driver
 
     def parse_price(self, price_text):
         """Converts '₹1,54,900' to integer 154900"""
         try:
             return int(re.sub(r'[^\d]', '', price_text))
-        except:
-            return 99999999 # Return high number if price not found
+        except Exception:
+            return 99999999  # Return high number if price not found
 
     def check_platform(self, driver, wait, platform, product):
         """Scrapes price and url from a specific platform."""
@@ -226,7 +229,8 @@ class PersonalShopper:
                     try: 
                         item = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
                         break
-                    except: continue
+                    except Exception:
+                        continue
                 
                 if not item: return data
 
@@ -234,24 +238,28 @@ class PersonalShopper:
                 try: 
                     price_elm = item.find_element(By.CSS_SELECTOR, ".a-price-whole")
                     data["price"] = self.parse_price(price_elm.text)
-                except: pass
+                except Exception:
+                    pass
                 
                 # Get URL
                 try:
                     link = item.find_element(By.TAG_NAME, "h2").find_element(By.TAG_NAME, "a")
                     data["url"] = link.get_attribute("href")
                     data["title"] = link.text
-                except: 
-                     # Fallback URL
-                    try: data["url"] = item.find_element(By.TAG_NAME, "a").get_attribute("href")
-                    except: pass
+                except Exception:
+                    # Fallback URL
+                    try:
+                        data["url"] = item.find_element(By.TAG_NAME, "a").get_attribute("href")
+                    except Exception:
+                        pass
 
             elif platform == "Flipkart":
                 driver.get("https://www.flipkart.com")
                 try:
                     box = wait.until(EC.presence_of_element_located((By.NAME, "q")))
                     box.clear(); box.send_keys(product); box.send_keys(Keys.RETURN)
-                except: return data 
+                except Exception:
+                    return data
                 
                 # Find Item & Price (Flipkart has variable classes)
                 try:
@@ -261,7 +269,7 @@ class PersonalShopper:
                     data["price"] = self.parse_price(price_text)
                     data["url"] = container.get_attribute("href")
                     data["title"] = container.find_element(By.CSS_SELECTOR, "div._4rR01T").text
-                except:
+                except Exception:
                     # Grid View
                     try:
                         container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div._4ddWZP a.s1Q9rs")))
@@ -269,7 +277,8 @@ class PersonalShopper:
                         data["price"] = self.parse_price(price_text)
                         data["url"] = container.get_attribute("href")
                         data["title"] = container.get_attribute("title")
-                    except: pass
+                    except Exception:
+                        pass
                     
         except Exception as e: print(f"Error checking {platform}: {e}")
         return data

@@ -35,9 +35,26 @@ except ImportError:
 
 # IMPORT PROMPT
 try:
-    from prompt import AGENT_INSTRUCTION
+    from prompt import AGENT_INSTRUCTION, SESSION_INSTRUCTION
 except ImportError:
-    from agent.prompt import AGENT_INSTRUCTION
+    from agent.prompt import AGENT_INSTRUCTION, SESSION_INSTRUCTION
+
+# IMPORT GOOGLE AUTH & TOOLS (optional — needs web_credentials.json)
+try:
+    try:
+        from auth import AuthManager
+        from google_tools import GoogleTools
+    except ImportError:
+        from agent.auth import AuthManager
+        from agent.google_tools import GoogleTools
+    _auth_manager = AuthManager()
+    _google_tools = GoogleTools(_auth_manager)
+    GOOGLE_AUTH_AVAILABLE = True
+except Exception as _e:
+    _auth_manager = None
+    _google_tools = None
+    GOOGLE_AUTH_AVAILABLE = False
+    print(f"⚠️  Google OAuth disabled: {_e}")
 
 # --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
@@ -70,7 +87,8 @@ class MultimodalProcessor:
         try:
             if "," in image_data: image_data = image_data.split(",")[1]
             return Image.open(io.BytesIO(base64.b64decode(image_data)))
-        except: return None
+        except Exception:
+            return None
 
 class RealTimeContext:
     @staticmethod
@@ -289,6 +307,7 @@ class VoiceAssistant:
         self.email_mode = False
         self.email_step = 0
         self.email_draft = {}
+        self._google_user_id = None  # Set after /auth/callback OAuth login
 
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
     def _init_models(self):
@@ -303,15 +322,19 @@ class VoiceAssistant:
             print("🚀 Loading Gemini 2.5 Flash...")
             model_fast = genai.GenerativeModel(
                 "gemini-2.5-flash",  # Will try this first
-                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Reply Instantly."
+                system_instruction=(
+                    PERSONALITIES[self.current_persona]
+                    + "\n GOAL: Reply Instantly."
+                    + "\n\n" + SESSION_INSTRUCTION
+                )
             )
             chat_fast = model_fast.start_chat(history=[])
             print("✅ Gemini 2.5 Flash Online")
         except Exception as e:
             print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 1.5 Flash.")
             model_fast = genai.GenerativeModel(
-                "gemini-1.5-flash", 
-                system_instruction=PERSONALITIES[self.current_persona]
+                "gemini-1.5-flash",
+                system_instruction=PERSONALITIES[self.current_persona] + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
 
@@ -321,15 +344,19 @@ class VoiceAssistant:
             print("🧠 Loading Gemini 2.5 Pro...")
             model_smart = genai.GenerativeModel(
                 "gemini-2.5-pro",  # Will try this first
-                system_instruction=PERSONALITIES[self.current_persona] + "\n GOAL: Deep Reasoning & Coding."
+                system_instruction=(
+                    PERSONALITIES[self.current_persona]
+                    + "\n GOAL: Deep Reasoning & Coding."
+                    + "\n\n" + SESSION_INSTRUCTION
+                )
             )
             chat_smart = model_smart.start_chat(history=[])
             print("✅ Gemini 2.5 Pro Online")
         except Exception as e:
             print(f"⚠️ Gemini 2.5 Pro Unavailable ({e}). Fallback to 1.5 Pro.")
             model_smart = genai.GenerativeModel(
-                "gemini-1.5-pro", 
-                system_instruction=PERSONALITIES[self.current_persona]
+                "gemini-1.5-pro",
+                system_instruction=PERSONALITIES[self.current_persona] + "\n\n" + SESSION_INSTRUCTION
             )
             chat_smart = model_smart.start_chat(history=[])
 
@@ -341,11 +368,27 @@ class VoiceAssistant:
 
 
     def switch_personality(self, persona_key):
-        if persona_key in PERSONALITIES:
-            self.current_persona = persona_key
-            self.fast_chat, self.smart_chat = self._init_models()
-            return f"Mode switched to {persona_key.upper()}."
-        return "Personality not found."
+        """Switch personality without wiping conversation history.
+        
+        Instead of re-initializing entire models (which wipes history and is
+        expensive), we just update the persona key and send a lightweight
+        role-switch instruction to both chats.
+        """
+        if persona_key not in PERSONALITIES:
+            return "Personality not found."
+        self.current_persona = persona_key
+        new_instruction = PERSONALITIES[persona_key]
+        try:
+            # Inject the new role into the existing chat sessions as a system note
+            self.fast_chat.send_message(
+                f"[SYSTEM INSTRUCTION UPDATE] You are now operating in this mode:\n{new_instruction}\nAcknowledge briefly."
+            )
+            self.smart_chat.send_message(
+                f"[SYSTEM INSTRUCTION UPDATE] You are now operating in this mode:\n{new_instruction}\nAcknowledge briefly."
+            )
+        except Exception as e:
+            print(f"⚠️ Personality switch inject error: {e}")
+        return f"Mode switched to {persona_key.upper()}. Conversation history preserved."
 
     def clean_response(self, text):
         """
@@ -371,48 +414,51 @@ class VoiceAssistant:
         
         return self.fast_chat, "fast"
 
-async def process_file(self, file_data, filename):
-    try:
-        print(f"📂 Processing file: {filename}")
+    async def process_file(self, file_data, filename):
+        """Process an uploaded file and inject its content into the smart chat session."""
+        try:
+            print(f"📂 Processing file: {filename}")
 
-        # Decode base64 safely
-        if "," not in file_data:
-            return "❌ Invalid file format."
+            # Decode base64 safely
+            if "," not in file_data:
+                return "❌ Invalid file format."
 
-        decoded = base64.b64decode(file_data.split(",")[1])
-        text = ""
+            decoded = base64.b64decode(file_data.split(",")[1])
+            text = ""
 
-        # Extract PDF text
-        if filename.lower().endswith(".pdf"):
-            reader = PyPDF2.PdfReader(io.BytesIO(decoded))
-            for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n"
-        else:
-            text = decoded.decode("utf-8")
+            # Extract PDF text
+            if filename.lower().endswith(".pdf"):
+                reader = PyPDF2.PdfReader(io.BytesIO(decoded))
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+            else:
+                text = decoded.decode("utf-8")
 
-        if not text.strip():
-            return "❌ No readable text found in file."
+            if not text.strip():
+                return "❌ No readable text found in file."
 
-        # Store in knowledge base
-        self.knowledge_base = text
+            # Store in knowledge base
+            self.knowledge_base = text
 
-        # 🔥 VERY IMPORTANT: inject into active chat session
-        await self.smart_chat.send_message(
-            f"The user has uploaded a file named '{filename}'. "
-            f"Here is the full content of the file:\n\n{text}\n\n"
-            f"You must use this content to answer any questions about the file."
-        )
+            # Inject into active smart chat session
+            await asyncio.get_running_loop().run_in_executor(
+                None,
+                lambda: self.smart_chat.send_message(
+                    f"The user has uploaded a file named '{filename}'. "
+                    f"Here is the full content of the file:\n\n{text}\n\n"
+                    f"You must use this content to answer any questions about the file."
+                )
+            )
 
-        response = f"✅ I have successfully read '{filename}'. You can now ask questions about it."
-        self.memory.add_message("model", response)
+            response = f"✅ I have successfully read '{filename}'. You can now ask questions about it."
+            self.memory.add_message("model", response)
+            return response
 
-        return response
-
-    except Exception as e:
-        print("File Processing Error:", e)
-        return f"❌ Error reading file: {str(e)}"
+        except Exception as e:
+            print("File Processing Error:", e)
+            return f"❌ Error reading file: {str(e)}"
 
     async def process_message(self, data: str):
         global SYSTEM_CALLBACK
@@ -424,7 +470,8 @@ async def process_file(self, file_data, filename):
         except ImportError:
             return "Error: tools.py not found."
 
-        user_text = ""; user_image = None
+        user_text = ""
+        user_image = None
         try:
             parsed = json.loads(data)
             
@@ -450,26 +497,27 @@ async def process_file(self, file_data, filename):
             user_text = data
 
         clean_text = user_text.lower().strip()
-        # ... (after clean_text = user_text.lower().strip()) ...
 
         # --- A. FINANCE BYPASS (HARDWARE DIRECT) ---
         if "stock" in clean_text or "trend for" in clean_text or "finance" in clean_text:
             if SYSTEM_CALLBACK:
-                SYSTEM_CALLBACK(clean_text) # Sends to main.py to open chart
+                SYSTEM_CALLBACK(clean_text)
             return "Opening financial terminal."
 
         # --- B. REAL-TIME DATA INJECTION ---
         real_time_context = ""
         live_triggers = ["score", "match", "price", "news", "latest", "who is", "what is"]
-        # Only search if it looks like a query, not a command like "open"
         if any(t in clean_text for t in live_triggers) and "open" not in clean_text:
             live_info = get_realtime_data(clean_text)
             if live_info:
                 real_time_context = f"\n\n[REAL-TIME INTERNET DATA]:\n{live_info}\n"
-        if not clean_text and not user_image: return "" 
+
+        if not clean_text and not user_image:
+            return ""
 
         # --- SAFETY & LEARNING ---
-        if not self.safety.validate_input(clean_text): return "Request unsafe."
+        if not self.safety.validate_input(clean_text):
+            return "Request unsafe."
         self.memory.learn_fact(clean_text)
         self.memory.add_message("user", user_text)
 
@@ -488,31 +536,65 @@ async def process_file(self, file_data, filename):
         if "activate professional" in clean_text: return self.switch_personality("core_ai")
         if "reset mode" in clean_text: return self.switch_personality("default")
 
-        # --- ACTION HANDLERS (Fixes Hallucination) ---
-        
+        # --- EMAIL DRAFT FLOW (multi-step conversation) ---
+        if self.email_mode:
+            return self._handle_email_step(clean_text, user_text)
+
+        # --- GOOGLE TOOLS COMMAND HANDLERS ---
+        # Check email
+        if re.search(r'\bcheck\b.*\bemail\b|\bmy email\b|\bunread\b', clean_text):
+            if GOOGLE_AUTH_AVAILABLE and self._google_user_id:
+                result = _google_tools.check_emails(self._google_user_id)
+                resp = f"Here are your unread emails:\n{result}"
+            else:
+                resp = "Please log in via /login to access Gmail, or use 'send email' for SMTP."
+            self.memory.add_message("model", resp)
+            return resp
+
+        # Create Google Doc
+        if re.search(r'\bcreate\b.*\bdoc\b|\bnew doc\b|\bwrite a doc\b', clean_text):
+            if GOOGLE_AUTH_AVAILABLE and self._google_user_id:
+                title_match = re.search(r'(?:called|named|titled)\s+["\']?([\w\s]+)["\']?', clean_text)
+                title = title_match.group(1).strip() if title_match else "Miro Document"
+                result = _google_tools.create_doc(self._google_user_id, title, "")
+                resp = f"Done, Sir. {result}"
+            else:
+                resp = "Please log in via /login to create Google Docs."
+            self.memory.add_message("model", resp)
+            return resp
+
+        # Send email (start multi-step flow)
+        if re.search(r'\bsend\b.*\bemail\b|\bemail\s+\w+', clean_text):
+            self.email_mode = True
+            self.email_step = 0
+            self.email_draft = {}
+            resp = "Of course, Sir. Who should I address this email to?"
+            self.memory.add_message("model", resp)
+            return resp
+
+        # --- ACTION HANDLERS ---
+
         # 1. PLAY HANDLER (word-boundary check to avoid false positives like "display")
         if re.search(r'\bplay\b', clean_text):
             song = re.sub(r'\bplay\b', '', clean_text).strip()
             if song:
-                await open_website("youtube", search_query=song)
+                # FIX: use 'q=' not 'search_query=' to match open_website signature
+                await open_website("youtube", q=song)
                 return f"Playing {song} on YouTube."
-            # --- NEW: SHOPPING AGENT ---
-# --- SHOPPING COMMAND (AUTO-COMPARE) ---
+
+        # --- SHOPPING COMMAND (AUTO-COMPARE) ---
         triggers = ["order", "buy", "purchase", "shop", "get me a"]
         if any(t in clean_text for t in triggers):
-            
-            # 1. Detect Platform (Default to 'auto' for price comparison)
-            target_platform = "auto" 
+            target_platform = "auto"
             if "flipkart" in clean_text: target_platform = "Flipkart"
             if "amazon" in clean_text: target_platform = "Amazon"
 
-            # 2. Clean Input
             target_item = clean_text
             for t in triggers: target_item = target_item.replace(t, "")
             target_item = target_item.replace("from amazon", "").replace("on amazon", "").replace("amazon", "")
             target_item = target_item.replace("from flipkart", "").replace("on flipkart", "").replace("flipkart", "")
             target_item = target_item.replace(" me ", " ").replace(" a ", " ").replace(" an ", " ").strip()
-            
+
             if len(target_item) < 2:
                 return "What item would you like me to order?"
 
@@ -521,20 +603,16 @@ async def process_file(self, file_data, filename):
                 return await shop_online(target_item, target_platform)
             except Exception as e:
                 return f"Shopping Error: {str(e)}"
-        
-        
 
         # 2. OPEN HANDLER
         if re.search(r'\bopen\b', clean_text):
             target = re.sub(r'\bopen\b', '', clean_text).strip()
-            # Check desktop apps first
             apps_list = ["notepad", "calculator", "chrome", "vscode", "settings", "cmd", "terminal", "explorer"]
             opened = False
             for app in apps_list:
                 if app in target:
                     await open_application(app)
                     opened = True
-            # If not desktop app, assume website
             if not opened:
                 url = target.replace(" ", "")
                 if "." not in url: url += ".com"
@@ -546,64 +624,74 @@ async def process_file(self, file_data, filename):
             if "up" in clean_text: return await set_volume("up")
             if "down" in clean_text: return await set_volume("down")
             if "mute" in clean_text: return await set_volume("mute")
-        
+
         if "screenshot" in clean_text: return await take_screenshot()
         if "minimize" in clean_text: return await minimize_windows()
 
-        if "disconnect" in clean_text: 
+        if "disconnect" in clean_text:
             if SYSTEM_CALLBACK: SYSTEM_CALLBACK("stop")
             return "Disconnected."
 
         if "activate" in clean_text:
-            if "mouse" in clean_text: 
+            if "mouse" in clean_text:
                 if SYSTEM_CALLBACK: SYSTEM_CALLBACK("mouse"); return "Mouse Active."
-            if "vision" in clean_text: 
+            if "vision" in clean_text:
                 if SYSTEM_CALLBACK: SYSTEM_CALLBACK("vision"); return "Vision Camera On."
 
         # --- RESPONSE GENERATION (HYBRID ROUTING) ---
         try:
             tool_result = ""
-            selected_chat, mode = self.select_brain(clean_text, has_image=(user_image is not None), has_file=(len(self.knowledge_base)>0))
-            
-            # Real-time Context Injection
+            selected_chat, mode = self.select_brain(
+                clean_text,
+                has_image=(user_image is not None),
+                has_file=(len(self.knowledge_base) > 0)
+            )
+
             context_header = f"[SYSTEM: {RealTimeContext.get_context()} | USER: {self.memory.get_profile_context()}]"
-            
+
             if user_image:
-                print("📸 Processing Image...")
-                # Inject the live data if we found any
-                response = selected_chat.send_message(context_header + real_time_context + " " + user_text)
+                print("📸 Processing Image with Gemini multimodal...")
+                # FIX: actually send the image to Gemini's multimodal API
+                # Pass a list of [text_prompt, PIL_image] so vision works correctly
+                prompt_text = context_header + real_time_context + " " + user_text
+                loop = asyncio.get_running_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: selected_chat.send_message([prompt_text, user_image])
+                )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
-            # Tool Checks (Fallback for complex tools like weather)
-            if "time" in clean_text: tool_result = await get_system_time()
+            # Tool Checks
+            if "time" in clean_text:
+                tool_result = await get_system_time()
             elif "weather" in clean_text:
-                # Extract city from user message, fallback to Hyderabad
                 city_match = re.search(r'weather\s+(?:in|at|for|of)?\s*([\w\s]+)', clean_text)
                 city = city_match.group(1).strip() if city_match else "Hyderabad"
                 tool_result = await get_weather(city)
             elif "search" in clean_text:
-                query = clean_text.replace("search","").replace("for","").strip()
+                query = clean_text.replace("search", "").replace("for", "").strip()
                 tool_result = await search_web(query)
 
             if tool_result:
-                response = selected_chat.send_message(f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally.")
+                response = selected_chat.send_message(
+                    f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
+                )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
-            
+
             # --- NORMAL CHAT ---
             response = selected_chat.send_message(context_header + " " + user_text)
-            
-            # CRITICAL LOGIC: If mode is smart (code), DO NOT CLEAN aggressively.
+
             if mode == "smart":
-                clean_resp = response.text # Keep formatting for code
+                clean_resp = response.text
             else:
-                clean_resp = self.clean_response(response.text) # Clean for voice
-            
+                clean_resp = self.clean_response(response.text)
+
             self.memory.add_message("model", clean_resp)
-            
+
             # --- AUTO SAVE ---
             hist_data = [{"role": t.role, "parts": [{"text": t.parts[0].text}]} for t in selected_chat.history]
             title = user_text[:30] if len(hist_data) <= 2 else None
@@ -614,6 +702,75 @@ async def process_file(self, file_data, filename):
         except Exception as e:
             print(f"❌ Response Generation Error: {e}")
             return f"Error: {str(e)}"
+
+    def _handle_email_step(self, clean_text: str, user_text: str) -> str:
+        """Multi-step email composition flow.
+        
+        step 0 → recipient
+        step 1 → subject
+        step 2 → body  
+        step 3 → sends and resets
+        """
+        if "cancel" in clean_text or "nevermind" in clean_text:
+            self.email_mode = False
+            self.email_step = 0
+            self.email_draft = {}
+            return "Email cancelled, Sir."
+
+        if self.email_step == 0:
+            self.email_draft["to"] = user_text.strip()
+            self.email_step = 1
+            return f"Addressing to {user_text.strip()}. What should the subject be?"
+
+        elif self.email_step == 1:
+            self.email_draft["subject"] = user_text.strip()
+            self.email_step = 2
+            return "Got it. What should the body of the email say?"
+
+        elif self.email_step == 2:
+            self.email_draft["body"] = user_text.strip()
+            self.email_step = 3
+            to = self.email_draft.get('to', '')
+            subject = self.email_draft.get('subject', '')
+            return (
+                f"Ready to send:\n"
+                f"  To: {to}\n"
+                f"  Subject: {subject}\n"
+                f"  Body: {self.email_draft.get('body', '')}\n"
+                f"Shall I send it? (yes / cancel)"
+            )
+
+        elif self.email_step == 3:
+            if "yes" in clean_text or "send" in clean_text or "sure" in clean_text:
+                to = self.email_draft.get("to", "")
+                subject = self.email_draft.get("subject", "")
+                body = self.email_draft.get("body", "")
+
+                # Try Google OAuth path first, then SMTP fallback
+                if GOOGLE_AUTH_AVAILABLE and self._google_user_id:
+                    result = _google_tools.send_email(self._google_user_id, to, subject, body)
+                else:
+                    import asyncio as _aio
+                    try:
+                        from tools import send_email as smtp_send
+                    except ImportError:
+                        from tools import send_email as smtp_send
+                    result = _aio.get_event_loop().run_until_complete(
+                        smtp_send(to, subject, body)
+                    ) if not asyncio.get_event_loop().is_running() else "Email queued."
+
+                self.email_mode = False
+                self.email_step = 0
+                self.email_draft = {}
+                return f"Done, Sir. {result}"
+            else:
+                self.email_mode = False
+                self.email_step = 0
+                self.email_draft = {}
+                return "Email cancelled, Sir."
+
+        self.email_mode = False
+        return ""
 
     def run(self):
         print("🚀 Miro Server running on ws://localhost:8000/ws")
@@ -629,6 +786,37 @@ def get_assistant():
         _assistant_instance = VoiceAssistant()
     return _assistant_instance
 
+# ==========================================
+# GOOGLE OAUTH ROUTES
+# ==========================================
+from fastapi import Request
+from fastapi.responses import RedirectResponse, JSONResponse
+
+@app.get("/login")
+async def google_login(request: Request):
+    """Redirects the user to Google's OAuth consent screen."""
+    if not GOOGLE_AUTH_AVAILABLE:
+        return JSONResponse({"error": "Google OAuth not configured. Add web_credentials.json."})
+    redirect_uri = str(request.base_url) + "auth/callback"
+    url = _auth_manager.get_login_url(redirect_uri)
+    return RedirectResponse(url)
+
+@app.get("/auth/callback")
+async def google_callback(request: Request, code: str = ""):
+    """Handles Google OAuth callback, stores credentials."""
+    if not GOOGLE_AUTH_AVAILABLE or not code:
+        return JSONResponse({"error": "Auth failed or OAuth not configured."})
+    try:
+        redirect_uri = str(request.base_url) + "auth/callback"
+        user_id, name = _auth_manager.exchange_code(code, redirect_uri)
+        # Store user_id on the singleton assistant for tool calls
+        assistant = get_assistant()
+        assistant._google_user_id = user_id
+        # Redirect back to the frontend
+        return RedirectResponse(f"/?logged_in=1&name={name}")
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -640,7 +828,8 @@ async def websocket_endpoint(websocket: WebSocket):
             response = await assistant.process_message(data)
             if response:
                 await websocket.send_text(response)
-    except Exception: pass
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     assistant = get_assistant()

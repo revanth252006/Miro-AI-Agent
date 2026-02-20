@@ -28,7 +28,8 @@ class MemoryManager:
             try:
                 with open(MEMORY_FILE, "r") as f:
                     return json.load(f)
-            except: pass
+            except Exception:
+                pass
         return {"user_name": None, "history": [], "profile": {"facts": []}}
 
     def save(self):
@@ -72,6 +73,7 @@ class SessionManager:
     """Manages separate JSON files for sidebar chat history."""
     def __init__(self):
         self.sessions_dir = SESSIONS_DIR
+        self._lock = threading.Lock()
 
     def create_session(self):
         return str(uuid.uuid4())[:8]
@@ -84,7 +86,8 @@ class SessionManager:
             try:
                 with open(session_file, "r") as f:
                     current_title = json.load(f).get("title", "New Chat")
-            except: pass
+            except Exception:
+                pass
             
         data = {
             "id": session_id,
@@ -92,15 +95,18 @@ class SessionManager:
             "history": history,
             "timestamp": str(datetime.datetime.now())
         }
-        with open(session_file, "w") as f:
-            json.dump(data, f, indent=2)
+        with self._lock:
+            with open(session_file, "w") as f:
+                json.dump(data, f, indent=2)
     
     def load_session(self, session_id):
         session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
         if os.path.exists(session_file):
             try:
-                with open(session_file, "r") as f: return json.load(f)
-            except: pass
+                with open(session_file, "r") as f:
+                    return json.load(f)
+            except Exception:
+                pass
         return None
     
     def get_all_sessions(self):
@@ -113,5 +119,6 @@ class SessionManager:
                     with open(file_path, "r") as f:
                         data = json.load(f)
                         sessions.append({"id": data["id"], "title": data.get("title", "Chat")})
-                except: continue
+                except Exception:
+                    continue
         return sessions

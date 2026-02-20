@@ -33,6 +33,13 @@ except ImportError as e:
     AGENT_AVAILABLE = False
     app = None
 
+# --- IMPORT WAKE WORD (optional) ---
+try:
+    from wake_word import WakeWordListener
+    WAKE_WORD_AVAILABLE = True
+except ImportError:
+    WAKE_WORD_AVAILABLE = False
+
 # --- GLOBAL STATE ---
 class SystemState:
     def __init__(self):
@@ -281,6 +288,35 @@ def camera_loop():
             time.sleep(0.5)
 
 # ==========================================
+# 3.5 WAKE WORD LOOP
+# ==========================================
+def wake_word_loop():
+    """Runs WakeWordListener in a background thread.
+    
+    Logs when 'Hey Miro' / 'Hey Jarvis' is detected.
+    Gracefully exits if the Picovoice key is missing or libraries
+    are not installed — server will still start without this feature.
+    
+    TODO: When mic-to-WebSocket pipeline is built, trigger voice capture
+    here by sending a signal to the frontend via an asyncio queue.
+    """
+    if not WAKE_WORD_AVAILABLE:
+        print("⚠️  Wake word disabled (pvporcupine/pyaudio not installed).")
+        return
+    try:
+        listener = WakeWordListener()
+        print("🎤 Wake word listener active. Say 'Hey Miro' to activate voice input.")
+        while not STATE.stop_event.is_set():
+            if listener.listen():
+                print("🎙️ Wake word detected! Voice input ready.")
+                # TODO: signal frontend/WebSocket to start voice capture
+        listener.close()
+    except ValueError as e:
+        print(f"⚠️  Wake word disabled: {e}")
+    except Exception as e:
+        print(f"⚠️  Wake word listener error: {e}")
+
+# ==========================================
 # 4. MAIN ENTRY POINT
 # ==========================================
 def main():
@@ -290,7 +326,11 @@ def main():
     t = threading.Thread(target=camera_loop, daemon=True)
     t.start()
 
-    # 2. Link & Start Server
+    # 2. Start Wake Word Thread
+    ww = threading.Thread(target=wake_word_loop, daemon=True)
+    ww.start()
+
+    # 3. Link & Start Server
     if AGENT_AVAILABLE and app:
         print("🔗 Linking Agent to Hardware...")
         set_system_state_callback(handle_command)
