@@ -93,11 +93,63 @@ async def get_weather(city: str) -> str:
     except Exception as e: return f"Weather Error: {e}"
 
 async def search_web(query: str) -> str:
+    """Web search — returns title + snippet body so Gemini has real content, not just links."""
     try:
         loop = asyncio.get_running_loop()
-        res = await loop.run_in_executor(None, lambda: list(DDGS().text(query, max_results=3)))
-        return "\n".join([f"- {r['title']}: {r['href']}" for r in res]) if res else "No results."
-    except Exception as e: return f"Search failed: {e}"
+        res = await loop.run_in_executor(
+            None,
+            lambda: list(DDGS().text(query, max_results=5))
+        )
+        if not res:
+            return "No results found."
+        lines = []
+        for r in res:
+            title = r.get("title", "")
+            body  = r.get("body", r.get("snippet", ""))
+            href  = r.get("href", "")
+            lines.append(f"• {title}\n  {body}\n  Source: {href}")
+        return "\n\n".join(lines)
+    except Exception as e:
+        return f"Search failed: {e}"
+
+async def wiki_lookup(query: str) -> str:
+    """Fetch a Wikipedia summary for factual/encyclopedic questions."""
+    try:
+        safe = urllib.parse.quote(query)
+        url  = f"https://en.wikipedia.org/api/rest_v1/page/summary/{safe}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=6)) as resp:
+                if resp.status != 200:
+                    return f"Wikipedia: no article found for '{query}'."
+                data    = await resp.json()
+                title   = data.get("title", "")
+                extract = data.get("extract", "No summary available.")
+                page    = data.get("content_urls", {}).get("desktop", {}).get("page", "")
+                return f"**{title}** (Wikipedia)\n{extract}\nRead more: {page}"
+    except Exception as e:
+        return f"Wikipedia lookup failed: {e}"
+
+async def get_news(topic: str = "latest") -> str:
+    """Fetch recent news headlines + snippets via DuckDuckGo News."""
+    try:
+        loop = asyncio.get_running_loop()
+        res = await loop.run_in_executor(
+            None,
+            lambda: list(DDGS().news(topic, max_results=5))
+        )
+        if not res:
+            return f"No recent news found for '{topic}'."
+        lines = []
+        for r in res:
+            title  = r.get("title", "")
+            body   = r.get("body", "")
+            source = r.get("source", "")
+            date   = r.get("date", "")
+            url    = r.get("url", "")
+            lines.append(f"• [{date}] {title} — {source}\n  {body}\n  {url}")
+        return "\n\n".join(lines)
+    except Exception as e:
+        return f"News fetch failed: {e}"
 
 async def send_email(
     to_email: str,

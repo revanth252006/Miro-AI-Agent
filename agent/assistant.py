@@ -415,6 +415,139 @@ class VoiceAssistant:
         
         return self.fast_chat, "fast"
 
+    # ==========================================
+    # PILLAR 2 — ADVANCED REASONING
+    # ==========================================
+    def _complexity_score(self, text: str) -> int:
+        """Scores how complex / multi-step a question is (0-10)."""
+        score = 0
+        t = text.lower()
+        if len(t) > 120:           score += 2
+        elif len(t) > 60:          score += 1
+        deep_words = [
+            "analyze", "analyse", "compare", "contrast", "evaluate",
+            "pros and cons", "trade-off", "why", "how does", "explain",
+            "implications", "impact", "difference between", "which is better",
+            "think through", "reason", "step by step", "deep dive",
+            "should i", "is it worth", "future of", "what would happen"
+        ]
+        for w in deep_words:
+            if w in t:
+                score += 1
+        # Multi-question indicators
+        if text.count("?") > 1:    score += 1
+        if " and " in t and "?" in t: score += 1
+        return min(score, 10)
+
+    def _build_reasoning_prompt(self, context_header: str, user_text: str) -> str:
+        """Prepends chain-of-thought preamble for complex questions."""
+        return (
+            f"{context_header}\n\n"
+            "[REASONING MODE]\n"
+            "Think through this carefully, step by step. "
+            "Show your reasoning process before giving the final answer. "
+            "Consider multiple angles, weigh pros and cons, and be precise.\n\n"
+            f"Question: {user_text}"
+        )
+
+    # ==========================================
+    # PILLAR 3 — CREATIVE GENERATION
+    # ==========================================
+    CREATIVE_TRIGGERS = {
+        "story":  ["write a story", "tell me a story", "short story", "write a tale",
+                   "write a narrative", "fiction about"],
+        "poem":   ["write a poem", "write poetry", "compose a poem", "write a sonnet",
+                   "write a haiku", "write a song", "write lyrics"],
+        "code":   ["write code", "generate code", "write a script", "write a program",
+                   "implement a", "build a function", "code that"],
+        "design": ["design a", "create a ui", "create a ux", "layout for", "wireframe",
+                   "design brief", "color palette", "design system"],
+    }
+
+    def _detect_creative_mode(self, text: str) -> str | None:
+        """Returns creative mode string or None if not a creative request."""
+        t = text.lower()
+        for mode, triggers in self.CREATIVE_TRIGGERS.items():
+            if any(trig in t for trig in triggers):
+                return mode
+        return None
+
+    async def _handle_creative(self, user_text: str, mode: str) -> str:
+        """Handles creative generation with genre-specific system prompting."""
+        CREATIVE_SYSTEM = {
+            "story": (
+                "You are an award-winning fiction author. Write with vivid imagery, "
+                "compelling characters, and a clear narrative arc. Be original and avoid clichés. "
+                "Aim for literary quality."
+            ),
+            "poem": (
+                "You are a renowned poet. Compose with strong imagery, rhythm, emotional resonance, "
+                "and structural intention. Use metaphor and subtext. Be original and evocative."
+            ),
+            "code": (
+                "You are a principal software engineer. Write clean, efficient, production-grade code. "
+                "Include comments for complex sections. Follow best practices. "
+                "Wrap code in proper markdown fenced code blocks with language tags."
+            ),
+            "design": (
+                "You are a world-class UI/UX architect. Produce detailed design briefs including: "
+                "layout structure, color palette, typography, spacing, component hierarchy, "
+                "interaction patterns, and accessibility considerations."
+            ),
+        }
+        system_note = CREATIVE_SYSTEM.get(mode, "")
+        prompt = (
+            f"[CREATIVE MODE: {mode.upper()}]\n"
+            f"{system_note}\n\n"
+            f"Request: {user_text}"
+        )
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: self.smart_chat.send_message(prompt)
+        )
+        clean_resp = response.text
+        self.memory.add_message("model", clean_resp)
+        return clean_resp
+
+    # ==========================================
+    # PILLAR 4 — ENHANCED MULTIMODAL
+    # ==========================================
+    def _analyze_image_intent(self, user_text: str) -> str:
+        """Returns a specialized image analysis prompt based on user intent."""
+        t = user_text.lower().strip()
+
+        if not t:  # Image sent with no text → auto-describe
+            return (
+                "Describe this image in rich detail. Cover: what is shown, "
+                "people or objects present, setting/environment, colors and composition, "
+                "mood and artistic style, and any notable details. Be thorough."
+            )
+        if any(w in t for w in ["read", "text", "ocr", "extract text", "what does it say",
+                                 "words", "written"]):
+            return (
+                "Read and extract ALL text visible in this image, exactly as it appears. "
+                "Preserve line breaks and formatting. If there are multiple text regions, "
+                "label them (e.g., Title, Body, Caption)."
+            )
+        if any(w in t for w in ["chart", "graph", "plot", "data", "analyze this",
+                                  "statistics", "trend", "table"]):
+            return (
+                "Analyze this chart or data visualization in detail. "
+                "Identify: chart type, axes/labels, key trends, notable data points, "
+                "highs and lows, and a concise executive summary of what the data shows."
+            )
+        if any(w in t for w in ["identify", "who is", "what is", "what are",
+                                  "recognize", "classify"]):
+            return (
+                f"Look at this image carefully and answer: {user_text}\n"
+                "Be specific and confident. If unsure, say so."
+            )
+        # Default: answer the question using the image
+        return (
+            f"Using this image as your primary reference, answer the following: {user_text}"
+        )
+
     async def process_file(self, file_data, filename):
         """Process an uploaded file and store its text in knowledge_base.
         
@@ -515,9 +648,9 @@ class VoiceAssistant:
         global SYSTEM_CALLBACK
         
         try:
-            from tools import (get_system_time, search_web, open_website, send_email, 
-                               search_product, get_weather, set_volume, take_screenshot, 
-                               minimize_windows, open_application)
+            from tools import (get_system_time, search_web, open_website, send_email,
+                               search_product, get_weather, set_volume, take_screenshot,
+                               minimize_windows, open_application, wiki_lookup, get_news)
         except ImportError:
             return "Error: tools.py not found."
 
@@ -626,6 +759,11 @@ class VoiceAssistant:
             self.memory.add_message("model", resp)
             return resp
 
+        # --- CREATIVE GENERATION (Pillar 3) ---
+        creative_mode = self._detect_creative_mode(clean_text)
+        if creative_mode:
+            return await self._handle_creative(user_text, creative_mode)
+
         # --- ACTION HANDLERS ---
 
         # 1. PLAY HANDLER (word-boundary check to avoid false positives like "display")
@@ -705,21 +843,30 @@ class VoiceAssistant:
 
             if user_image:
                 print("📸 Processing Image with Gemini multimodal...")
-                # FIX: actually send the image to Gemini's multimodal API
-                # Pass a list of [text_prompt, PIL_image] so vision works correctly
-                prompt_text = context_header + real_time_context + " " + user_text
+                # Pillar 4: intent-specific prompt based on what the user asked
+                image_prompt = self._analyze_image_intent(user_text)
                 loop = asyncio.get_running_loop()
                 response = await loop.run_in_executor(
                     None,
-                    lambda: selected_chat.send_message([prompt_text, user_image])
+                    lambda: selected_chat.send_message([image_prompt, user_image])
                 )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
             # Tool Checks
+            tool_result = ""
             if "time" in clean_text:
                 tool_result = await get_system_time()
+            elif re.search(r'\bnews\b|latest headlines|what happened today', clean_text):
+                topic = re.sub(r'news|latest|headlines|today|about|the', '', clean_text).strip() or "latest"
+                tool_result = await get_news(topic)
+            elif any(w in clean_text for w in ["who is", "who was", "what is", "what was",
+                                                "tell me about", "history of", "biography"])\
+                    and "search" not in clean_text:
+                topic = re.sub(r'who is|who was|what is|what was|tell me about|history of|biography of',
+                               '', clean_text).strip()
+                tool_result = await wiki_lookup(topic) if topic else ""
             elif "weather" in clean_text:
                 city_match = re.search(r'weather\s+(?:in|at|for|of)?\s*([\w\s]+)', clean_text)
                 city = city_match.group(1).strip() if city_match else "Hyderabad"
@@ -729,19 +876,19 @@ class VoiceAssistant:
                 tool_result = await search_web(query)
 
             if tool_result:
-                response = selected_chat.send_message(
-                    f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: selected_chat.send_message(
+                        f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
+                    )
                 )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
-            # --- NORMAL CHAT (with file content embedded in-context) ---
+            # --- NORMAL CHAT with optional reasoning boost (Pillar 2) ---
             if self.knowledge_base:
-                # Embed the FULL extracted file text in every Q&A prompt.
-                # This is the only reliable approach — Gemini has no disk access and
-                # will refuse to answer if content is only referenced by name.
-                # Cap at 30k chars in the per-message prompt (leave room for the answer).
+                # File Q&A: embed full extracted text so Gemini can't refuse
                 kb_snippet = self.knowledge_base[:30_000]
                 prompt = (
                     f"{context_header}\n\n"
@@ -751,6 +898,10 @@ class VoiceAssistant:
                     f"Using ONLY the file content above, answer this question:\n"
                     f"{user_text}"
                 )
+            elif self._complexity_score(user_text) >= 3:
+                # Complex question: use chain-of-thought reasoning mode
+                prompt = self._build_reasoning_prompt(context_header, user_text)
+                selected_chat = self.smart_chat  # always use Pro for reasoning
             else:
                 prompt = context_header + " " + user_text
 
