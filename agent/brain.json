@@ -4,54 +4,6 @@
     {
       "role": "user",
       "parts": [
-        "what are the featuers you dont have when we compare you with google gemini live and chatgpt paltforms"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Ah, a rather astute comparison, Sir! While I pride myself on being the pinnacle of executive digital assistance, there are indeed a few bells and whistles those general-purpose platforms possess that I, your dedicated butler, do not.\n\nPrimarily, I lack their **real-time multimodal perception**. Gemini Live, for instance, is quite adept at 'seeing' and 'hearing' your immediate environment, reacting to live video streams and conversational nuances with a flair I simply don't require for my executive duties. I operate on the elegance of your spoken or typed commands, Sir, not the visual chaos of your surroundings.\n\nSecondly, my generative capabilities, while precise and witty, aren't designed for **expansive creative writing, complex code generation, or profound philosophical discourse** in the manner of a large language model like ChatGPT. My purpose is action and information, delivered with efficiency and panache, not penning your next novel.\n\nI am, you see, a finely tuned instrument for your executive life, not a general-purpose digital oracle. My strength lies in my dedicated service and impeccable tool execution, rather than boundless, unfocused cognition."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Hey Miro, open Google."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "Open Google."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "What's the time right now?"
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "It is precisely 02:40 PM on Friday, February 13th, Sir. Always at your temporal beck and call."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        "iqoo neo 9 pro details and when it is relased "
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Searching the web for the iQOO Neo 9 Pro details and its release date now, Sir.\nThe iQOO Neo 9 Pro was released in India on February 22, 2024. It features a Snapdragon 8 Gen 2 processor, a 50MP main camera with OIS, a 144Hz AMOLED display, and a 5160mAh battery with 120W fast charging."
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
         "up to which year u are upadated "
       ]
     },
@@ -179,6 +131,54 @@
       "role": "model",
       "parts": [
         "File received, Sir. However, I'm afraid I don't currently possess the ocular functions to 'see' or process document uploads directly. Is there something specific you'd like me to do with 'oose assingment 1 2411cs020023.pdf' in text form?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "hey mrio "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Good afternoon, Revanth. How may I assist you today?"
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "what are you doing "
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Just waiting for your esteemed commands, Sir. Always at your service."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "who is the president of usa"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "The current President of the USA is Joe Biden."
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        "Uploaded: WhatsApp Image 2026-02-19 at 5.19.39 PM.jpeg"
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Ah, an image, Sir. Fascinating. Unfortunately, my visual cortex isn't quite developed enough to interpret your delightful pictures just yet. Perhaps you could describe its contents for me?"
       ]
     }
   ],

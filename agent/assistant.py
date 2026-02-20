@@ -287,7 +287,8 @@ class VoiceAssistant:
         self.safety = SafetyGuardrail()
 
         self.user_name = self.memory.get_name()
-        self.knowledge_base = ""
+        self.knowledge_base = ""       # extracted text from uploaded file
+        self.knowledge_base_name = ""  # original filename
 
         # 2. Load Past History
         past_history = self.memory.get_history()
@@ -415,44 +416,94 @@ class VoiceAssistant:
         return self.fast_chat, "fast"
 
     async def process_file(self, file_data, filename):
-        """Process an uploaded file and inject its content into the smart chat session."""
+        """Process an uploaded file and store its text in knowledge_base.
+        
+        Supported formats: PDF, DOCX, TXT, CSV, JSON, PY, JS, MD and any UTF-8 text.
+        The extracted text is stored in self.knowledge_base so every subsequent
+        message can reference it via the file_context anchor.
+        """
         try:
             print(f"📂 Processing file: {filename}")
 
-            # Decode base64 safely
             if "," not in file_data:
-                return "❌ Invalid file format."
+                return "❌ Invalid file format — expected base64 data URL."
 
             decoded = base64.b64decode(file_data.split(",")[1])
             text = ""
+            ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
 
-            # Extract PDF text
-            if filename.lower().endswith(".pdf"):
-                reader = PyPDF2.PdfReader(io.BytesIO(decoded))
-                for page in reader.pages:
-                    page_text = page.extract_text()
-                    if page_text:
-                        text += page_text + "\n"
+            if ext == "pdf":
+                # --- PDF ---
+                try:
+                    reader = PyPDF2.PdfReader(io.BytesIO(decoded))
+                    for page in reader.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                except Exception as e:
+                    return f"❌ PDF read error: {e}"
+
+            elif ext == "docx":
+                # --- Word Document ---
+                try:
+                    import docx
+                    doc = docx.Document(io.BytesIO(decoded))
+                    text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+                except ImportError:
+                    # Fallback: try raw text extraction
+                    try:
+                        text = decoded.decode("utf-8", errors="ignore")
+                    except Exception:
+                        return "❌ Install python-docx to read Word files: pip install python-docx"
+                except Exception as e:
+                    return f"❌ DOCX read error: {e}"
+
+            elif ext == "csv":
+                # --- CSV ---
+                import csv as _csv
+                try:
+                    rows = list(_csv.reader(io.StringIO(decoded.decode("utf-8", errors="replace"))))
+                    text = "\n".join(", ".join(row) for row in rows)
+                except Exception as e:
+                    return f"❌ CSV read error: {e}"
+
             else:
-                text = decoded.decode("utf-8")
+                # --- Any UTF-8 text (txt, py, js, md, json, html, etc.) ---
+                try:
+                    text = decoded.decode("utf-8")
+                except UnicodeDecodeError:
+                    text = decoded.decode("latin-1", errors="replace")
 
-            if not text.strip():
-                return "❌ No readable text found in file."
+            text = text.strip()
+            if not text:
+                return "❌ No readable text found in file. Please upload a text-based file."
 
-            # Store in knowledge base
+            # Trim very large files to avoid token limit overflows (~50k chars ≈ ~12k tokens)
+            MAX_CHARS = 50_000
+            truncated = False
+            if len(text) > MAX_CHARS:
+                text = text[:MAX_CHARS]
+                truncated = True
+
+            # Store in knowledge base for Q&A sessions
             self.knowledge_base = text
+            self.knowledge_base_name = filename
 
-            # Inject into active smart chat session
+            # Inject into smart chat session so history is aware of the file
+            injection_prompt = (
+                f"[FILE UPLOADED: '{filename}']\n"
+                f"The user has uploaded this file. Here is its FULL content:\n\n"
+                f"{text}\n\n"
+                f"Study this content carefully. When the user asks ANY question, "
+                f"answer using ONLY this file's content unless they explicitly ask otherwise."
+            )
             await asyncio.get_running_loop().run_in_executor(
                 None,
-                lambda: self.smart_chat.send_message(
-                    f"The user has uploaded a file named '{filename}'. "
-                    f"Here is the full content of the file:\n\n{text}\n\n"
-                    f"You must use this content to answer any questions about the file."
-                )
+                lambda: self.smart_chat.send_message(injection_prompt)
             )
 
-            response = f"✅ I have successfully read '{filename}'. You can now ask questions about it."
+            trunc_note = f" (first {MAX_CHARS:,} characters loaded)" if truncated else ""
+            response = f"✅ File '{filename}' loaded successfully{trunc_note}. Ask me anything about it!"
             self.memory.add_message("model", response)
             return response
 
@@ -485,6 +536,9 @@ class VoiceAssistant:
             if parsed.get("type") == "new_chat":
                 self.current_session_id = self.session_manager.create_session()
                 self.fast_chat.history.clear()
+                self.smart_chat.history.clear()
+                self.knowledge_base = ""      # clear file context for fresh chat
+                self.knowledge_base_name = ""
                 return json.dumps({"type": "chat_loaded", "history": [], "title": "New Chat"})
 
             if parsed.get("type") == "upload":
@@ -682,8 +736,23 @@ class VoiceAssistant:
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
-            # --- NORMAL CHAT ---
-            response = selected_chat.send_message(context_header + " " + user_text)
+            # --- NORMAL CHAT (with optional file context anchor) ---
+            if self.knowledge_base:
+                # Re-anchor file context on every turn so Gemini doesn't forget
+                # Keep the snippet short to save tokens, but remind it of the source
+                prompt = (
+                    f"{context_header}\n"
+                    f"[ACTIVE FILE: '{self.knowledge_base_name}' — answer questions using this file]\n"
+                    f"User question: {user_text}"
+                )
+            else:
+                prompt = context_header + " " + user_text
+
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: selected_chat.send_message(prompt)
+            )
 
             if mode == "smart":
                 clean_resp = response.text
