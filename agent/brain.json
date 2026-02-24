@@ -284,6 +284,38 @@
           "text": "give me the spects of oneplus nord 5"
         }
       ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hi"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good afternoon, Sir. How can I assist you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who are you "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am Miro, your AI Executive Butler, at your service. I was created by you, Revanth, and your esteemed team: Manoj Kumar, Amit Kumar, and Jaideep."
+        }
+      ]
     }
   ],
   "profile": {
