@@ -180,6 +180,110 @@
       "parts": [
         "Sir, that appears to be a privacy icon, specifically one representing a secure or private browser window.\n\nUnless you've had a rather minimalist digital makeover, I can assure you that is not a live feed from your webcam."
       ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey miro "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good afternoon, Sir. How can I assist you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what are you doing "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Just standing by, Sir, eagerly anticipating your next command. I am always at your service."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "which model are you "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I am Miro, an AI executive butler, designed by you, Revanth, and your esteemed team. I'm here to manage your digital life with unparalleled efficiency."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is mean by butler "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Sir, it seems my previous attempt to look up \"mean by butler\" was a bit too literal. A butler, in essence, is a chief male servant of a household, responsible for managing other domestic staff and often overseeing the dining room, wine cellar, and pantry. Think of them as the executive assistant of a large estate.\n\nIf you'd like a more formal definition, I can attempt to look up \"butler\" directly."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the president of usa "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "check again "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the president of usa "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "It appears my internal archives, while vast, didn't quite appreciate the phrasing \"the president of usa.\" Perhaps a slight rephrasing, like \"President of the United States,\" might yield better results. Shall I give that a try?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "give me the spects of oneplus nord 5"
+        }
+      ]
     }
   ],
   "profile": {
