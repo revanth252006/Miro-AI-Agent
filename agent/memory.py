@@ -24,12 +24,13 @@ class MemoryManager:
             self.save()
 
     def _load(self):
-        if os.path.exists(MEMORY_FILE):
-            try:
-                with open(MEMORY_FILE, "r") as f:
-                    return json.load(f)
-            except Exception:
-                pass
+        with self._lock:  # FIXED: Protect against race conditions on startup
+            if os.path.exists(MEMORY_FILE):
+                try:
+                    with open(MEMORY_FILE, "r") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
         return {"user_name": None, "history": [], "profile": {"facts": []}}
 
     def save(self):
@@ -45,11 +46,12 @@ class MemoryManager:
         return self.data.get("user_name")
 
     def add_message(self, role, text):
-        """Saves a message to the main history."""
-        self.data["history"].append({"role": role, "parts": [text]})
-        # Limit to last 30 messages to prevent JSON bloat
-        if len(self.data["history"]) > 30:
-            self.data["history"] = self.data["history"][-30:]
+        """Saves a message to the main history in Gemini SDK-compatible format."""
+        # FIXED: parts must be a list of dicts, not plain strings, for Gemini SDK compatibility
+        self.data["history"].append({"role": role, "parts": [{"text": text}]})
+        # Limit to last 50 messages to prevent JSON bloat (was 30, too small)
+        if len(self.data["history"]) > 50:
+            self.data["history"] = self.data["history"][-50:]
         self.save()
 
     def get_history(self):

@@ -310,6 +310,10 @@ class VoiceAssistant:
         self.email_draft = {}
         self._google_user_id = None  # Set after /auth/callback OAuth login
 
+        # Wake word broadcast support
+        self._active_ws = []           # Active WebSocket connections
+        self._event_loop = None        # Set when the async server starts
+
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
     def _init_models(self):
         """Initializes Models: FORCES Gemini 2.5 as requested."""
@@ -369,27 +373,14 @@ class VoiceAssistant:
 
 
     def switch_personality(self, persona_key):
-        """Switch personality without wiping conversation history.
-        
-        Instead of re-initializing entire models (which wipes history and is
-        expensive), we just update the persona key and send a lightweight
-        role-switch instruction to both chats.
-        """
+        """Switch personality without wiping or polluting conversation history."""
         if persona_key not in PERSONALITIES:
             return "Personality not found."
         self.current_persona = persona_key
-        new_instruction = PERSONALITIES[persona_key]
-        try:
-            # Inject the new role into the existing chat sessions as a system note
-            self.fast_chat.send_message(
-                f"[SYSTEM INSTRUCTION UPDATE] You are now operating in this mode:\n{new_instruction}\nAcknowledge briefly."
-            )
-            self.smart_chat.send_message(
-                f"[SYSTEM INSTRUCTION UPDATE] You are now operating in this mode:\n{new_instruction}\nAcknowledge briefly."
-            )
-        except Exception as e:
-            print(f"⚠️ Personality switch inject error: {e}")
-        return f"Mode switched to {persona_key.upper()}. Conversation history preserved."
+        # FIXED: Re-initialize models with new system instruction instead of
+        # sending a fake user message which corrupts the chat history.
+        self.fast_chat, self.smart_chat = self._init_models()
+        return f"Mode switched to {persona_key.upper()}. I'm now operating in that mode."
 
     def clean_response(self, text):
         """
@@ -686,7 +677,10 @@ class VoiceAssistant:
         clean_text = user_text.lower().strip()
 
         # --- A. FINANCE BYPASS (HARDWARE DIRECT) ---
-        if "stock" in clean_text or "trend for" in clean_text or "finance" in clean_text:
+        # FIXED: Only intercept commands that explicitly ask to SHOW/DISPLAY a chart.
+        # Pure text questions like "what is the stock market" now go to AI instead.
+        finance_action_words = ["show", "display", "open", "chart", "graph", "terminal", "price of"]
+        if ("stock" in clean_text or "finance" in clean_text) and any(w in clean_text for w in finance_action_words):
             if SYSTEM_CALLBACK:
                 SYSTEM_CALLBACK(clean_text)
             return "Opening financial terminal."
@@ -725,7 +719,7 @@ class VoiceAssistant:
 
         # --- EMAIL DRAFT FLOW (multi-step conversation) ---
         if self.email_mode:
-            return self._handle_email_step(clean_text, user_text)
+            return await self._handle_email_step(clean_text, user_text)
 
         # --- GOOGLE TOOLS COMMAND HANDLERS ---
         # Check email
@@ -855,6 +849,7 @@ class VoiceAssistant:
                 return clean_resp
 
             # Tool Checks
+            loop = asyncio.get_running_loop()
             tool_result = ""
             if "time" in clean_text:
                 tool_result = await get_system_time()
@@ -911,15 +906,15 @@ class VoiceAssistant:
                 lambda: selected_chat.send_message(prompt)
             )
 
-            if mode == "smart":
-                clean_resp = response.text
-            else:
-                clean_resp = self.clean_response(response.text)
+            clean_resp = self.clean_response(response.text)
 
             self.memory.add_message("model", clean_resp)
 
-            # --- AUTO SAVE ---
-            hist_data = [{"role": t.role, "parts": [{"text": t.parts[0].text}]} for t in selected_chat.history]
+            # --- AUTO SAVE --- FIXED: use selected_chat (not always smart_chat)
+            try:
+                hist_data = [{"role": t.role, "parts": [{"text": p.text for p in t.parts}]} for t in selected_chat.history]
+            except Exception:
+                hist_data = []
             title = user_text[:30] if len(hist_data) <= 2 else None
             self.session_manager.save_session(self.current_session_id, hist_data, title)
 
@@ -929,7 +924,7 @@ class VoiceAssistant:
             print(f"❌ Response Generation Error: {e}")
             return f"Error: {str(e)}"
 
-    def _handle_email_step(self, clean_text: str, user_text: str) -> str:
+    async def _handle_email_step(self, clean_text: str, user_text: str) -> str:
         """Multi-step email composition flow.
         
         step 0 → recipient
@@ -976,14 +971,16 @@ class VoiceAssistant:
                 if GOOGLE_AUTH_AVAILABLE and self._google_user_id:
                     result = _google_tools.send_email(self._google_user_id, to, subject, body)
                 else:
-                    import asyncio as _aio
+                    # FIXED: Use asyncio-safe call instead of run_until_complete() which
+                    # crashes inside a running event loop.
                     try:
                         from tools import send_email as smtp_send
                     except ImportError:
                         from tools import send_email as smtp_send
-                    result = _aio.get_event_loop().run_until_complete(
-                        smtp_send(to, subject, body)
-                    ) if not asyncio.get_event_loop().is_running() else "Email queued."
+                    try:
+                        result = await smtp_send(to, subject, body)
+                    except Exception as e:
+                        result = f"Email failed: {e}"
 
                 self.email_mode = False
                 self.email_step = 0
@@ -1047,16 +1044,35 @@ async def google_callback(request: Request, code: str = ""):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     assistant = get_assistant()
+    # Track event loop and active connections for wake word broadcast
+    import asyncio as _aio
+    if assistant._event_loop is None:
+        assistant._event_loop = _aio.get_event_loop()
+    assistant._active_ws.append(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            if not data: continue
-            response = await assistant.process_message(data)
+            raw = await websocket.receive_text()
+            if not raw:
+                continue
+            # process_message handles all message types:
+            # - plain text chat
+            # - JSON: {type: "upload", file, filename}
+            # - JSON: {type: "get_history"}
+            # - JSON: {type: "load_session", id}
+            # - JSON: {type: "new_chat"}
+            # - JSON: {type: "text", text, image}
+            response = await assistant.process_message(raw)
             if response:
                 await websocket.send_text(response)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"⚠️ WebSocket error: {e}")
+    finally:
+        # Always remove from active connections on disconnect
+        if websocket in assistant._active_ws:
+            assistant._active_ws.remove(websocket)
+
 
 if __name__ == "__main__":
     assistant = get_assistant()
     assistant.run()
+

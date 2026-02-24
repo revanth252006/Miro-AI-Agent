@@ -56,7 +56,7 @@ STATE = SystemState()
 class VirtualMouse:
     def __init__(self):
         # Safety: Prevents crash when mouse hits corner
-        pyautogui.FAILSAFE = False 
+        pyautogui.FAILSAFE = True  # FIXED: Keep this True so moving mouse to corner is an emergency stop
         self.wScr, self.hScr = pyautogui.size()
         
         # TWEAK THESE FOR SMOOTHNESS
@@ -157,9 +157,10 @@ class SignDetector:
             cv2.putText(img, label, (x, y - 26), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
             
             return img, label
-        except Exception: 
+        except Exception:
             return img, None
-        # ==========================================
+
+# ==========================================
 # 2.5 FINANCE ENGINE LOGIC
 # ==========================================
 class FinanceEngine:
@@ -230,16 +231,20 @@ def handle_command(command: str):
         
     # --- NEW: FINANCE COMMAND ---
     elif "stock" in command or "finance" in command:
-        # Tries to extract the company name from the command
-        company = command.replace("stock", "").replace("finance", "").strip()
-        if not company: company = "tata motors" # Default
-        
+        # FIXED: Extract company name more reliably using keyword removal
+        noise_words = ["stock", "finance", "show", "chart", "for", "of", "price", "check", "the", "get", "me"]
+        words = command.split()
+        company_words = [w for w in words if w not in noise_words]
+        company = " ".join(company_words).strip() if company_words else "tata motors"
+        if not company:
+            company = "tata motors"  # Sensible default
+        print(f"📈 Finance command for company: '{company}'")
         chart_img = finance_engine.get_intraday_chart(company)
         if chart_img is not None:
             STATE.active_chart = chart_img
             STATE.mode = "FINANCE"
             STATE.camera_active = True
-            threading.Timer(10.0, close_chart).start() # Auto-close after 10s
+            threading.Timer(10.0, close_chart).start()  # Auto-close after 10s
     
 
 def camera_loop():
@@ -293,12 +298,9 @@ def camera_loop():
 def wake_word_loop():
     """Runs WakeWordListener in a background thread.
     
-    Logs when 'Hey Miro' / 'Hey Jarvis' is detected.
-    Gracefully exits if the Picovoice key is missing or libraries
-    are not installed — server will still start without this feature.
-    
-    TODO: When mic-to-WebSocket pipeline is built, trigger voice capture
-    here by sending a signal to the frontend via an asyncio queue.
+    When 'Hey Miro' is detected, broadcasts a JSON wake_up event to all
+    currently connected WebSocket clients. The frontend receives this and
+    activates voice input mode automatically.
     """
     if not WAKE_WORD_AVAILABLE:
         print("⚠️  Wake word disabled (pvporcupine/pyaudio not installed).")
@@ -308,8 +310,25 @@ def wake_word_loop():
         print("🎤 Wake word listener active. Say 'Hey Miro' to activate voice input.")
         while not STATE.stop_event.is_set():
             if listener.listen():
-                print("🎙️ Wake word detected! Voice input ready.")
-                # TODO: signal frontend/WebSocket to start voice capture
+                print("🎙️ Wake word detected! Signaling frontend...")
+                # Broadcast the wake signal to all connected WebSocket clients
+                if AGENT_AVAILABLE:
+                    try:
+                        from agent.assistant import get_assistant
+                        assistant = get_assistant()
+                        # Signal via the global active connections list
+                        import asyncio, json as _json
+                        wake_msg = _json.dumps({"type": "wake_up"})
+                        for conn in list(getattr(assistant, '_active_ws', [])):
+                            try:
+                                asyncio.run_coroutine_threadsafe(
+                                    conn.send_text(wake_msg),
+                                    assistant._event_loop
+                                )
+                            except Exception:
+                                pass
+                    except Exception as e:
+                        print(f"⚠️ Wake word broadcast error: {e}")
         listener.close()
     except ValueError as e:
         print(f"⚠️  Wake word disabled: {e}")

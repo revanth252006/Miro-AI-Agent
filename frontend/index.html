@@ -86,29 +86,7 @@
   const [liveTranscript, setLiveTranscript] = useState("");
   const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
 
-  // --- 2. THE BRIDGE CODE (Connects Website to Python) ---
-  // --- START OF CONNECTION CODE ---
-  // --- 🔴 PASTE THIS BRIDGE CODE HERE 🔴 ---
-  React.useEffect(() => {
-    // 1. Connect to your local Python "Ears"
-    const ws = new WebSocket("ws://localhost:8000/ws");
-
-    ws.onopen = () => console.log("🟢 Connected to Miro Brain");
-
-    ws.onmessage = (event) => {
-      // 2. Listen for the magic word "WAKE_UP"
-      if (event.data === "WAKE_UP") {
-        console.log("⚡ Wake Word Received!");
-
-        // 3. WAKE UP THE WEBSITE
-        // This triggers your existing "Listening..." animation
-        setVoiceMode(true); 
-      }
-    };
-
-    return () => ws.close();
-  }, []);
-  // --- 🔴 END OF CODE 🔴 ---
+  // FIXED: Removed duplicate bridge WebSocket (was opening 2 connections)
             
 
             // Logic Refs
@@ -126,14 +104,41 @@
 
             useEffect(() => { isVoiceModeRef.current = isVoiceMode; }, [isVoiceMode]);
 
+            // --- SESSION HISTORY STATE ---
+            const [sessionHistory, setSessionHistory] = useState([]);
+
             // 1. WEBSOCKET
             useEffect(() => {
                 const connect = () => {
                     ws.current = new WebSocket('ws://localhost:8000/ws');
-                    ws.current.onopen = () => setWsStatus("Online");
+                    ws.current.onopen = () => {
+                        setWsStatus("Online");
+                        // FIXED: Load session history sidebar on connect
+                        ws.current.send(JSON.stringify({ type: "get_history" }));
+                    };
                     ws.current.onclose = () => { setWsStatus("Offline"); setTimeout(connect, 3000); };
                     ws.current.onmessage = (event) => {
                         const data = event.data;
+
+                        // Handle JSON control messages
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.type === "history_list") {
+                                setSessionHistory(parsed.data || []);
+                                return;
+                            }
+                            if (parsed.type === "chat_loaded") {
+                                setMessages((parsed.history || []).map((m, i) => ({
+                                    id: i, role: m.role === 'model' ? 'assistant' : m.role,
+                                    content: m.parts?.[0]?.text || m.parts?.[0] || ''
+                                })));
+                                setIsGenerating(false);
+                                return;
+                            }
+                            // Wake word signal from backend
+                            if (parsed.type === "wake_up") { toggleVoiceMode(true); return; }
+                        } catch(e) { /* not JSON, treat as plain text response */ }
+
                         if (data.includes("Vision Camera On")) { setVisionActive(true); startWebcam(); return; }
                         if (data.includes("Disconnected")) { setVisionActive(false); stopWebcam(); return; }
                         
@@ -299,7 +304,21 @@
             return (
                 <div className="flex h-screen w-full bg-bg text-textMain overflow-hidden font-sans">
                     
-                    <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => handleSend(`Uploaded: ${e.target.files[0]?.name}`)} />
+                    {/* FIXED: File upload now reads base64 and sends proper payload to backend */}
+            <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.docx,.txt,.csv,.json,.py,.js,.md" onChange={(e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (ws.current?.readyState === WebSocket.OPEN) {
+                        setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📎 Uploading: ${file.name}` }]);
+                        setIsGenerating(true);
+                        ws.current.send(JSON.stringify({ type: 'upload', file: ev.target.result, filename: file.name }));
+                    }
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            }} />
 
                     {/* Sidebar */}
                     <motion.aside 
@@ -308,11 +327,24 @@
                     >
                         <div className="p-4 w-[280px] flex flex-col h-full">
                             <button onClick={() => setSidebarOpen(false)} className="hover:bg-surfaceHover p-2 rounded-full text-textSec w-fit mb-6"><Icons.Menu /></button>
-                            <button onClick={() => window.location.reload()} className="flex items-center gap-3 px-4 py-3 bg-surfaceHover rounded-full text-sm hover:bg-[#3c3d40] transition-colors mb-6 w-fit text-textSec">
+                            <button onClick={() => {
+                                if (ws.current?.readyState === WebSocket.OPEN) {
+                                    ws.current.send(JSON.stringify({ type: 'new_chat' }));
+                                } else { window.location.reload(); }
+                            }} className="flex items-center gap-3 px-4 py-3 bg-surfaceHover rounded-full text-sm hover:bg-[#3c3d40] transition-colors mb-6 w-fit text-textSec">
                                 <Icons.Plus /> <span className="text-[#e3e3e3]">New chat</span>
                             </button>
+                            {/* FIXED: Session history now loads from backend */}
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 <div className="text-xs font-medium text-textSec mb-2 px-4 mt-2">Recent</div>
+                                {sessionHistory.map(s => (
+                                    <button key={s.id} onClick={() => {
+                                        if (ws.current?.readyState === WebSocket.OPEN)
+                                            ws.current.send(JSON.stringify({ type: 'load_session', id: s.id }));
+                                    }} className="w-full text-left px-4 py-2 text-sm text-textSec hover:bg-surfaceHover rounded-lg truncate transition-colors">
+                                        {s.title || 'Chat'}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </motion.aside>

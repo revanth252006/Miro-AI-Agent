@@ -88,7 +88,10 @@ async def get_system_time() -> str:
 async def get_weather(city: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://wttr.in/{city}?format=3", timeout=5) as resp:
+            async with session.get(
+                f"https://wttr.in/{city}?format=3",
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
                 return (await resp.text()).strip() if resp.status == 200 else "Weather unavailable."
     except Exception as e: return f"Weather Error: {e}"
 
@@ -222,8 +225,13 @@ async def manage_shopping(action: str, item: str="", price: float=0) -> str:
     if action == "add": STORE.cart.append({"name": item, "price": price}); return "Added."
     return str(STORE.cart)
 
-async def book_ride(a: str, b: str) -> str: return "Ride booked."
-async def search_product(p: str) -> str: return "Searched."
+async def book_ride(a: str, b: str) -> str:
+    """Simulates booking a ride. Returns confirmation message."""
+    return f"I've noted your ride request from '{a}' to '{b}'. For real booking, please open Uber or Rapido from your browser."
+
+async def search_product(p: str) -> str:
+    """Delegates to web search for the product."""
+    return await search_web(f"{p} best price buy online India")
 
 # ==========================================
 # 3. 🛍️ SMART PRICE COMPARISON ENGINE
@@ -238,8 +246,9 @@ class PersonalShopper:
                 self.driver.current_url
                 return self.driver
             except Exception:
-                self.driver = None
+                self.driver = None  # Mark as dead
 
+        # FIXED: Always create a new driver if none exists or previous one died
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
         options.add_experimental_option("detach", True)
@@ -398,6 +407,8 @@ AVAILABLE_TOOLS = {
     "get_system_time": get_system_time,
     "get_weather": get_weather,
     "search_web": search_web,
+    "wiki_lookup": wiki_lookup,       # FIXED: was missing
+    "get_news": get_news,             # FIXED: was missing
     "send_email": send_email,
     "open_website": open_website,
     "manage_shopping": manage_shopping,
@@ -407,5 +418,5 @@ AVAILABLE_TOOLS = {
     "take_screenshot": take_screenshot,
     "minimize_windows": minimize_windows,
     "open_application": open_application,
-    "shop_online": shop_online 
+    "shop_online": shop_online
 }
