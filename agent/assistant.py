@@ -61,6 +61,58 @@ except Exception as _e:
     GOOGLE_AUTH_AVAILABLE = False
     print(f"⚠️  Google OAuth disabled: {_e}")
 
+# Finance Tracker (local SQLite, no API needed)
+try:
+    from finance_tracker import log_expense, get_spending_summary
+except ImportError:
+    try:
+        from agent.finance_tracker import log_expense, get_spending_summary
+    except ImportError:
+        log_expense = None
+        get_spending_summary = None
+
+# WhatsApp Integration
+try:
+    import pywhatkit
+    WHATSAPP_AVAILABLE = True
+except ImportError:
+    pywhatkit = None
+    WHATSAPP_AVAILABLE = False
+    print("⚠️ pywhatkit not installed — WhatsApp disabled (pip install pywhatkit)")
+
+# Screen Reader (PIL + pytesseract)
+try:
+    from screen_reader import describe_screen, capture_screen
+except ImportError:
+    try:
+        from agent.screen_reader import describe_screen, capture_screen
+    except ImportError:
+        describe_screen = None
+        capture_screen = None
+
+# Google Calendar
+try:
+    from google_calendar import get_todays_events, create_event, parse_schedule_command
+except ImportError:
+    try:
+        from agent.google_calendar import get_todays_events, create_event, parse_schedule_command
+    except ImportError:
+        get_todays_events = None
+        create_event = None
+        parse_schedule_command = None
+
+# Vector Memory (ChromaDB)
+try:
+    from vector_memory import VectorMemory
+    VECTOR_MEMORY_AVAILABLE = True
+except ImportError:
+    try:
+        from agent.vector_memory import VectorMemory
+        VECTOR_MEMORY_AVAILABLE = True
+    except ImportError:
+        VectorMemory = None
+        VECTOR_MEMORY_AVAILABLE = False
+
 # --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
 logging.getLogger("uvicorn.error").disabled = True
@@ -347,6 +399,71 @@ class VoiceAssistant:
         # Wake word broadcast support
         self._active_ws = []           # Active WebSocket connections
         self._event_loop = None        # Set when the async server starts
+        self._briefing_sent_today = False  # Daily briefing flag
+        self._current_ws = None            # Current WebSocket for streaming
+        self._was_streamed = False          # Flag: last response was streamed
+
+    # ==========================================
+    # FEATURE: AUTO DAILY BRIEFING (8 AM)
+    # ==========================================
+    async def _generate_daily_briefing(self) -> str:
+        """Generates a morning briefing: weather + news + email summary."""
+        parts = ["## ☀️ Good Morning, Sir! Here's your daily briefing:\n"]
+        
+        try:
+            weather = await get_weather("Hyderabad")
+            parts.append(f"### 🌡️ Weather\n{weather}\n")
+        except Exception:
+            parts.append("### 🌡️ Weather\nCouldn't fetch weather.\n")
+        
+        try:
+            news = await get_news("latest")
+            if news:
+                parts.append(f"### 📰 Top Headlines\n{news[:1000]}\n")
+        except Exception:
+            parts.append("### 📰 News\nCouldn't fetch news.\n")
+        
+        try:
+            from tools import read_inbox
+            emails = await read_inbox(max_emails=5)
+            if emails:
+                parts.append(f"### 📧 Email Summary\n{emails[:800]}\n")
+        except Exception:
+            pass
+        
+        parts.append("\n*Have a productive day! 🚀*")
+        return "\n".join(parts)
+
+    async def _daily_briefing_scheduler(self):
+        """Background task: sends daily briefing at 8:00 AM to all connected WebSocket clients."""
+        print("⏰ Daily briefing scheduler started (8:00 AM)")
+        while True:
+            now = datetime.datetime.now()
+            target = now.replace(hour=8, minute=0, second=0, microsecond=0)
+            if now >= target:
+                target += datetime.timedelta(days=1)
+            wait_seconds = (target - now).total_seconds()
+            
+            await asyncio.sleep(wait_seconds)
+            
+            if not self._briefing_sent_today:
+                try:
+                    briefing = await self._generate_daily_briefing()
+                    # Broadcast to all connected WebSockets
+                    for ws in self._active_ws[:]:
+                        try:
+                            await ws.send_json({"response": briefing})
+                        except Exception:
+                            self._active_ws.remove(ws)
+                    print("📋 Daily briefing sent!")
+                    self._briefing_sent_today = True
+                except Exception as e:
+                    print(f"❌ Daily briefing error: {e}")
+            
+            # Reset flag at midnight
+            await asyncio.sleep(60)
+            if datetime.datetime.now().hour == 0:
+                self._briefing_sent_today = False
 
     def _check_ollama(self) -> bool:
         """Check if Ollama is running locally."""
@@ -384,6 +501,85 @@ class VoiceAssistant:
 
         return await loop.run_in_executor(None, _call)
 
+    async def _ask_ollama_stream(self, prompt: str, websocket=None, model: str = None):
+        """Stream response from Ollama token by token. Returns full text."""
+        import json as _json
+        model = model or self.ollama_model
+        full_response = []
+
+        def _stream():
+            """Generator that yields chunks from Ollama streaming API."""
+            resp = _requests.post(
+                f"{self.ollama_url}/api/generate",
+                json={
+                    "model": model,
+                    "system": AGENT_INSTRUCTION,
+                    "prompt": prompt,
+                    "stream": True,
+                    "options": {"temperature": 0.7, "num_predict": 2000}
+                },
+                timeout=120,
+                stream=True
+            )
+            for line in resp.iter_lines():
+                if line:
+                    chunk = _json.loads(line)
+                    if "response" in chunk:
+                        yield chunk["response"]
+                    if chunk.get("done", False):
+                        break
+
+        loop = asyncio.get_running_loop()
+        # Collect chunks in a thread, then stream to WebSocket
+        import queue
+        q = queue.Queue()
+        
+        def _producer():
+            try:
+                for chunk in _stream():
+                    q.put(chunk)
+            finally:
+                q.put(None)  # sentinel
+        
+        # Start producer thread
+        import threading
+        t = threading.Thread(target=_producer, daemon=True)
+        t.start()
+        
+        # Send stream_start
+        if websocket:
+            try:
+                await websocket.send_json({"type": "stream_start"})
+            except Exception:
+                pass
+        
+        # Consume chunks and forward to WebSocket
+        while True:
+            try:
+                chunk = await loop.run_in_executor(None, lambda: q.get(timeout=0.05))
+            except Exception:
+                await asyncio.sleep(0.02)
+                continue
+            
+            if chunk is None:
+                break
+            
+            full_response.append(chunk)
+            if websocket:
+                try:
+                    await websocket.send_json({"type": "stream_chunk", "text": chunk})
+                except Exception:
+                    break
+        
+        # Send stream_end
+        if websocket:
+            try:
+                await websocket.send_json({"type": "stream_end"})
+            except Exception:
+                pass
+        
+        return "".join(full_response)
+
     async def _send_message_with_retry(self, chat, message, max_retries=2):
         """Hybrid AI routing: Ollama (local) → Gemini (cloud) → OpenAI (last resort).
 
@@ -405,7 +601,12 @@ class VoiceAssistant:
         if self.ollama_available and isinstance(message, str):
             try:
                 print("🏠 Local: Sending to Ollama...")
-                text = await self._ask_ollama(message)
+                # Use streaming if WebSocket available
+                if self._current_ws:
+                    text = await self._ask_ollama_stream(message, websocket=self._current_ws)
+                    self._was_streamed = True
+                else:
+                    text = await self._ask_ollama(message)
                 if text and len(text.strip()) > 5:
                     return MockResponse(text)
                 errors.append("Ollama: empty response")
@@ -648,6 +849,58 @@ class VoiceAssistant:
             if any(trig in t for trig in triggers):
                 return mode
         return None
+
+    # ==========================================
+    # FEATURE: EMOTION DETECTION
+    # ==========================================
+    _EMOTION_MAP = {
+        "frustrated": {
+            "keywords": ["not working", "broken", "useless", "stupid", "hate", "annoyed",
+                         "frustrated", "angry", "wtf", "terrible", "worst", "fix this",
+                         "why isn't", "doesn't work", "failed", "error", "bug", "wrong"],
+            "tone": "User seems frustrated. Respond with extra patience, empathy, and care. Apologize if something went wrong. Be calm and solution-focused."
+        },
+        "happy": {
+            "keywords": ["thanks", "awesome", "great", "love it", "perfect", "amazing",
+                         "wonderful", "excellent", "brilliant", "nice", "cool", "wow",
+                         "haha", "lol", "yay", "thank you"],
+            "tone": "User is in a good mood! Be casual, fun, and upbeat. Match their positive energy."
+        },
+        "stressed": {
+            "keywords": ["stressed", "overwhelmed", "too much", "exhausted", "tired",
+                         "deadline", "pressure", "can't handle", "help me", "urgent",
+                         "running out of time", "so much work", "burnt out"],
+            "tone": "User seems stressed. Be supportive and calming. Offer to help prioritize. Suggest a short break if appropriate."
+        },
+        "sad": {
+            "keywords": ["sad", "depressed", "lonely", "miss", "lost", "crying",
+                         "heartbroken", "disappointed", "unfortunate", "bad day"],
+            "tone": "User seems down. Be warm, empathetic, and uplifting. Offer encouragement."
+        },
+        "curious": {
+            "keywords": ["how does", "why does", "what if", "explain", "tell me about",
+                         "curious", "wonder", "interesting", "how to"],
+            "tone": "User is curious and in learning mode. Be detailed, informative, and enthusiastic about sharing knowledge."
+        },
+    }
+
+    def _detect_emotion(self, text: str) -> tuple[str, str]:
+        """Detects user emotion from text. Returns (emotion_name, tone_instruction)."""
+        t = text.lower()
+        best_emotion = "neutral"
+        best_score = 0
+        best_tone = ""
+
+        for emotion, data in self._EMOTION_MAP.items():
+            score = sum(1 for kw in data["keywords"] if kw in t)
+            if score > best_score:
+                best_score = score
+                best_emotion = emotion
+                best_tone = data["tone"]
+
+        if best_score == 0:
+            return "neutral", ""
+        return best_emotion, best_tone
 
     async def _handle_creative(self, user_text: str, mode: str) -> str:
         """Handles creative generation with genre-specific system prompting."""
@@ -924,6 +1177,37 @@ class VoiceAssistant:
         if "activate professional" in clean_text: return self.switch_personality("core_ai")
         if "reset mode" in clean_text: return self.switch_personality("default")
 
+        # --- SCREEN READER (#9) ---
+        screen_triggers = ["what's on my screen", "read my screen", "what am i looking at",
+                          "screen reader", "read screen", "analyze my screen", "whats on screen"]
+        if describe_screen and any(t in clean_text for t in screen_triggers):
+            screen_content = await describe_screen()
+            # Feed screen content to AI for analysis
+            prompt = f"{screen_content}\n\nUser asks: {user_text}\nDescribe what you see on the screen in a helpful way."
+            response = await self._send_message_with_retry(self.fast_chat, prompt)
+            resp = response.text if hasattr(response, 'text') else str(response)
+            self.memory.add_message("model", resp)
+            return resp
+
+        # --- GOOGLE CALENDAR (#7) ---
+        calendar_triggers = ["my calendar", "today's events", "today's schedule",
+                            "what's on my calendar", "events today", "my events"]
+        schedule_triggers = ["schedule", "create event", "add to calendar", "book meeting"]
+        
+        if get_todays_events and any(t in clean_text for t in calendar_triggers):
+            creds = getattr(self, '_google_credentials', None)
+            resp = await get_todays_events(creds)
+            self.memory.add_message("model", resp)
+            return resp
+        
+        if parse_schedule_command and any(t in clean_text for t in schedule_triggers):
+            event_data = parse_schedule_command(clean_text)
+            if event_data and create_event:
+                creds = getattr(self, '_google_credentials', None)
+                resp = await create_event(creds, event_data['title'], event_data['datetime'])
+                self.memory.add_message("model", resp)
+                return resp
+
         # --- EMAIL DRAFT FLOW (multi-step conversation) ---
         if self.email_mode:
             return await self._handle_email_step(clean_text, user_text)
@@ -965,6 +1249,54 @@ class VoiceAssistant:
             resp = "Of course, Sir. Who should I address this email to?"
             self.memory.add_message("model", resp)
             return resp
+
+        # --- FINANCE TRACKER ---
+        expense_triggers = ["spent", "paid", "expense", "cost me", "bought for", "i paid"]
+        spending_triggers = ["spending", "expenses", "how much", "spent this", "finance", "money tracker"]
+        
+        if log_expense and any(t in clean_text for t in expense_triggers):
+            return await log_expense(clean_text)
+        
+        if get_spending_summary and any(t in clean_text for t in spending_triggers):
+            if "today" in clean_text:
+                return await get_spending_summary("today")
+            elif "month" in clean_text:
+                return await get_spending_summary("month")
+            else:
+                return await get_spending_summary("week")
+
+        # --- WHATSAPP HANDLER ---
+        whatsapp_triggers = ["send on whatsapp", "whatsapp", "message on whatsapp",
+                            "send whatsapp", "send a whatsapp"]
+        if WHATSAPP_AVAILABLE and any(t in clean_text for t in whatsapp_triggers):
+            # Extract phone number and message
+            phone_match = re.search(r'(\+?\d{10,13})', clean_text)
+            if phone_match:
+                phone = phone_match.group(1)
+                if not phone.startswith("+"):
+                    phone = "+91" + phone  # Default to India
+                # Extract message: everything after the phone number
+                msg_text = clean_text.split(phone_match.group(1))[-1].strip()
+                if not msg_text:
+                    msg_text = re.sub(r'send|whatsapp|message|on|to|\+?\d{10,13}', '', clean_text).strip()
+                if msg_text:
+                    try:
+                        loop = asyncio.get_running_loop()
+                        now = datetime.datetime.now()
+                        await loop.run_in_executor(
+                            None,
+                            lambda: pywhatkit.sendwhatmsg(
+                                phone, msg_text,
+                                now.hour, now.minute + 2
+                            )
+                        )
+                        return f"✅ WhatsApp message scheduled to **{phone}**: \"{msg_text}\""
+                    except Exception as e:
+                        return f"❌ WhatsApp error: {str(e)}"
+                else:
+                    return "What message should I send? Please include the message text."
+            else:
+                return "Please include a phone number. Example: 'send +919876543210 hello on whatsapp'"
 
         # --- CREATIVE GENERATION (Pillar 3) ---
         creative_mode = self._detect_creative_mode(clean_text)
@@ -1046,7 +1378,12 @@ class VoiceAssistant:
                 has_file=(len(self.knowledge_base) > 0)
             )
 
-            context_header = f"[SYSTEM: {RealTimeContext.get_context()} | USER: {self.memory.get_profile_context()}]"
+            # Emotion detection
+            emotion, emotion_tone = self._detect_emotion(user_text)
+            emotion_ctx = f" | MOOD: {emotion} — {emotion_tone}" if emotion_tone else ""
+            context_header = f"[SYSTEM: {RealTimeContext.get_context()} | USER: {self.memory.get_profile_context()}{emotion_ctx}]"
+            if emotion != "neutral":
+                print(f"💭 Detected emotion: {emotion}")
 
             if user_image:
                 print("📸 Processing Image with Gemini multimodal...")
@@ -1213,6 +1550,16 @@ def get_assistant():
     return _assistant_instance
 
 # ==========================================
+# SERVER STARTUP — start background tasks
+# ==========================================
+@app.on_event("startup")
+async def _on_startup():
+    assistant = get_assistant()
+    assistant._event_loop = asyncio.get_running_loop()
+    # Start daily briefing scheduler
+    asyncio.create_task(assistant._daily_briefing_scheduler())
+
+# ==========================================
 # GOOGLE OAUTH ROUTES
 # ==========================================
 from fastapi import Request
@@ -1257,22 +1604,20 @@ async def websocket_endpoint(websocket: WebSocket):
             raw = await websocket.receive_text()
             if not raw:
                 continue
-            # process_message handles all message types:
-            # - plain text chat
-            # - JSON: {type: "upload", file, filename}
-            # - JSON: {type: "get_history"}
-            # - JSON: {type: "load_session", id}
-            # - JSON: {type: "new_chat"}
-            # - JSON: {type: "text", text, image}
+            # Store current websocket for streaming
+            assistant._current_ws = websocket
             response = await assistant.process_message(raw)
-            if response:
+            # Only send plain text if response exists and wasn't already streamed
+            if response and not getattr(assistant, '_was_streamed', False):
                 await websocket.send_text(response)
+            assistant._was_streamed = False
     except Exception as e:
         print(f"⚠️ WebSocket error: {e}")
     finally:
-        # Always remove from active connections on disconnect
         if websocket in assistant._active_ws:
             assistant._active_ws.remove(websocket)
+        if getattr(assistant, '_current_ws', None) == websocket:
+            assistant._current_ws = None
 
 
 if __name__ == "__main__":

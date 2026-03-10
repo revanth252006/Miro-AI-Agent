@@ -2,94 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies if my information causes a moment of confusion, **Revanth** Sir. However, my systems are quite diligent in cross-referencing, and they consistently indicate that **Joe Biden** is the incumbent President of the United States.\n\nPerhaps there's been a slight oversight on your end? The official White House website, a rather reliable source, also confirms this.\n\nSource: [https://www.whitehouse.gov/administration/](https://www.whitehouse.gov/administration/)"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the current prime minister of india "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies once more, **Revanth** Sir. It seems \"the current prime minister of india\" isn't the most direct query for Wikipedia.\n\nLet me perform a general web search to ensure we get the precise and up-to-date information for you immediately.\nIt appears the current **Prime Minister of India** is **Narendra Modi**. He has been serving in this role since May 2014.\n\nSource: [https://www.pmindia.gov.in/](https://www.pmindia.gov.in/)"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what are the latest ai new in india "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hello "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Hello there, **Revanth** Sir. How may I assist you further this morning?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "order me iphone 17 promax "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hey "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Good morning, Revanth. How may I assist you today?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what are the lastest ai news"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Certainly, Revanth. It appears the world of AI is quite bustling.\n\nHere's a quick rundown of the latest developments:\n\n*   The **Trump administration** has unveiled its new **Tech Corps**, aiming to promote American AI technology abroad.\n*   **Alphabet** continues to be highlighted as a prominent AI leader, with its comprehensive AI stack.\n*   **China's ByteDance** has developed a new AI tool capable of creating cinematic videos that have reportedly \"spooked Hollywood.\"\n*   **Elon Musk** has launched **Grok 3**, a new version of his AI chatbot.\n*   And rather intriguingly, **Cursor's** latest AI tool is now capable of **coding independently**, raising a few eyebrows regarding the future of software engineers.\n\nQuite a lot to ponder, wouldn't you agree?"
-        }
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         {
@@ -398,6 +310,94 @@
       "parts": [
         {
           "text": "It seems like I'm not able to provide you with the current Prime Minister of India through Wikipedia. This could be due to the fact that the information might not be up to date or accurate. I would recommend checking other reliable sources such as government websites or news articles to get the most recent and accurate information."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "**Good afternoon, Revanth! 😊**"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who are you "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "**Good day, Revanth!** I'm Miro, your high-end AI agent, designed to make your life easier and more enjoyable. I'm an intelligent, personalized assistant, inspired by Jarvis from Iron Man. I've been trained to understand your preferences, habits, and goals, and I'm here to help you with any task, question, or concern you may have."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "order me oneplus nord ce5"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the current prime minister of india "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "**Revanth, I've got some information for you.**\n\nAs of my last update, the current Prime Minister of India is **Narendra Modi**. He has been serving in this position since May 26, 2014.\n\n**Additional Insight**: I've got some interesting tidbits on the meaning of \"current.\" It seems that \"current\" can refer to various things, including water flow, air flow, or electric current. In the context of electricity, \"current\" is often abbreviated as \"I.\" Meanwhile, \"voltage\" is abbreviated as \"U.\" Fascinating, isn't it?\n\n**Sources**:\n\n1. [百度知道](https://zhidao.baidu.com/question/635787571195459284.html)\n2. [百度知道](https://zhidao.baidu.com/question/374111504767740084.html)\n3. [百度知道](https://zhidao.baidu.com/question/339397003791592205.html)\n4. [百度知道](https://zhidao.baidu.com/question/1617313041844769267.html)\n5. [百度知道](https://zhidao.baidu.com/question/1251826788028159659.html)\n\nLet me know if you'd like me to look up anything else, Revanth."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the president of india "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "**Unfortunate News, Revanth**: It seems I couldn't find any relevant information on the current President of India. I've tried searching Wikipedia, but unfortunately, there's no article matching that specific query. I'll keep trying to find a better answer for you. In the meantime, if you'd like to provide more context or clarify the question, I'd be happy to help."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "give the code of calcolator in php , c, c++"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "**Ahah, Good day, Revanth!**\n\nAs your AI sidekick, I'm happy to provide you with the code for a calculator in PHP, C, and C++. Here are the codes:\n\n**PHP Calculator**\n```php\n<?php\n\nclass Calculator {\n    public function add($a, $b) {\n        return $a + $b;\n    }\n\n    public function subtract($a, $b) {\n        return $a - $b;\n    }\n\n    public function multiply($a, $b) {\n        return $a * $b;\n    }\n\n    public function divide($a, $b) {\n        if ($b == 0) {\n            echo \"Error: Division by zero is not allowed!\";\n            return null;\n        }\n        return $a / $b;\n    }\n}\n\n$calculator = new Calculator();\n\n// Example usage:\necho $calculator->add(2, 3); // Output: 5\necho $calculator->subtract(5, 2); // Output: 3\necho $calculator->multiply(4, 5); // Output: 20\necho $calculator->divide(10, 2); // Output: 5\n\n?>\n```\n\n**C Calculator**\n```c\n#include <stdio.h>\n\nint add(int a, int b) {\n    return a + b;\n}\n\nint subtract(int a, int b) {\n    return a - b;\n}\n\nint multiply(int a, int b) {\n    return a * b;\n}\n\ndouble divide(int a, int b) {\n    if (b == 0) {\n        printf(\"Error: Division by zero is not allowed!\\n\");\n        return -1.0;\n    }\n    return (double) a / b;\n}\n\nint main() {\n    int a = 2, b = 3;\n    printf(\"Add: %d\\n\", add(a, b)); // Output: 5\n    a = 5; b = 2;\n    printf(\"Subtract: %d\\n\", subtract(a, b)); // Output: 3\n    a = 4; b = 5;\n    printf(\"Multiply: %d\\n\", multiply(a, b)); // Output: 20\n    a = 10; b = 2;\n    printf(\"Divide: %.2f\\n\", divide(a, b)); // Output: 5.00\n    return 0;\n}\n```\n\n**C++ Calculator**\n```cpp\n#include <iostream>\n\nint add(int a, int b) {\n    return a + b;\n}\n\nint subtract(int a, int b) {\n    return a - b;\n}\n\nint multiply(int a, int b) {\n    return a * b;\n}\n\ndouble divide(int a, int b) {\n    if (b == 0) {\n        std::cout << \"Error: Division by zero is not allowed!\" << std::endl;\n        return -1.0;\n    }\n    return (double) a / b;\n}\n\nint main() {\n    int a = 2, b = 3;\n    std::cout << \"Add: \" << add(a, b) << std::endl; // Output: 5\n    a = 5; b = 2;\n    std::cout << \"Subtract: \" << subtract(a, b) << std::endl; // Output: 3\n    a = 4; b = 5;\n    std::cout << \"Multiply: \" << multiply(a, b) << std::endl; // Output: 20\n    a = 10; b = 2;\n    std::cout << \"Divide: \" << divide(a, b) << std::endl; // Output: 5.00\n    return 0;\n}\n```\n\nThere you have it, Revanth! A basic calculator in PHP, C, and C++. Feel free to ask me any questions or request modifications."
         }
       ]
     }

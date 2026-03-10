@@ -417,6 +417,49 @@
                             }
                             // Wake word signal from backend
                             if (parsed.type === "wake_up") { toggleVoiceMode(true); return; }
+
+                            // === STREAMING PROTOCOL ===
+                            if (parsed.type === "stream_start") {
+                                setIsGenerating(false);
+                                setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: '', streaming: true }]);
+                                return;
+                            }
+                            if (parsed.type === "stream_chunk") {
+                                setMessages(prev => {
+                                    const updated = [...prev];
+                                    const last = updated[updated.length - 1];
+                                    if (last && last.streaming) {
+                                        last.content += parsed.text;
+                                    }
+                                    return [...updated];
+                                });
+                                return;
+                            }
+                            if (parsed.type === "stream_end") {
+                                setMessages(prev => {
+                                    const updated = [...prev];
+                                    const last = updated[updated.length - 1];
+                                    if (last && last.streaming) {
+                                        last.streaming = false;
+                                    }
+                                    return [...updated];
+                                });
+                                if (isVoiceModeRef.current) {
+                                    // Speak the full streamed message
+                                    setMessages(prev => {
+                                        const last = prev[prev.length - 1];
+                                        if (last && last.role === 'assistant') speak(last.content);
+                                        return prev;
+                                    });
+                                }
+                                return;
+                            }
+                            // Daily briefing or other JSON with response
+                            if (parsed.response) {
+                                setIsGenerating(false);
+                                setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: parsed.response }]);
+                                return;
+                            }
                         } catch (e) { /* not JSON, treat as plain text response */ }
 
                         if (data.includes("Vision Camera On")) { setVisionActive(true); startWebcam(); return; }
