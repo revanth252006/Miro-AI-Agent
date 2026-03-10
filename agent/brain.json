@@ -5,126 +5,6 @@
       "role": "user",
       "parts": [
         {
-          "text": "order me onplus nord ce5"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the president of usa "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Revanth. It seems my current lookup method is having a momentary lapse with such a well-known fact. While I am generally aware of such prominent figures, the system reports it couldn't locate that specific article just now."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what i the cost of the realme p4 pro in india"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what is the current cost of the petrol in india"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Revanth. It appears I am having difficulty retrieving real-time data such as petrol prices with the current tools. Perhaps a more general inquiry would yield better results."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "why try again "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "ok"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Understood, Sir. Is there anything else I can assist you with at the moment?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "activate virtual mouse "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "disconnect "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the current prime minister of india "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Revanth. It seems my information retrieval tools are persistently struggling with locating details about prominent national leaders today. A most unfortunate oversight."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the current prime minister of india"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hey"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
           "text": "miro "
         }
       ]
@@ -398,6 +278,126 @@
       "parts": [
         {
           "text": "Right away, Revanth. Let's try that again with a more precise inquiry.\n\n**Tool Call**: `wiki_lookup` with query: \"Prime Minister of India\""
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the prime minister of india"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Sir. It appears my Wikipedia lookup for 'the prime minister of india' was a tad too generic and yielded no direct article. Would you prefer I rephrase the query for Wikipedia or broaden the search using a general web query?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good morning, Revanth. How can I assist you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is the time right now "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "It's precisely **11:08 AM** on **Tuesday, March 10th**, Sir."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "in usa "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Certainly, Sir. Just to clarify, as the **USA** spans multiple time zones, could you specify which particular state or city you're interested in? This would allow me to provide the most precise current time for you."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "califonia "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "in canada "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Canada also observes several time zones, Sir. Could you please specify a particular city or province within Canada so I can provide the accurate local time for you?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "tell me the average time "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "tell me the capital city of canada "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "why this is happenign "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hello"
         }
       ]
     }

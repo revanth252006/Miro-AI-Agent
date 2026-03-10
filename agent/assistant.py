@@ -360,8 +360,15 @@ class VoiceAssistant:
             return "limit: 0" in err_msg
 
         # --- Helper: try OpenAI fallback ---
+        _openai_error = None  # capture the actual error for reporting
+
         async def _try_openai(msg):
-            if not self.openai_client or not isinstance(msg, str):
+            nonlocal _openai_error
+            if not self.openai_client:
+                _openai_error = "No OPENAI_API_KEY in .env"
+                return None
+            if not isinstance(msg, str):
+                _openai_error = "OpenAI can't handle image/multimodal messages"
                 return None
             print("🔄 Falling back to OpenAI (gpt-4o-mini)...")
             try:
@@ -378,6 +385,7 @@ class VoiceAssistant:
                         self.text = text
                 return MockResponse(resp.choices[0].message.content)
             except Exception as oe:
+                _openai_error = str(oe)
                 print(f"❌ OpenAI fallback failed: {oe}")
                 return None
 
@@ -424,18 +432,11 @@ class VoiceAssistant:
         if openai_result:
             return openai_result
 
-        # All failed — build a helpful error
-        if not self.openai_client:
-            openai_status = "No OPENAI_API_KEY configured in .env"
-        elif not isinstance(message, str):
-            openai_status = "OpenAI cannot handle image/multimodal messages"
-        else:
-            openai_status = "OpenAI call failed (check key validity and billing)"
-
+        # All failed — include the ACTUAL error messages
         raise Exception(
             f"All AI models exhausted.\n"
             f"• Gemini: {error_str[:200]}\n"
-            f"• OpenAI: {openai_status}\n"
+            f"• OpenAI: {_openai_error or 'unknown error'}\n"
             f"Fix: Check API keys in .env and ensure you have active billing."
         )
 
