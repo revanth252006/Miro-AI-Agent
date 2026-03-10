@@ -324,9 +324,14 @@ class VoiceAssistant:
         self.openai_client = None
         openai_key = os.getenv("OPENAI_API_KEY")
         if openai_key:
-            openai.api_key = openai_key
-            self.openai_client = openai.OpenAI(api_key=openai_key)
-            print("✅ OpenAI client initialized as fallback")
+            try:
+                openai.api_key = openai_key
+                self.openai_client = openai.OpenAI(api_key=openai_key)
+                print("✅ OpenAI client initialized as fallback")
+            except Exception as oe:
+                print(f"⚠️ OpenAI init failed: {oe}")
+        else:
+            print("⚠️ No OPENAI_API_KEY in .env — OpenAI fallback disabled")
 
         self.email_mode = False
         self.email_step = 0
@@ -419,13 +424,19 @@ class VoiceAssistant:
         if openai_result:
             return openai_result
 
-        # All failed
+        # All failed — build a helpful error
+        if not self.openai_client:
+            openai_status = "No OPENAI_API_KEY configured in .env"
+        elif not isinstance(message, str):
+            openai_status = "OpenAI cannot handle image/multimodal messages"
+        else:
+            openai_status = "OpenAI call failed (check key validity and billing)"
+
         raise Exception(
-            "All AI models exhausted.\n"
-            "• Gemini free-tier daily quota is used up (resets at midnight Pacific Time).\n"
-            "• No OpenAI fallback configured.\n"
-            "Fix: Add OPENAI_API_KEY=sk-... to your .env file, "
-            "or upgrade Gemini at https://ai.google.dev/pricing"
+            f"All AI models exhausted.\n"
+            f"• Gemini: {error_str[:200]}\n"
+            f"• OpenAI: {openai_status}\n"
+            f"Fix: Check API keys in .env and ensure you have active billing."
         )
 
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
