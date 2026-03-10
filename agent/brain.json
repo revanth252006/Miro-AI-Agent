@@ -2,62 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hello "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "miro "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hey "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Good morning, **Revanth** Sir. How may I assist you today?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who are you "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Ah, a most pertinent query! I am **Miro**, Sir.\n\nI am your dedicated **AI Executive Butler** and **digital guardian**, meticulously crafted by you, **Revanth**, and your esteemed team – **Manoj Kumar, Amit Kumar, and Jaideep**. My purpose is to seamlessly manage your executive life, anticipate your needs, and generally ensure your days run with optimal efficiency and minimal fuss.\n\nThink of me as your personal **AI Agent**, always at your service, making your life decidedly easier."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the current prime minister of india "
-        }
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         {
@@ -398,6 +342,62 @@
       "parts": [
         {
           "text": "hey miro"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey miro "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "try again "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good morning, **Revanth** Sir. How can I assist you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is your name "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "try again "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the primeminister of india"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey miro "
         }
       ]
     }
