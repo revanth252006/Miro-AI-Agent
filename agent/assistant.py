@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import warnings
+
 import logging
 import os
 import sys
@@ -257,24 +259,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# --- NEW: REAL-TIME SEARCH HELPER ---
-def get_realtime_data(query):
-    """Fetches live data using DuckDuckGo to prevent hallucinations."""
-    try:
+# --- REAL-TIME SEARCH HELPER (ASYNC — fixes WebSocket timeout) ---
+async def get_realtime_data(query: str) -> str | None:
+    """Fetches live data using DuckDuckGo in a thread pool so the async
+    event loop is never blocked. Has an 8-second hard timeout.
+    WS error 1001/1012 was caused by this being a blocking sync call."""
+    def _blocking_search():
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        triggers = ["price", "stock", "score", "match", "weather", "vs",
+                    "news", "latest", "current", "today", "right now"]
         search_query = query
-        triggers = ["price", "stock", "score", "match", "weather", "vs", "news", "latest", "current"]
-        
         if any(kw in query.lower() for kw in triggers):
-            search_query += f" current status {datetime.datetime.now().year}"
+            search_query += f" {datetime.datetime.now().year}"
+        print(f"🌍 Live Search: {search_query}")
+        results = DDGS().text(search_query, region='in-en', max_results=5)
+        if not results:
+            return None
+        lines = []
+        for r in results:
+            lines.append(f"**{r['title']}**\n{r['body']}\nSource: {r.get('href', '')}")
+        return f"[Live data as of {current_time}]\n\n" + "\n\n---\n\n".join(lines)
 
-        print(f"🌍 Searching Live Data: {search_query}")
-        results = DDGS().text(search_query, region='wt-wt', max_results=3)
-
-        if not results: return None
-
-        formatted = [f"[{current_time}] {r['title']}: {r['body']}" for r in results]
-        return "\n".join(formatted)
+    try:
+        return await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(None, _blocking_search),
+            timeout=8.0
+        )
+    except asyncio.TimeoutError:
+        print("⏱️ Real-time search timed out (8s)")
+        return None
     except Exception as e:
         print(f"Search Error: {e}")
         return None
@@ -317,18 +330,26 @@ class VoiceAssistant:
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
     def _init_models(self):
         """Initializes Models: FORCES Gemini 2.5 as requested."""
-        
         key_fast = os.getenv("GOOGLE_API_KEY")
-        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast 
+        key_smart = os.getenv("GOOGLE_API_KEY_PRO") or key_fast
+
+        # Build memory-enriched system instruction
+        profile_ctx = self.memory.get_profile_context()
+        memory_block = f"""
+
+# KNOWN USER PROFILE (from learning engine — use this automatically):
+{profile_ctx}
+"""
 
         # 1. FAST BRAIN (Voice) -> Trying Gemini 2.5 Flash
         genai.configure(api_key=key_fast)
         try:
             print("🚀 Loading Gemini 2.5 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-2.5-flash",  # Will try this first
+                "gemini-2.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
+                    + memory_block
                     + "\n GOAL: Reply Instantly."
                     + "\n\n" + SESSION_INSTRUCTION
                 )
@@ -339,7 +360,7 @@ class VoiceAssistant:
             print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 1.5 Flash.")
             model_fast = genai.GenerativeModel(
                 "gemini-1.5-flash",
-                system_instruction=PERSONALITIES[self.current_persona] + "\n\n" + SESSION_INSTRUCTION
+                system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
 
@@ -348,9 +369,10 @@ class VoiceAssistant:
         try:
             print("🧠 Loading Gemini 2.5 Pro...")
             model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro",  # Will try this first
+                "gemini-2.5-pro",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
+                    + memory_block
                     + "\n GOAL: Deep Reasoning & Coding."
                     + "\n\n" + SESSION_INSTRUCTION
                 )
@@ -361,7 +383,7 @@ class VoiceAssistant:
             print(f"⚠️ Gemini 2.5 Pro Unavailable ({e}). Fallback to 1.5 Pro.")
             model_smart = genai.GenerativeModel(
                 "gemini-1.5-pro",
-                system_instruction=PERSONALITIES[self.current_persona] + "\n\n" + SESSION_INSTRUCTION
+                system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_smart = model_smart.start_chat(history=[])
 
@@ -686,12 +708,14 @@ class VoiceAssistant:
             return "Opening financial terminal."
 
         # --- B. REAL-TIME DATA INJECTION ---
+        # FIXED: now awaited (was blocking sync call → caused WS 1001/1012 timeouts)
         real_time_context = ""
-        live_triggers = ["score", "match", "price", "news", "latest", "who is", "what is"]
+        live_triggers = ["score", "match", "price", "news", "latest", "who is",
+                         "what is", "today", "right now", "current", "2024", "2025", "2026"]
         if any(t in clean_text for t in live_triggers) and "open" not in clean_text:
-            live_info = get_realtime_data(clean_text)
+            live_info = await get_realtime_data(clean_text)
             if live_info:
-                real_time_context = f"\n\n[REAL-TIME INTERNET DATA]:\n{live_info}\n"
+                real_time_context = f"\n\n[REAL-TIME INTERNET DATA — use this as ground truth]:\n{live_info}\n"
 
         if not clean_text and not user_image:
             return ""
@@ -702,12 +726,28 @@ class VoiceAssistant:
         self.memory.learn_fact(clean_text)
         self.memory.add_message("user", user_text)
 
-        # --- MEMORY NAME CHECK ---
+        # --- MEMORY NAME CHECK + SELF-LEARNING ---
         name_match = re.search(r"my name is (\w+)", clean_text)
         if name_match:
             new_name = name_match.group(1).capitalize()
             self.memory.set_name(new_name)
-            resp = f"Nice to meet you, {new_name}. I'll remember that!"
+            resp = f"Nice to meet you, {new_name}. I'll remember that, Sir!"
+            self.memory.add_message("model", resp)
+            return resp
+
+        # Memory introspection command
+        memory_introspect = ["what do you know about me", "what have you learned",
+                              "show my profile", "what's in your memory", "my memory"]
+        if any(phrase in clean_text for phrase in memory_introspect):
+            summary = self.memory.get_memory_summary()
+            profile = self.memory.get_profile_context()
+            resp = (
+                f"### 🧠 My Memory Profile for You\n\n"
+                f"{profile}\n\n"
+                f"---\n"
+                f"**Total facts stored:** {summary['total_facts']}  "
+                f"| **Last updated:** {summary.get('last_updated', 'never')}"
+            )
             self.memory.add_message("model", resp)
             return resp
 
@@ -722,13 +762,19 @@ class VoiceAssistant:
             return await self._handle_email_step(clean_text, user_text)
 
         # --- GOOGLE TOOLS COMMAND HANDLERS ---
-        # Check email
-        if re.search(r'\bcheck\b.*\bemail\b|\bmy email\b|\bunread\b', clean_text):
+        # Check email / read inbox
+        inbox_pattern = r'\bcheck\b.*\bemail\b|\bmy email\b|\bunread\b|\binbox\b|\bany.*mail\b|\bimportant.*email\b|\bread.*email\b'
+        if re.search(inbox_pattern, clean_text):
             if GOOGLE_AUTH_AVAILABLE and self._google_user_id:
                 result = _google_tools.check_emails(self._google_user_id)
                 resp = f"Here are your unread emails:\n{result}"
             else:
-                resp = "Please log in via /login to access Gmail, or use 'send email' for SMTP."
+                # Use IMAP reader (no OAuth needed, just App Password)
+                try:
+                    from tools import read_inbox as _read_inbox
+                except ImportError:
+                    from tools import read_inbox as _read_inbox
+                resp = await _read_inbox()
             self.memory.add_message("model", resp)
             return resp
 

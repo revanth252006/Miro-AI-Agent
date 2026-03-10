@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
+
 import ssl
 import smtplib
 import urllib.parse
@@ -403,6 +405,130 @@ async def shop_online(product_query: str, platform: str) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, shopper.execute_shopping, product_query, platform)
 
+# ==========================================
+# 6. EMAIL INBOX READER (IMAP)
+# ==========================================
+import imaplib
+import email as _email
+from email.header import decode_header as _decode_header
+
+def _decode_mime(val):
+    """Safely decode a MIME encoded-word string."""
+    if val is None:
+        return ""
+    parts = _decode_header(val)
+    result = []
+    for b, enc in parts:
+        if isinstance(b, bytes):
+            result.append(b.decode(enc or "utf-8", errors="replace"))
+        else:
+            result.append(b)
+    return " ".join(result)
+
+async def read_inbox(max_emails: int = 15) -> str:
+    """
+    Reads the Gmail inbox via IMAP using GMAIL_EMAIL + GMAIL_APP_PASSWORD.
+    Returns a formatted summary of important unread emails, filtered for spam.
+    """
+    gmail_user  = os.getenv("GMAIL_EMAIL", "")
+    gmail_pass  = os.getenv("GMAIL_APP_PASSWORD", "")
+
+    if not gmail_user or not gmail_pass:
+        return "❌ Gmail credentials missing. Add GMAIL_EMAIL and GMAIL_APP_PASSWORD to .env"
+
+    # Spam/noise keywords — emails with these subjects are skipped
+    SPAM_KEYWORDS = [
+        "unsubscribe", "offer", "discount", "sale", "deal", "win",
+        "congratulations", "verify your email", "newsletter", "click here",
+        "limited time", "free", "prize", "lottery", "claim"
+    ]
+    # High-importance senders / keywords
+    IMPORTANT_KEYWORDS = [
+        "invoice", "payment", "bank", "statement", "receipt", "order",
+        "reference", "approval", "deadline", "urgent", "action required",
+        "otp", "due", "interview", "offer letter", "joining", "result",
+        "result", "acceptance", "rejection", "alert", "security"
+    ]
+
+    def _fetch():
+        try:
+            mail = imaplib.IMAP4_SSL("imap.gmail.com")
+            mail.login(gmail_user, gmail_pass)
+            mail.select("INBOX")
+
+            # Fetch last N unseen messages
+            _, data = mail.search(None, "UNSEEN")
+            ids = data[0].split()
+            # Take the last max_emails
+            ids = ids[-max_emails:] if len(ids) > max_emails else ids
+            ids.reverse()   # newest first
+
+            summaries = []
+            important_count = 0
+
+            for uid in ids:
+                _, msg_data = mail.fetch(uid, "(RFC822)")
+                raw = msg_data[0][1]
+                msg = _email.message_from_bytes(raw)
+
+                subject = _decode_mime(msg.get("Subject", "(No Subject)"))
+                sender  = _decode_mime(msg.get("From", "Unknown"))
+                date    = msg.get("Date", "")[:25]
+
+                subj_lower = subject.lower()
+
+                # Skip obvious spam
+                if any(kw in subj_lower for kw in SPAM_KEYWORDS):
+                    continue
+
+                # Score importance
+                importance = "📧 Normal"
+                if any(kw in subj_lower for kw in IMPORTANT_KEYWORDS):
+                    importance = "🔴 **IMPORTANT**"
+                    important_count += 1
+
+                # Get plain text body snippet
+                body_snippet = ""
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        ct = part.get_content_type()
+                        cd = str(part.get("Content-Disposition", ""))
+                        if ct == "text/plain" and "attachment" not in cd:
+                            try:
+                                body_snippet = part.get_payload(decode=True).decode("utf-8", errors="replace")[:200]
+                            except Exception:
+                                pass
+                            break
+                else:
+                    try:
+                        body_snippet = msg.get_payload(decode=True).decode("utf-8", errors="replace")[:200]
+                    except Exception:
+                        pass
+
+                summaries.append(
+                    f"{importance}\n"
+                    f"**From:** {sender}\n"
+                    f"**Subject:** {subject}\n"
+                    f"**Date:** {date}\n"
+                    f"**Preview:** {body_snippet.strip()[:150]}..."
+                )
+
+            mail.logout()
+
+            if not summaries:
+                return "✅ Inbox looks clean! No important unread emails found."
+
+            header = f"📬 Found **{len(summaries)}** unread emails ({important_count} important):\n\n"
+            return header + "\n\n---\n\n".join(summaries)
+
+        except imaplib.IMAP4.error as e:
+            return f"❌ IMAP login failed: {e}. Make sure GMAIL_APP_PASSWORD is an App Password (not your Google account password)."
+        except Exception as e:
+            return f"❌ Inbox error: {e}"
+
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _fetch)
+
 AVAILABLE_TOOLS = {
     "get_system_time": get_system_time,
     "get_weather": get_weather,
@@ -410,6 +536,7 @@ AVAILABLE_TOOLS = {
     "wiki_lookup": wiki_lookup,       # FIXED: was missing
     "get_news": get_news,             # FIXED: was missing
     "send_email": send_email,
+    "read_inbox": read_inbox,         # NEW: Gmail inbox reader
     "open_website": open_website,
     "manage_shopping": manage_shopping,
     "book_ride": book_ride,

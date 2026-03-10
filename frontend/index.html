@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Miro Agent</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -27,7 +30,7 @@
                 extend: {
                     fontFamily: { sans: ['Google Sans', 'Inter', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
                     colors: {
-                        bg: '#131314', surface: '#1e1f20', surfaceHover: '#2d2e31', 
+                        bg: '#131314', surface: '#1e1f20', surfaceHover: '#2d2e31',
                         accent: '#a8c7fa', textMain: '#e3e3e3', textSec: '#c4c7c5'
                     }
                 }
@@ -36,16 +39,293 @@
     </script>
 
     <style>
-        body { background-color: #131314; color: #e3e3e3; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 20px; }
-        .markdown-body pre { background: #0d0d0d; padding: 1rem; border-radius: 0.5rem; border: 1px solid #333; overflow-x: auto; }
-        .markdown-body code { font-family: 'Fira Code', monospace; font-size: 0.9em; color: #a8c7fa; }
-        .voice-orb { width: 120px; height: 120px; background: radial-gradient(circle, #4285f4 0%, #a8c7fa 60%, transparent 80%); border-radius: 50%; filter: blur(20px); animation: pulse-glow 2s infinite; }
-        @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #131314;
+            color: #e3e3e3;
+            margin: 0;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+        }
+
+        /* ── Gemini-quality Markdown ── */
+        .markdown-body {
+            font-size: 15px;
+            line-height: 1.75;
+            color: #e3e3e3;
+            word-break: break-word;
+        }
+
+        .markdown-body p {
+            margin: 0.6em 0;
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4 {
+            color: #fff;
+            font-weight: 600;
+            margin: 1.2em 0 0.5em;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.65em;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.3em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.35em;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 0.2em;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.1em;
+            color: #c4c7c5;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            padding-left: 1.5em;
+            margin: 0.6em 0;
+        }
+
+        .markdown-body li {
+            margin: 0.25em 0;
+        }
+
+        .markdown-body strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .markdown-body em {
+            color: #c4c7c5;
+        }
+
+        .markdown-body a {
+            color: #a8c7fa;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .markdown-body a:hover {
+            color: #6fa8f5;
+        }
+
+        .markdown-body blockquote {
+            border-left: 3px solid #4285f4;
+            background: #1e2533;
+            padding: 0.75em 1em;
+            margin: 0.75em 0;
+            border-radius: 0 8px 8px 0;
+            color: #c4c7c5;
+        }
+
+        /* Inline code */
+        .markdown-body :not(pre)>code {
+            background: #2a1a2e;
+            color: #e8a0f0;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88em;
+            border: 1px solid #3a2a3e;
+        }
+
+        /* Code blocks */
+        .markdown-body pre {
+            position: relative;
+            background: #0d0d0d;
+            padding: 1.1em 1.2em;
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            color: #e3e3e3;
+            padding: 0;
+            border: none;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88em;
+            display: block;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            padding: 0.4em 1em;
+            margin-bottom: -2px;
+            font-size: 0.75em;
+            color: #888;
+        }
+
+        .copy-btn {
+            cursor: pointer;
+            background: none;
+            border: 1px solid #333;
+            color: #aaa;
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-size: 0.78em;
+        }
+
+        .copy-btn:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        /* Tables */
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+        }
+
+        .markdown-body th {
+            background: #1a2233;
+            color: #a8c7fa;
+            font-weight: 600;
+            padding: 0.7em 1em;
+            text-align: left;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .markdown-body td {
+            padding: 0.6em 1em;
+            border-bottom: 1px solid #1f1f1f;
+            color: #c4c7c5;
+        }
+
+        .markdown-body tr:hover td {
+            background: #1e1f20;
+        }
+
+        .markdown-body tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Horizontal rule */
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid #2a2a2a;
+            margin: 1.5em 0;
+        }
+
+        /* Task lists */
+        .markdown-body input[type=checkbox] {
+            margin-right: 6px;
+            accent-color: #4285f4;
+        }
+
+        /* Message animation */
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .msg-animate {
+            animation: msgIn 0.25s ease-out;
+        }
+
+        /* Voice orb */
+        .voice-orb {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #4285f4 0%, #a8c7fa 60%, transparent 80%);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
     </style>
+    <script>
+        // Configure marked.js with GFM, tables, line breaks
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.marked) {
+                window.marked.setOptions({
+                    gfm: true,
+                    breaks: true,
+                    tables: true,
+                    smartypants: false,
+                    highlight: function (code, lang) {
+                        if (window.Prism && lang && Prism.languages[lang]) {
+                            return Prism.highlight(code, Prism.languages[lang], lang);
+                        }
+                        return code;
+                    }
+                });
+            }
+        });
+
+        // Call after any markdown render to add copy buttons and Prism highlighting
+        window.enhanceMarkdown = function (container) {
+            if (!container) return;
+            // Add code headers with copy buttons
+            container.querySelectorAll('pre').forEach(pre => {
+                if (pre.previousElementSibling?.classList?.contains('code-header')) return;
+                const code = pre.querySelector('code');
+                const lang = (code?.className.match(/language-(\w+)/) || [])[1] || '';
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                header.innerHTML = `<span>${lang || 'code'}</span><button class="copy-btn" onclick="navigator.clipboard.writeText(this.closest('.code-header').nextSibling.textContent).then(()=>{this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy',2000)})">Copy</button>`;
+                pre.parentNode.insertBefore(header, pre);
+                // Prism highlight
+                if (window.Prism && lang && Prism.languages[lang]) {
+                    Prism.highlightElement(code);
+                }
+            });
+        };
+    </script>
 </head>
+
 <body>
     <div id="root"></div>
 
@@ -55,13 +335,13 @@
 
         // --- RAW ICONS (Guaranteed to Load) ---
         const Icons = {
-            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>,
-            Mic: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>,
-            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
-            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
-            Image: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
-            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
-            Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>,
+            Mic: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="23" /><line x1="8" x2="16" y1="23" y2="23" /></svg>,
+            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>,
+            Image: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>,
+            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>,
+            Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" /></svg>
         };
 
         const SUGGESTIONS = [
@@ -72,29 +352,29 @@
         ];
 
         // --- APP LOGIC ---
-      const App = () => {
-  // --- 1. STATE VARIABLES (Restored from your screenshots) ---
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isVoiceMode, setVoiceMode] = useState(false);
-  
-  // These were visible in your screenshots, so I included them to avoid errors:
-  const [visionActive, setVisionActive] = useState(false);
-  const [wsStatus, setWsStatus] = useState("Connecting...");
-  const [liveTranscript, setLiveTranscript] = useState("");
-  const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
+        const App = () => {
+            // --- 1. STATE VARIABLES (Restored from your screenshots) ---
+            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [messages, setMessages] = useState([]);
+            const [inputValue, setInputValue] = useState("");
+            const [isGenerating, setIsGenerating] = useState(false);
+            const [isVoiceMode, setVoiceMode] = useState(false);
 
-  // FIXED: Removed duplicate bridge WebSocket (was opening 2 connections)
-            
+            // These were visible in your screenshots, so I included them to avoid errors:
+            const [visionActive, setVisionActive] = useState(false);
+            const [wsStatus, setWsStatus] = useState("Connecting...");
+            const [liveTranscript, setLiveTranscript] = useState("");
+            const [voiceStatusText, setVoiceStatusText] = useState("LISTENING...");
+
+            // FIXED: Removed duplicate bridge WebSocket (was opening 2 connections)
+
 
             // Logic Refs
             const ws = useRef(null);
             const videoRef = useRef(null);
             const fileInputRef = useRef(null);
             const messagesEndRef = useRef(null);
-            
+
             // Voice Refs
             const recognition = useRef(null);
             const isVoiceModeRef = useRef(false);
@@ -137,19 +417,19 @@
                             }
                             // Wake word signal from backend
                             if (parsed.type === "wake_up") { toggleVoiceMode(true); return; }
-                        } catch(e) { /* not JSON, treat as plain text response */ }
+                        } catch (e) { /* not JSON, treat as plain text response */ }
 
                         if (data.includes("Vision Camera On")) { setVisionActive(true); startWebcam(); return; }
                         if (data.includes("Disconnected")) { setVisionActive(false); stopWebcam(); return; }
-                        
+
                         setIsGenerating(false);
                         setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: data }]);
-                        
+
                         if (isVoiceModeRef.current) speak(data);
                     };
                 };
                 connect();
-                return () => { if(ws.current) ws.current.close(); stopWebcam(); }
+                return () => { if (ws.current) ws.current.close(); stopWebcam(); }
             }, []);
 
             useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isGenerating]);
@@ -211,32 +491,32 @@
 
                     r.onend = () => {
                         // Always restart to keep listening
-                        try { r.start(); } catch(e) {}
+                        try { r.start(); } catch (e) { }
                     };
 
-                    try { r.start(); } catch(e) {}
+                    try { r.start(); } catch (e) { }
                     recognition.current = r;
                 }
             }, []);
 
             const handleVoiceCommand = (text) => {
-                if(!text || text.length < 1) return;
+                if (!text || text.length < 1) return;
                 setVoiceStatusText("PROCESSING...");
                 setLiveTranscript("");
-                
+
                 // Send text
                 handleSend(text);
-                
+
                 setTimeout(() => setVoiceStatusText("LISTENING..."), 1000);
             };
 
             const toggleVoiceMode = (forceState) => {
                 const newState = forceState !== undefined ? forceState : !isVoiceMode;
                 setVoiceMode(newState);
-                
+
                 if (newState) {
                     const h = new Date().getHours();
-                    const g = h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening";
+                    const g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening";
                     speak(`${g}, Revanth. I am Miro.`);
                 } else {
                     window.speechSynthesis.cancel();
@@ -259,7 +539,7 @@
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     if (videoRef.current) videoRef.current.srcObject = stream;
                     setVisionActive(true);
-                } catch(e) { console.error(e); }
+                } catch (e) { console.error(e); }
             };
             const stopWebcam = () => {
                 const stream = videoRef.current?.srcObject;
@@ -271,9 +551,9 @@
             const handleSend = (text = inputValue) => {
                 if (!text || !text.trim()) return;
                 setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }]);
-                setInputValue(""); 
+                setInputValue("");
                 setIsGenerating(true);
-                
+
                 if (ws.current?.readyState === WebSocket.OPEN) {
                     if (visionActive && videoRef.current) {
                         const canvas = document.createElement("canvas");
@@ -292,10 +572,10 @@
             };
 
             const triggerTool = (tool) => {
-                if(tool === "Upload") fileInputRef.current.click();
-                else if(tool === "Camera") { 
-                    if(!visionActive) { setVisionActive(true); startWebcam(); } 
-                    else { setVisionActive(false); stopWebcam(); } 
+                if (tool === "Upload") fileInputRef.current.click();
+                else if (tool === "Camera") {
+                    if (!visionActive) { setVisionActive(true); startWebcam(); }
+                    else { setVisionActive(false); stopWebcam(); }
                 }
                 else handleSend(`Activate ${tool}`);
             };
@@ -303,25 +583,25 @@
             // --- RENDER ---
             return (
                 <div className="flex h-screen w-full bg-bg text-textMain overflow-hidden font-sans">
-                    
+
                     {/* FIXED: File upload now reads base64 and sends proper payload to backend */}
-            <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.docx,.txt,.csv,.json,.py,.js,.md" onChange={(e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    if (ws.current?.readyState === WebSocket.OPEN) {
-                        setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📎 Uploading: ${file.name}` }]);
-                        setIsGenerating(true);
-                        ws.current.send(JSON.stringify({ type: 'upload', file: ev.target.result, filename: file.name }));
-                    }
-                };
-                reader.readAsDataURL(file);
-                e.target.value = '';
-            }} />
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.docx,.txt,.csv,.json,.py,.js,.md" onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            if (ws.current?.readyState === WebSocket.OPEN) {
+                                setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: `📎 Uploading: ${file.name}` }]);
+                                setIsGenerating(true);
+                                ws.current.send(JSON.stringify({ type: 'upload', file: ev.target.result, filename: file.name }));
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                    }} />
 
                     {/* Sidebar */}
-                    <motion.aside 
+                    <motion.aside
                         initial={false} animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
                         className="hidden md:flex flex-col h-full bg-surface shrink-0 overflow-hidden"
                     >
@@ -380,16 +660,25 @@
                                 ) : (
                                     <div className="space-y-6">
                                         {messages.map((msg) => (
-                                            <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                                <div className={`w-8 h-8 mt-1 flex items-center justify-center rounded-full ${msg.role === 'assistant'?'':'hidden'}`}>{msg.role === 'assistant' && <Icons.Sparkles className="text-accent"/>}</div>
-                                                <div className={`max-w-[85%] ${msg.role === 'user' ? 'bg-surface px-5 py-3 rounded-[20px] rounded-tr-sm' : ''}`}>
-                                                    <div className="markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(msg.content)}} />
+                                            <div key={msg.id} className={`flex gap-4 msg-animate ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                                <div className={`w-8 h-8 mt-1 flex items-center justify-center rounded-full shrink-0 ${msg.role === 'assistant' ? 'bg-[#1a2233]' : 'hidden'}`}>
+                                                    {msg.role === 'assistant' && <Icons.Sparkles className="text-accent" />}
+                                                </div>
+                                                <div className={`min-w-0 ${msg.role === 'user' ? 'max-w-[80%] bg-surface px-5 py-3 rounded-[20px] rounded-tr-sm' : 'w-full max-w-[92%]'}`}>
+                                                    <div
+                                                        className="markdown-body"
+                                                        ref={el => {
+                                                            if (el) {
+                                                                el.innerHTML = window.marked ? window.marked.parse(msg.content || '') : (msg.content || '');
+                                                                window.enhanceMarkdown && window.enhanceMarkdown(el);
+                                                            }
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                         ))}
-                                        {isGenerating && <div className="flex gap-4"><div className="w-8 h-8 mt-1"><Icons.Sparkles className="text-accent animate-pulse"/></div><div className="text-textSec text-sm mt-2">Thinking...</div></div>}
-                                        <div ref={messagesEndRef} />
-                                    </div>
+                                        {isGenerating && <div className="flex gap-4"><div className="w-8 h-8 mt-1 shrink-0 bg-[#1a2233] rounded-full flex items-center justify-center"><Icons.Sparkles className="text-accent animate-pulse" /></div><div className="text-textSec text-sm mt-2 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0ms' }} /><span className="inline-block w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '150ms' }} /><span className="inline-block w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '300ms' }} /></div></div>}
+                                        <div ref={messagesEndRef} /></div>
                                 )}
                             </div>
                         </div>
@@ -398,28 +687,28 @@
                         <div className="absolute bottom-0 w-full bg-bg pb-6 pt-2 px-4">
                             <div className="max-w-[850px] mx-auto">
                                 <div className={`relative bg-surface rounded-[28px] transition-colors focus-within:bg-surfaceHover`}>
-                                    
+
                                     {/* Left Tools */}
                                     <div className="absolute left-3 top-[14px] flex gap-2">
                                         <button onClick={() => triggerTool('Upload')} className="p-2 rounded-full hover:bg-[#3c3d40] text-textSec"><Icons.Plus /></button>
-                                        <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] ${visionActive?'text-red-400':'text-textSec'}`}><Icons.Image /></button>
+                                        <button onClick={() => triggerTool('Camera')} className={`p-2 rounded-full hover:bg-[#3c3d40] ${visionActive ? 'text-red-400' : 'text-textSec'}`}><Icons.Image /></button>
                                     </div>
-                                    
+
                                     {/* Text Area */}
-                                    <textarea 
-                                        value={inputValue} 
-                                        onChange={(e) => setInputValue(e.target.value)} 
-                                        onKeyDown={(e) => { 
-                                            if (e.key === 'Enter' && !e.shiftKey) { 
-                                                e.preventDefault(); 
-                                                handleSend(); 
-                                            } 
-                                        }} 
-                                        placeholder="Enter a prompt here" 
-                                        className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec" 
-                                        rows={1} 
+                                    <textarea
+                                        value={inputValue}
+                                        onChange={(e) => setInputValue(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSend();
+                                            }
+                                        }}
+                                        placeholder="Enter a prompt here"
+                                        className="w-full bg-transparent border-none outline-none resize-none py-4 pl-28 pr-28 min-h-[56px] max-h-[200px] text-[16px] text-textMain placeholder:text-textSec"
+                                        rows={1}
                                     />
-                                    
+
                                     {/* Right Actions - GUARANTEED SEND BUTTON */}
                                     <div className="absolute right-3 top-[10px] flex items-center gap-1 z-20">
                                         {inputValue.length > 0 ? (
@@ -442,16 +731,16 @@
                     {/* Overlays */}
                     <AnimatePresence>
                         {visionActive && (
-                            <motion.div initial={{scale:0}} animate={{scale:1}} exit={{scale:0}} className="absolute bottom-32 right-8 w-64 h-48 bg-black border border-accent rounded-xl overflow-hidden shadow-2xl z-50">
+                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="absolute bottom-32 right-8 w-64 h-48 bg-black border border-accent rounded-xl overflow-hidden shadow-2xl z-50">
                                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                                <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded text-[10px] text-accent font-bold"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/> LIVE</div>
+                                <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded text-[10px] text-accent font-bold"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> LIVE</div>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    
+
                     <AnimatePresence>
                         {isVoiceMode && (
-                            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center">
                                 <button onClick={() => toggleVoiceMode(false)} className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"><Icons.X /></button>
                                 <div className="relative mb-8">
                                     <div className="voice-orb" />
@@ -470,4 +759,5 @@
         root.render(<App />);
     </script>
 </body>
+
 </html>
