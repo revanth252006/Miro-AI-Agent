@@ -65,7 +65,7 @@ warnings.filterwarnings("ignore")
 logging.getLogger("uvicorn.error").disabled = True
 logging.getLogger("uvicorn.access").disabled = True
 
-load_dotenv()
+load_dotenv(override=True)  # override=True ensures .env values win over stale OS-level env vars
 # Note: We configure keys dynamically in the class
 if os.getenv("GOOGLE_API_KEY"):
     genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
