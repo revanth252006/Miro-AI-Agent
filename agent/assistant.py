@@ -25,6 +25,7 @@ if parent_dir not in sys.path:
 import google.generativeai as genai
 from google.api_core.exceptions import ResourceExhausted
 import openai
+import requests as _requests  # for Ollama local API
 # from google import genai
 
 from fastapi import FastAPI, WebSocket
@@ -316,18 +317,23 @@ class VoiceAssistant:
         # 3. Initialize Session
         self.current_session_id = self.session_manager.create_session()
 
-        # 4. Initialize HYBRID Models
+        # 4. Initialize LOCAL Ollama (Primary Brain — free, unlimited)
         self.current_persona = "default"
+        self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
+        self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+        self.ollama_available = self._check_ollama()
+
+        # 5. Initialize Gemini (Fallback for images + complex tasks)
         self.fast_chat, self.smart_chat = self._init_models()
 
-        # 5. Initialize OpenAI as fallback
+        # 6. Initialize OpenAI as last-resort fallback
         self.openai_client = None
         openai_key = os.getenv("OPENAI_API_KEY")
         if openai_key:
             try:
                 openai.api_key = openai_key
                 self.openai_client = openai.OpenAI(api_key=openai_key)
-                print("✅ OpenAI client initialized as fallback")
+                print("✅ OpenAI client initialized as last-resort fallback")
             except Exception as oe:
                 print(f"⚠️ OpenAI init failed: {oe}")
         else:
@@ -342,102 +348,137 @@ class VoiceAssistant:
         self._active_ws = []           # Active WebSocket connections
         self._event_loop = None        # Set when the async server starts
 
+    def _check_ollama(self) -> bool:
+        """Check if Ollama is running locally."""
+        try:
+            resp = _requests.get(f"{self.ollama_url}/api/version", timeout=3)
+            if resp.status_code == 200:
+                print(f"✅ Ollama ({self.ollama_model}) Online — local primary brain ready")
+                return True
+        except Exception:
+            pass
+        print(f"⚠️ Ollama offline at {self.ollama_url} — using Gemini as primary")
+        return False
+
+    async def _ask_ollama(self, prompt: str, model: str = None) -> str:
+        """Send prompt to local Ollama. Returns response text."""
+        model = model or self.ollama_model
+        loop = asyncio.get_running_loop()
+
+        def _call():
+            resp = _requests.post(
+                f"{self.ollama_url}/api/generate",
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 2000
+                    }
+                },
+                timeout=90
+            )
+            return resp.json()["response"]
+
+        return await loop.run_in_executor(None, _call)
+
     async def _send_message_with_retry(self, chat, message, max_retries=2):
-        """Send message to Gemini with smart retry and multi-model fallback.
+        """Hybrid AI routing: Ollama (local) → Gemini (cloud) → OpenAI (last resort).
 
         Strategy:
-        1. Try the requested chat model.
-        2. On quota exhaustion → immediately try the OTHER Gemini model
-           (each model has its own per-model daily quota).
-        3. On temporary rate limit → short retry (5s) then try other model.
-        4. If all Gemini models fail → try OpenAI (if configured).
+        1. If message is text and Ollama is available → try Ollama first (free, unlimited).
+        2. If Ollama fails or message has images → try Gemini.
+        3. If Gemini fails → try OpenAI.
+        4. User never sees the switching.
         """
         loop = asyncio.get_running_loop()
-        error_str = ""
+        errors = []
 
-        # --- Helper: detect if quota is permanently exhausted (limit: 0) ---
-        def _is_permanent_exhaustion(err_msg: str) -> bool:
-            return "limit: 0" in err_msg
+        # --- Helper: wrap response in a MockResponse for consistent .text access ---
+        class MockResponse:
+            def __init__(self, text):
+                self.text = text
 
-        # --- Helper: try OpenAI fallback ---
-        _openai_error = None  # capture the actual error for reporting
-
-        async def _try_openai(msg):
-            nonlocal _openai_error
-            if not self.openai_client:
-                _openai_error = "No OPENAI_API_KEY in .env"
-                return None
-            if not isinstance(msg, str):
-                _openai_error = "OpenAI can't handle image/multimodal messages"
-                return None
-            print("🔄 Falling back to OpenAI (gpt-4o-mini)...")
+        # === STEP 1: Try Ollama (local, free, unlimited) ===
+        if self.ollama_available and isinstance(message, str):
             try:
-                resp = await loop.run_in_executor(
-                    None,
-                    lambda: self.openai_client.chat.completions.create(
-                        model="gpt-4o-mini",
-                        messages=[{"role": "user", "content": msg}],
-                        max_tokens=1000
-                    )
-                )
-                class MockResponse:
-                    def __init__(self, text):
-                        self.text = text
-                return MockResponse(resp.choices[0].message.content)
-            except Exception as oe:
-                _openai_error = str(oe)
-                print(f"❌ OpenAI fallback failed: {oe}")
-                return None
+                print("🏠 Local: Sending to Ollama...")
+                text = await self._ask_ollama(message)
+                if text and len(text.strip()) > 5:
+                    return MockResponse(text)
+                errors.append("Ollama: empty response")
+            except Exception as e:
+                errors.append(f"Ollama: {str(e)[:100]}")
+                print(f"⚠️ Ollama failed: {e}")
+                # Mark offline so future calls skip the timeout
+                self.ollama_available = False
+                print("⚠️ Ollama marked offline — switching to Gemini")
 
-        # --- Helper: try sending on a specific chat ---
-        async def _try_chat(target_chat, label=""):
+        # === STEP 2: Try Gemini (cloud, quota-limited) ===
+        async def _try_gemini(target_chat, label):
             try:
                 resp = await loop.run_in_executor(
                     None, lambda: target_chat.send_message(message)
                 )
                 return resp
             except ResourceExhausted as e:
+                errors.append(f"{label}: quota exceeded")
                 print(f"⚠️ {label} quota exceeded: {e}")
-                return e
+                return None
             except Exception as e:
+                errors.append(f"{label}: {str(e)[:100]}")
                 print(f"❌ {label} error: {e}")
-                return e
+                return None
 
-        # Step 1: Try the requested model
-        result = await _try_chat(chat, "Primary model")
-        if not isinstance(result, Exception):
+        # Try primary Gemini model
+        print("☁️ Cloud: Sending to Gemini...")
+        result = await _try_gemini(chat, "Gemini primary")
+        if result:
             return result
 
-        error_str = str(result)
-        is_permanent = _is_permanent_exhaustion(error_str)
-
-        # Step 2: If temporary rate limit, do a short retry on the SAME model
-        if not is_permanent and isinstance(result, ResourceExhausted):
-            print("⏳ Temporary rate limit — retrying in 5s...")
-            await asyncio.sleep(5)
-            result = await _try_chat(chat, "Primary model (retry)")
-            if not isinstance(result, Exception):
-                return result
-
-        # Step 3: Try the OTHER Gemini model (separate per-model quota)
+        # Try alternate Gemini model
         alt_chat = self.smart_chat if chat is self.fast_chat else self.fast_chat
-        alt_label = "Smart brain" if chat is self.fast_chat else "Fast brain"
-        print(f"🔀 Trying alternate model ({alt_label})...")
-        result = await _try_chat(alt_chat, alt_label)
-        if not isinstance(result, Exception):
+        alt_label = "Gemini alt"
+        print(f"🔀 Trying alternate Gemini model...")
+        result = await _try_gemini(alt_chat, alt_label)
+        if result:
             return result
 
-        # Step 4: Try OpenAI fallback
-        openai_result = await _try_openai(message)
-        if openai_result:
-            return openai_result
+        # === STEP 3: Try OpenAI (last resort) ===
+        if self.openai_client and isinstance(message, str):
+            print("🔄 Last resort: OpenAI (gpt-4o-mini)...")
+            try:
+                resp = await loop.run_in_executor(
+                    None,
+                    lambda: self.openai_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": message}],
+                        max_tokens=1000
+                    )
+                )
+                return MockResponse(resp.choices[0].message.content)
+            except Exception as oe:
+                errors.append(f"OpenAI: {str(oe)[:100]}")
+                print(f"❌ OpenAI failed: {oe}")
 
-        # All failed — include the ACTUAL error messages
+        # === STEP 4: Try Ollama one more time (may have recovered) ===
+        if isinstance(message, str) and not self.ollama_available:
+            try:
+                # Re-check if Ollama came back online
+                self.ollama_available = self._check_ollama()
+                if self.ollama_available:
+                    text = await self._ask_ollama(message)
+                    if text and len(text.strip()) > 5:
+                        return MockResponse(text)
+            except Exception:
+                pass
+
+        # All failed
         raise Exception(
             f"All AI models exhausted.\n"
-            f"• Gemini: {error_str[:200]}\n"
-            f"• OpenAI: {_openai_error or 'unknown error'}\n"
-            f"Fix: Check API keys in .env and ensure you have active billing."
+            + "\n".join(f"• {e}" for e in errors)
+            + "\nFix: Start Ollama (`ollama serve`), check API keys, or try again later."
         )
 
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
@@ -526,16 +567,25 @@ class VoiceAssistant:
         return text
 
     def select_brain(self, text, has_image=False, has_file=False):
-        """Decides which brain handles the request."""
+        """Decides which brain handles the request.
+        
+        Routing:
+        - Images → Gemini smart (only cloud can do vision)
+        - Files → Gemini smart (needs large context)
+        - Text → fast_chat (Ollama handles it in _send_message_with_retry)
+        """
         text = text.lower()
-        # Expanded keywords to catch ALL coding requests
         smart_triggers = [
             "code", "script", "analyze", "architect", "complex", "plan", 
             "debug", "why", "write a", "python", "java", "cpp", "html", 
             "function", "api", "create a", "list", "generate", "table"
         ]
         
-        if has_file or has_image: return self.smart_chat, "smart"
+        # Images MUST go to Gemini (Ollama can't do vision)
+        if has_image: return self.smart_chat, "smart"
+        # Large files benefit from Gemini's bigger context window
+        if has_file: return self.smart_chat, "smart"
+        # Complex tasks: still route to smart_chat but Ollama gets tried first
         if any(trigger in text for trigger in smart_triggers) and len(text) > 10: 
             return self.smart_chat, "smart"
         
