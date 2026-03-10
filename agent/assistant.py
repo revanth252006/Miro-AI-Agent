@@ -361,7 +361,7 @@ class VoiceAssistant:
         return False
 
     async def _ask_ollama(self, prompt: str, model: str = None) -> str:
-        """Send prompt to local Ollama. Returns response text."""
+        """Send prompt to local Ollama with Miro persona. Returns response text."""
         model = model or self.ollama_model
         loop = asyncio.get_running_loop()
 
@@ -370,6 +370,7 @@ class VoiceAssistant:
                 f"{self.ollama_url}/api/generate",
                 json={
                     "model": model,
+                    "system": AGENT_INSTRUCTION,  # Miro persona
                     "prompt": prompt,
                     "stream": False,
                     "options": {
