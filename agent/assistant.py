@@ -341,12 +341,12 @@ class VoiceAssistant:
 {profile_ctx}
 """
 
-        # 1. FAST BRAIN (Voice) -> Gemini 1.5 Flash (generous free quota)
+        # 1. FAST BRAIN (Voice) -> Gemini 2.0 Flash (generous free quota)
         genai.configure(api_key=key_fast)
         try:
-            print("🚀 Loading Gemini 1.5 Flash...")
+            print("🚀 Loading Gemini 2.0 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-1.5-flash",
+                "gemini-2.0-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -355,21 +355,21 @@ class VoiceAssistant:
                 )
             )
             chat_fast = model_fast.start_chat(history=[])
-            print("✅ Gemini 1.5 Flash Online")
+            print("✅ Gemini 2.0 Flash Online")
         except Exception as e:
-            print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 2.5 Flash.")
+            print(f"⚠️ Gemini 2.0 Flash Unavailable ({e}). Fallback to 2.5 Flash.")
             model_fast = genai.GenerativeModel(
                 "gemini-2.5-flash",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
 
-        # 2. SMART BRAIN (Chat) -> Gemini 1.5 Pro (primary, saves quota)
+        # 2. SMART BRAIN (Chat) -> Gemini 2.5 Flash (primary, saves quota vs Pro)
         if key_smart != key_fast: genai.configure(api_key=key_smart)
         try:
-            print("🧠 Loading Gemini 1.5 Pro...")
+            print("🧠 Loading Gemini 2.5 Flash (smart)...")
             model_smart = genai.GenerativeModel(
-                "gemini-1.5-pro",
+                "gemini-2.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -378,9 +378,9 @@ class VoiceAssistant:
                 )
             )
             chat_smart = model_smart.start_chat(history=[])
-            print("✅ Gemini 1.5 Pro Online")
+            print("✅ Gemini 2.5 Flash (smart) Online")
         except Exception as e:
-            print(f"⚠️ Gemini 1.5 Pro Unavailable ({e}). Fallback to 2.5 Pro.")
+            print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 2.5 Pro.")
             model_smart = genai.GenerativeModel(
                 "gemini-2.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION

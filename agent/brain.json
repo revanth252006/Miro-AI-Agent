@@ -5,38 +5,6 @@
       "role": "user",
       "parts": [
         {
-          "text": "what it the nation game of india "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "India, Sir, does not officially have a national game. However, field hockey is often popularly considered its de facto national sport."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the t20 format captin for india team "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Sir, it seems my previous attempt to fetch that information was a bit too literal. Let me clarify the query for the T20 captain for the Indian team.\n**Tool Call**: `wiki_lookup(\"India national cricket team captain T20\")`"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
           "text": "can you send a mail "
         }
       ]
@@ -398,6 +366,38 @@
       "parts": [
         {
           "text": "My apologies, Revanth. It seems my information retrieval tools are persistently struggling with locating details about prominent national leaders today. A most unfortunate oversight."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the current prime minister of india"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "miro "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey miro "
         }
       ]
     }
