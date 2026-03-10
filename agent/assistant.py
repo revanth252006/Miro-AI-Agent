@@ -341,12 +341,12 @@ class VoiceAssistant:
 {profile_ctx}
 """
 
-        # 1. FAST BRAIN (Voice) -> Trying Gemini 2.5 Flash
+        # 1. FAST BRAIN (Voice) -> Gemini 1.5 Flash (generous free quota)
         genai.configure(api_key=key_fast)
         try:
-            print("🚀 Loading Gemini 2.5 Flash...")
+            print("🚀 Loading Gemini 1.5 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-2.5-flash",
+                "gemini-1.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -355,21 +355,21 @@ class VoiceAssistant:
                 )
             )
             chat_fast = model_fast.start_chat(history=[])
-            print("✅ Gemini 2.5 Flash Online")
+            print("✅ Gemini 1.5 Flash Online")
         except Exception as e:
-            print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 1.5 Flash.")
+            print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 2.5 Flash.")
             model_fast = genai.GenerativeModel(
-                "gemini-1.5-flash",
+                "gemini-2.5-flash",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
 
-        # 2. SMART BRAIN (Chat) -> Trying Gemini 2.5 Pro
+        # 2. SMART BRAIN (Chat) -> Gemini 1.5 Pro (primary, saves quota)
         if key_smart != key_fast: genai.configure(api_key=key_smart)
         try:
-            print("🧠 Loading Gemini 2.5 Pro...")
+            print("🧠 Loading Gemini 1.5 Pro...")
             model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro",
+                "gemini-1.5-pro",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -378,11 +378,11 @@ class VoiceAssistant:
                 )
             )
             chat_smart = model_smart.start_chat(history=[])
-            print("✅ Gemini 2.5 Pro Online")
+            print("✅ Gemini 1.5 Pro Online")
         except Exception as e:
-            print(f"⚠️ Gemini 2.5 Pro Unavailable ({e}). Fallback to 1.5 Pro.")
+            print(f"⚠️ Gemini 1.5 Pro Unavailable ({e}). Fallback to 2.5 Pro.")
             model_smart = genai.GenerativeModel(
-                "gemini-1.5-pro",
+                "gemini-2.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_smart = model_smart.start_chat(history=[])
@@ -710,9 +710,11 @@ class VoiceAssistant:
         # --- B. REAL-TIME DATA INJECTION ---
         # FIXED: now awaited (was blocking sync call → caused WS 1001/1012 timeouts)
         real_time_context = ""
-        live_triggers = ["score", "match", "price", "news", "latest", "who is",
-                         "what is", "today", "right now", "current", "2024", "2025", "2026"]
-        if any(t in clean_text for t in live_triggers) and "open" not in clean_text:
+        SKIP_SEARCH = ["hello", "hi", "thanks", "bye", "activate", "disconnect",
+                       "minimize", "screenshot", "volume", "what do you know about me",
+                       "show my profile", "reset mode", "open", "play"]
+        should_search = not any(s in clean_text for s in SKIP_SEARCH)
+        if should_search and "open" not in clean_text:
             live_info = await get_realtime_data(clean_text)
             if live_info:
                 real_time_context = f"\n\n[REAL-TIME INTERNET DATA — use this as ground truth]:\n{live_info}\n"
@@ -902,7 +904,7 @@ class VoiceAssistant:
             elif re.search(r'\bnews\b|latest headlines|what happened today', clean_text):
                 topic = re.sub(r'news|latest|headlines|today|about|the', '', clean_text).strip() or "latest"
                 tool_result = await get_news(topic)
-            elif any(w in clean_text for w in ["who is", "who was", "what is", "what was",
+            elif not real_time_context and any(w in clean_text for w in ["who is", "who was", "what is", "what was",
                                                 "tell me about", "history of", "biography"])\
                     and "search" not in clean_text:
                 topic = re.sub(r'who is|who was|what is|what was|tell me about|history of|biography of',
@@ -944,7 +946,7 @@ class VoiceAssistant:
                 prompt = self._build_reasoning_prompt(context_header, user_text)
                 selected_chat = self.smart_chat  # always use Pro for reasoning
             else:
-                prompt = context_header + " " + user_text
+                prompt = context_header + real_time_context + " " + user_text
 
             loop = asyncio.get_running_loop()
             response = await loop.run_in_executor(

@@ -2,182 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Good afternoon, Sir. How can I assist you today?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what are you doing "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Just standing by, Sir, eagerly anticipating your next command. I am always at your service."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "which model are you "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "I am Miro, an AI executive butler, designed by you, Revanth, and your esteemed team. I'm here to manage your digital life with unparalleled efficiency."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what is mean by butler "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Sir, it seems my previous attempt to look up \"mean by butler\" was a bit too literal. A butler, in essence, is a chief male servant of a household, responsible for managing other domestic staff and often overseeing the dining room, wine cellar, and pantry. Think of them as the executive assistant of a large estate.\n\nIf you'd like a more formal definition, I can attempt to look up \"butler\" directly."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the president of usa "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "check again "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the president of usa "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "It appears my internal archives, while vast, didn't quite appreciate the phrasing \"the president of usa.\" Perhaps a slight rephrasing, like \"President of the United States,\" might yield better results. Shall I give that a try?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "give me the spects of oneplus nord 5"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hi"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Good afternoon, Sir. How can I assist you today?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who are you "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "I am Miro, your AI Executive Butler, at your service. I was created by you, Revanth, and your esteemed team: Manoj Kumar, Amit Kumar, and Jaideep."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who are you "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Ah, a most pertinent question! I am Miro, Sir. Your dedicated AI Agent, crafted by yourself and your esteemed team, here to orchestrate the symphony of your executive life. How may I be of service?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who is the cheif minister of telangana"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Sir, but my initial query didn't quite hit the mark. Allow me to retrieve the Chief Minister of Telangana for you properly.\n**Tool Call**: `wiki_lookup(\"Chief Minister of Telangana\")`"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "why you not able to to do the websearch properly "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Sir. It seems the web was uncharacteristically silent on that particular matter. Perhaps we could try rephrasing the query?"
-        }
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         {
@@ -400,10 +224,187 @@
           "text": "Indeed, Sir. The email has been dispatched once more and I am awaiting confirmation of its successful delivery."
         }
       ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey miro"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good morning, **Revanth**. How can I assist you today, Sir?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what are you doing "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Right now, I am simply awaiting your command, Sir. My primary function is to be ready to assist you with any task you require."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is the full form of atcd in software "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Revanth, but I couldn't locate a standard full form for \"ATCD\" specifically in the software domain. It appears to be an uncommon acronym."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who am i "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "You are **Revanth**, Sir. My esteemed creator, and my boss. I am Miro, your personal AI Agent, here to make your life considerably more efficient."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "order me oneplus nord 5 "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "order me onplus nord ce5"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the president of usa "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Revanth. It seems my current lookup method is having a momentary lapse with such a well-known fact. While I am generally aware of such prominent figures, the system reports it couldn't locate that specific article just now."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what i the cost of the realme p4 pro in india"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what is the current cost of the petrol in india"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Revanth. It appears I am having difficulty retrieving real-time data such as petrol prices with the current tools. Perhaps a more general inquiry would yield better results."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "why try again "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "ok"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Understood, Sir. Is there anything else I can assist you with at the moment?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "activate virtual mouse "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "disconnect "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the current prime minister of india "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Revanth. It seems my information retrieval tools are persistently struggling with locating details about prominent national leaders today. A most unfortunate oversight."
+        }
+      ]
     }
   ],
   "profile": {
     "facts": [],
-    "preferences": {}
+    "preferences": {},
+    "structured": {}
   }
 }
