@@ -815,11 +815,19 @@ class VoiceAssistant:
         # --- B. REAL-TIME DATA INJECTION ---
         # FIXED: now awaited (was blocking sync call → caused WS 1001/1012 timeouts)
         real_time_context = ""
-        SKIP_SEARCH = ["hello", "hi", "thanks", "bye", "activate", "disconnect",
-                       "minimize", "screenshot", "volume", "what do you know about me",
-                       "show my profile", "reset mode", "open", "play"]
-        should_search = not any(s in clean_text for s in SKIP_SEARCH)
-        if should_search and "open" not in clean_text:
+        # Words that should skip search ONLY when the ENTIRE message is basically that word
+        SKIP_EXACT = {"hello", "hi", "hey", "thanks", "thank you", "bye", "goodbye", "ok", "okay"}
+        # Command words that skip search — matched with word boundaries (not substrings)
+        SKIP_COMMANDS = ["activate", "disconnect", "minimize", "screenshot", "volume",
+                         "what do you know about me", "show my profile", "reset mode"]
+        
+        words_set = set(clean_text.split())
+        is_greeting = clean_text in SKIP_EXACT or words_set <= SKIP_EXACT
+        is_command = any(cmd in clean_text for cmd in SKIP_COMMANDS)
+        is_open_or_play = bool(re.search(r'\bopen\b|\bplay\b', clean_text))
+        
+        should_search = not is_greeting and not is_command and not is_open_or_play
+        if should_search:
             live_info = await get_realtime_data(clean_text)
             if live_info:
                 real_time_context = f"\n\n[REAL-TIME INTERNET DATA — use this as ground truth]:\n{live_info}\n"

@@ -2,102 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Right away, Sir.\n**Tool Call**: `send_email(\"2411cs020023@mallareddyuniversity.ac.in\", \"hello revanth\", \"i am waiting for you message\")`"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "send"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Indeed, Sir. The email has been dispatched once more and I am awaiting confirmation of its successful delivery."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "hey miro"
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Good morning, **Revanth**. How can I assist you today, Sir?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what are you doing "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Right now, I am simply awaiting your command, Sir. My primary function is to be ready to assist you with any task you require."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "what is the full form of atcd in software "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "My apologies, Revanth, but I couldn't locate a standard full form for \"ATCD\" specifically in the software domain. It appears to be an uncommon acronym."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "who am i "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "You are **Revanth**, Sir. My esteemed creator, and my boss. I am Miro, your personal AI Agent, here to make your life considerably more efficient."
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "order me oneplus nord 5 "
-        }
-      ]
-    },
-    {
       "role": "user",
       "parts": [
         {
@@ -398,6 +302,102 @@
       "parts": [
         {
           "text": "order me iphone 17 promax "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Good morning, Revanth. How may I assist you today?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "what are the lastest ai news"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Certainly, Revanth. It appears the world of AI is quite bustling.\n\nHere's a quick rundown of the latest developments:\n\n*   The **Trump administration** has unveiled its new **Tech Corps**, aiming to promote American AI technology abroad.\n*   **Alphabet** continues to be highlighted as a prominent AI leader, with its comprehensive AI stack.\n*   **China's ByteDance** has developed a new AI tool capable of creating cinematic videos that have reportedly \"spooked Hollywood.\"\n*   **Elon Musk** has launched **Grok 3**, a new version of his AI chatbot.\n*   And rather intriguingly, **Cursor's** latest AI tool is now capable of **coding independently**, raising a few eyebrows regarding the future of software engineers.\n\nQuite a lot to ponder, wouldn't you agree?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the current president of usa"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Ah, a rather important query, Revanth. While the information you provided was quite illuminating on the linguistic nuances of the word \"current,\" it doesn't quite address the political landscape.\n\nTo ascertain the **current President of the USA**, I shall need to perform a quick search. Please allow me a moment."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the present president of america"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "My apologies, Revanth. It seems directly asking Wikipedia for \"the present president of America\" was a tad too specific for its article titles. Much like asking for \"the chap currently residing in the Oval Office,\" it requires a more general inquiry.\n\nAllow me to conduct a broader search to fetch that information for you."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "who is the prime minister of india "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "It appears Wikipedia is being rather particular today, Revanth. Much like the previous query, asking for \"the prime minister of India\" directly didn't yield a specific article.\n\nI'll broaden my search to get you the correct information promptly."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "try again "
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "Right away, Revanth. Let's try that again with a more precise inquiry.\n\n**Tool Call**: `wiki_lookup` with query: \"Prime Minister of India\""
         }
       ]
     }
