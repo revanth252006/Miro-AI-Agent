@@ -2,30 +2,6 @@
   "user_name": null,
   "history": [
     {
-      "role": "user",
-      "parts": [
-        {
-          "text": "can you send a mail "
-        }
-      ]
-    },
-    {
-      "role": "model",
-      "parts": [
-        {
-          "text": "Indeed, I can, Sir. To whom shall this esteemed correspondence be addressed?"
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "parts": [
-        {
-          "text": "2411cs0200232@mallareddyuniveristy.ac.in "
-        }
-      ]
-    },
-    {
       "role": "model",
       "parts": [
         {
@@ -398,6 +374,30 @@
       "parts": [
         {
           "text": "hey miro "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hey "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "hello "
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "miro "
         }
       ]
     }

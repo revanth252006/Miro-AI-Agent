@@ -23,6 +23,8 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
+import openai
 # from google import genai
 
 from fastapi import FastAPI, WebSocket
@@ -318,6 +320,14 @@ class VoiceAssistant:
         self.current_persona = "default"
         self.fast_chat, self.smart_chat = self._init_models()
 
+        # 5. Initialize OpenAI as fallback
+        self.openai_client = None
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key:
+            openai.api_key = openai_key
+            self.openai_client = openai.OpenAI(api_key=openai_key)
+            print("✅ OpenAI client initialized as fallback")
+
         self.email_mode = False
         self.email_step = 0
         self.email_draft = {}
@@ -326,6 +336,97 @@ class VoiceAssistant:
         # Wake word broadcast support
         self._active_ws = []           # Active WebSocket connections
         self._event_loop = None        # Set when the async server starts
+
+    async def _send_message_with_retry(self, chat, message, max_retries=2):
+        """Send message to Gemini with smart retry and multi-model fallback.
+
+        Strategy:
+        1. Try the requested chat model.
+        2. On quota exhaustion → immediately try the OTHER Gemini model
+           (each model has its own per-model daily quota).
+        3. On temporary rate limit → short retry (5s) then try other model.
+        4. If all Gemini models fail → try OpenAI (if configured).
+        """
+        loop = asyncio.get_running_loop()
+        error_str = ""
+
+        # --- Helper: detect if quota is permanently exhausted (limit: 0) ---
+        def _is_permanent_exhaustion(err_msg: str) -> bool:
+            return "limit: 0" in err_msg
+
+        # --- Helper: try OpenAI fallback ---
+        async def _try_openai(msg):
+            if not self.openai_client or not isinstance(msg, str):
+                return None
+            print("🔄 Falling back to OpenAI (gpt-4o-mini)...")
+            try:
+                resp = await loop.run_in_executor(
+                    None,
+                    lambda: self.openai_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": msg}],
+                        max_tokens=1000
+                    )
+                )
+                class MockResponse:
+                    def __init__(self, text):
+                        self.text = text
+                return MockResponse(resp.choices[0].message.content)
+            except Exception as oe:
+                print(f"❌ OpenAI fallback failed: {oe}")
+                return None
+
+        # --- Helper: try sending on a specific chat ---
+        async def _try_chat(target_chat, label=""):
+            try:
+                resp = await loop.run_in_executor(
+                    None, lambda: target_chat.send_message(message)
+                )
+                return resp
+            except ResourceExhausted as e:
+                print(f"⚠️ {label} quota exceeded: {e}")
+                return e
+            except Exception as e:
+                print(f"❌ {label} error: {e}")
+                return e
+
+        # Step 1: Try the requested model
+        result = await _try_chat(chat, "Primary model")
+        if not isinstance(result, Exception):
+            return result
+
+        error_str = str(result)
+        is_permanent = _is_permanent_exhaustion(error_str)
+
+        # Step 2: If temporary rate limit, do a short retry on the SAME model
+        if not is_permanent and isinstance(result, ResourceExhausted):
+            print("⏳ Temporary rate limit — retrying in 5s...")
+            await asyncio.sleep(5)
+            result = await _try_chat(chat, "Primary model (retry)")
+            if not isinstance(result, Exception):
+                return result
+
+        # Step 3: Try the OTHER Gemini model (separate per-model quota)
+        alt_chat = self.smart_chat if chat is self.fast_chat else self.fast_chat
+        alt_label = "Smart brain" if chat is self.fast_chat else "Fast brain"
+        print(f"🔀 Trying alternate model ({alt_label})...")
+        result = await _try_chat(alt_chat, alt_label)
+        if not isinstance(result, Exception):
+            return result
+
+        # Step 4: Try OpenAI fallback
+        openai_result = await _try_openai(message)
+        if openai_result:
+            return openai_result
+
+        # All failed
+        raise Exception(
+            "All AI models exhausted.\n"
+            "• Gemini free-tier daily quota is used up (resets at midnight Pacific Time).\n"
+            "• No OpenAI fallback configured.\n"
+            "Fix: Add OPENAI_API_KEY=sk-... to your .env file, "
+            "or upgrade Gemini at https://ai.google.dev/pricing"
+        )
 
     # 🔥 MOVE THIS FUNCTION HERE (INDENTED)
     def _init_models(self):
@@ -514,11 +615,7 @@ class VoiceAssistant:
             f"{system_note}\n\n"
             f"Request: {user_text}"
         )
-        loop = asyncio.get_running_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: self.smart_chat.send_message(prompt)
-        )
+        response = await self._send_message_with_retry(self.smart_chat, prompt)
         clean_resp = response.text
         self.memory.add_message("model", clean_resp)
         return clean_resp
@@ -643,10 +740,7 @@ class VoiceAssistant:
                 f"Study this content carefully. When the user asks ANY question, "
                 f"answer using ONLY this file's content unless they explicitly ask otherwise."
             )
-            await asyncio.get_running_loop().run_in_executor(
-                None,
-                lambda: self.smart_chat.send_message(injection_prompt)
-            )
+            await self._send_message_with_retry(self.smart_chat, injection_prompt)
 
             trunc_note = f" (first {MAX_CHARS:,} characters loaded)" if truncated else ""
             response = f"✅ File '{filename}' loaded successfully{trunc_note}. Ask me anything about it!"
@@ -887,11 +981,7 @@ class VoiceAssistant:
                 print("📸 Processing Image with Gemini multimodal...")
                 # Pillar 4: intent-specific prompt based on what the user asked
                 image_prompt = self._analyze_image_intent(user_text)
-                loop = asyncio.get_running_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: selected_chat.send_message([image_prompt, user_image])
-                )
+                response = await self._send_message_with_retry(selected_chat, [image_prompt, user_image])
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
@@ -919,11 +1009,9 @@ class VoiceAssistant:
                 tool_result = await search_web(query)
 
             if tool_result:
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: selected_chat.send_message(
-                        f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
-                    )
+                response = await self._send_message_with_retry(
+                    selected_chat,
+                    f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
                 )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
@@ -948,11 +1036,7 @@ class VoiceAssistant:
             else:
                 prompt = context_header + real_time_context + " " + user_text
 
-            loop = asyncio.get_running_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: selected_chat.send_message(prompt)
-            )
+            response = await self._send_message_with_retry(selected_chat, prompt)
 
             clean_resp = self.clean_response(response.text)
 
