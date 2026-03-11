@@ -384,11 +384,11 @@ class VoiceAssistant:
         # 3. Initialize Session
         self.current_session_id = self.session_manager.create_session()
 
-        # 4. Initialize LOCAL Ollama (Primary Brain — free, unlimited)
+        # 4. Ollama disabled — using Google Gemini API only (per user preference)
         self.current_persona = "default"
         self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
-        self.ollama_available = self._check_ollama()
+        self.ollama_available = False  # DISABLED: Use Gemini only
 
         # 5. Initialize Gemini (Fallback for images + complex tasks)
         self.fast_chat, self.smart_chat = self._init_models()
