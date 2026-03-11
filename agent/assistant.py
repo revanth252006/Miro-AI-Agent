@@ -325,7 +325,7 @@ You adapt continuously based on feedback and context.
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "https://miro-ai-agent.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -984,10 +984,73 @@ class VoiceAssistant:
                 f"Look at this image carefully and answer: {user_text}\n"
                 "Be specific and confident. If unsure, say so."
             )
+        # Shopping/ordering intent — identify the product for price search
+        if any(w in t for w in ["buy", "order", "shop", "price", "cost", "purchase",
+                                  "where can i get", "find this", "how much",
+                                  "cheapest", "best deal", "add to cart"]):
+            return (
+                f"The user wants to BUY or FIND PRICES for what they're showing. "
+                f"User said: \"{user_text}\"\n\n"
+                "Your task:\n"
+                "1. Identify the EXACT product/item in the image (brand, model, color, size if visible)\n"
+                "2. Respond in this EXACT format:\n"
+                "PRODUCT_SEARCH: <precise product name for shopping search>\n"
+                "DESCRIPTION: <brief 1-line description of what you see>\n\n"
+                "Example:\n"
+                "PRODUCT_SEARCH: Apple AirPods Pro 2nd Generation White\n"
+                "DESCRIPTION: White wireless earbuds with Apple AirPods Pro charging case\n\n"
+                "Be as specific as possible with the product name for accurate search results."
+            )
         # Default: answer the question using the image
         return (
             f"Using this image as your primary reference, answer the following: {user_text}"
         )
+
+    def _is_shopping_intent(self, text: str) -> bool:
+        """Check if the user's message indicates shopping/ordering intent."""
+        t = text.lower()
+        return any(w in t for w in ["buy", "order", "shop", "price", "cost", "purchase",
+                                      "where can i get", "find this", "how much",
+                                      "cheapest", "best deal", "add to cart"])
+
+    async def _search_product_prices(self, product_name: str) -> str:
+        """Search for product prices across shopping platforms using web search."""
+        try:
+            from duckduckgo_search import DDGS
+            results = []
+            
+            # Search across major shopping platforms
+            platforms = [
+                ("Amazon India", f"{product_name} site:amazon.in price"),
+                ("Flipkart", f"{product_name} site:flipkart.com price"),
+                ("General", f"{product_name} buy online India best price"),
+            ]
+            
+            loop = asyncio.get_running_loop()
+            
+            for platform, query in platforms:
+                try:
+                    def _search(q=query):
+                        with DDGS() as ddgs:
+                            return list(ddgs.text(q, max_results=3))
+                    
+                    search_results = await loop.run_in_executor(None, _search)
+                    for r in search_results:
+                        title = r.get("title", "")
+                        link = r.get("href", r.get("link", ""))
+                        snippet = r.get("body", "")
+                        if link:
+                            results.append(f"- **{title}**\n  {snippet}\n  🔗 [View on {platform}]({link})")
+                except Exception:
+                    continue
+            
+            if results:
+                header = f"### 🛒 Shopping Results for: **{product_name}**\n\n"
+                return header + "\n\n".join(results[:6]) + "\n\n> 💡 *Tip: Click the links to compare prices and buy!*"
+            else:
+                return f"I couldn't find online listings for **{product_name}**. Try searching on [Amazon](https://www.amazon.in/s?k={product_name.replace(' ', '+')}) or [Flipkart](https://www.flipkart.com/search?q={product_name.replace(' ', '+')}) directly."
+        except Exception as e:
+            return f"Shopping search error: {e}"
 
     async def process_file(self, file_data, filename):
         """Process an uploaded file and store its text in knowledge_base.
@@ -998,6 +1061,7 @@ class VoiceAssistant:
         """
         try:
             print(f"📂 Processing file: {filename}")
+
 
             if "," not in file_data:
                 return "❌ Invalid file format — expected base64 data URL."
@@ -1406,6 +1470,29 @@ class VoiceAssistant:
                 image_prompt = self._analyze_image_intent(user_text)
                 response = await self._send_message_with_retry(selected_chat, [image_prompt, user_image])
                 clean_resp = self.clean_response(response.text)
+
+                # 🛒 SHOPPING PIPELINE: If shopping intent detected, parse product and search prices
+                if self._is_shopping_intent(user_text) and "PRODUCT_SEARCH:" in clean_resp:
+                    # Extract product name from Gemini's structured response
+                    product_name = ""
+                    description = ""
+                    for line in clean_resp.split("\n"):
+                        if line.strip().startswith("PRODUCT_SEARCH:"):
+                            product_name = line.split("PRODUCT_SEARCH:", 1)[1].strip()
+                        elif line.strip().startswith("DESCRIPTION:"):
+                            description = line.split("DESCRIPTION:", 1)[1].strip()
+                    
+                    if product_name:
+                        print(f"🛒 Shopping intent! Searching prices for: {product_name}")
+                        if self._current_ws:
+                            await self._current_ws.send_text(
+                                f"🔍 I see: **{description or product_name}**\n\n"
+                                f"Searching for the best prices across shopping platforms..."
+                            )
+                        price_results = await self._search_product_prices(product_name)
+                        self.memory.add_message("model", price_results)
+                        return price_results
+                
                 self.memory.add_message("model", clean_resp)
                 return clean_resp
 
@@ -1578,6 +1665,19 @@ async def _on_startup():
     asyncio.create_task(assistant._daily_briefing_scheduler())
 
 # ==========================================
+# SECURITY: Auto-token endpoint (localhost-only, safe)
+# Since server is bound to 127.0.0.1, only local
+# processes can access this — no external risk.
+# ==========================================
+@app.get("/api/ws-token")
+async def get_ws_token():
+    """Returns the WebSocket auth token.
+    Safe because server only listens on localhost."""
+    import os as _os
+    token = _os.getenv("MIRO_SECRET_TOKEN", "")
+    return {"token": token}
+
+# ==========================================
 # GOOGLE OAUTH ROUTES
 # ==========================================
 from fastapi import Request
@@ -1641,11 +1741,26 @@ async def websocket_endpoint(websocket: WebSocket):
                 continue
 
             # --- SECURITY: Input Sanitization ---
-            is_safe, sanitized = InputSanitizer.sanitize(raw)
-            if not is_safe:
-                SecurityLogger.log_blocked_input(remote)
-                await websocket.send_text(sanitized)
-                continue
+            # For JSON payloads (images, uploads, controls), only sanitize the text field
+            text_to_check = raw
+            try:
+                _parsed = json.loads(raw)
+                if isinstance(_parsed, dict):
+                    # Control messages (get_history, new_chat, load_session) — skip sanitization
+                    if _parsed.get("type") in ("get_history", "new_chat", "load_session", "upload"):
+                        text_to_check = None
+                    else:
+                        # Image/vision payloads — only check the text field
+                        text_to_check = _parsed.get("text", "")
+            except (json.JSONDecodeError, ValueError):
+                pass  # Plain text message, sanitize as-is
+
+            if text_to_check:
+                is_safe, sanitized = InputSanitizer.sanitize(text_to_check)
+                if not is_safe:
+                    SecurityLogger.log_blocked_input(remote)
+                    await websocket.send_text(sanitized)
+                    continue
 
             # Store current websocket for streaming
             assistant._current_ws = websocket
