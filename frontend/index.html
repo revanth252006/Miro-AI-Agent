@@ -388,29 +388,42 @@
             const [sessionHistory, setSessionHistory] = useState([]);
 
             // 1. WEBSOCKET (with token authentication)
+            const hasPromptedRef = useRef(false);
+            const authFailedRef = useRef(false);
+
             useEffect(() => {
                 const connect = () => {
-                    // SECURITY: Read token from localStorage or prompt user
+                    // If auth failed, don't auto-reconnect (user must reload page)
+                    if (authFailedRef.current) return;
+
+                    // SECURITY: Read token from localStorage
                     let token = localStorage.getItem('MIRO_SECRET_TOKEN');
-                    if (!token) {
+
+                    // Only prompt ONCE per page load, and only if no token stored
+                    if (!token && !hasPromptedRef.current) {
+                        hasPromptedRef.current = true;
                         token = prompt('Enter your MIRO_SECRET_TOKEN to connect:');
                         if (token) localStorage.setItem('MIRO_SECRET_TOKEN', token);
                     }
+
                     const wsUrl = token
                         ? `ws://localhost:8000/ws?token=${encodeURIComponent(token)}`
                         : 'ws://localhost:8000/ws';
                     ws.current = new WebSocket(wsUrl);
                     ws.current.onopen = () => {
                         setWsStatus("Online");
-                        // FIXED: Load session history sidebar on connect
+                        // Load session history sidebar on connect
                         ws.current.send(JSON.stringify({ type: "get_history" }));
                     };
                     ws.current.onclose = (event) => {
                         setWsStatus("Offline");
-                        // If closed with 1008 (Unauthorized), clear stored token
+                        // If closed with 1008 (Unauthorized), stop reconnect loop
                         if (event.code === 1008) {
+                            authFailedRef.current = true;
                             localStorage.removeItem('MIRO_SECRET_TOKEN');
-                            alert('Authentication failed. Please check your MIRO_SECRET_TOKEN.');
+                            setWsStatus("Auth Failed");
+                            alert('Authentication failed. Enter your MIRO_SECRET_TOKEN from .env and reload the page.');
+                            return; // Don't reconnect
                         }
                         setTimeout(connect, 3000);
                     };
