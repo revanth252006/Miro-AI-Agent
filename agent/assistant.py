@@ -417,6 +417,7 @@ class VoiceAssistant:
         self._briefing_sent_today = False  # Daily briefing flag
         self._current_ws = None            # Current WebSocket for streaming
         self._was_streamed = False          # Flag: last response was streamed
+        self._greeted = False              # Flag: first-message greeting sent
 
     # ==========================================
     # FEATURE: AUTO DAILY BRIEFING (8 AM)
@@ -1549,6 +1550,16 @@ class VoiceAssistant:
             response = await self._send_message_with_retry(selected_chat, prompt)
 
             clean_resp = self.clean_response(response.text)
+
+            # ONE-TIME GREETING: prepend greeting to the very first response only
+            if not self._greeted:
+                self._greeted = True
+                now = datetime.datetime.now()
+                hour = now.hour
+                tod = "morning" if hour < 12 else ("afternoon" if hour < 17 else "evening")
+                name = self.user_name or "Sir"
+                greeting = f"Good {tod}, {name}! 😊\n\n"
+                clean_resp = greeting + clean_resp
 
             self.memory.add_message("model", clean_resp)
 
