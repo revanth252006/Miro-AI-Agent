@@ -358,7 +358,7 @@ def main():
             print("🌍 Hosting Frontend at http://localhost:8000")
             app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
             
-        uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
+        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
     else:
         print("❌ Critical: Agent not loaded.")
 

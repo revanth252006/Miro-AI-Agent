@@ -1,15 +1,32 @@
+# ─── Python ───
 venv/
 __pycache__/
 *.pyc
+
+# ─── Secrets & Credentials ───
 .env
-.DS_Store
-sign_detection/Model/keras_model.h5
+
+# ─── Sensitive Data ───
+brain.json
+miro_security.log
+finance.db
+miro_finance.db
+miro_finance.db.enc
+
+# ─── Generated Directories ───
 bot_profile/
-*.log
-node_modules
-package-lock.json
-ngrok.exe
-*.jpg
+chroma_db/
+screenshots/
 sessions/
 agent/sessions/
-agent/brain.json
+
+# ─── System ───
+.DS_Store
+node_modules
+package-lock.json
+
+# ─── Large Files ───
+ngrok.exe
+sign_detection/Model/keras_model.h5
+*.jpg
+*.log

@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Miro Memory Manager — with Fernet encryption for brain.json.
+Uses MIRO_SECRET_TOKEN to derive encryption key.
+"""
+
 import json
 import os
 import re
@@ -7,6 +13,22 @@ import datetime
 import threading
 from typing import Optional
 
+# --- Encryption ---
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+    ENCRYPTION_AVAILABLE = True
+except ImportError:
+    ENCRYPTION_AVAILABLE = False
+    print("⚠️ cryptography not installed — brain.json will NOT be encrypted (pip install cryptography)")
+
+try:
+    from security import derive_fernet_key
+except ImportError:
+    try:
+        from agent.security import derive_fernet_key
+    except ImportError:
+        derive_fernet_key = None
+
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MEMORY_FILE = os.path.join(BASE_DIR, "brain.json")
@@ -14,6 +36,64 @@ SESSIONS_DIR = os.path.join(BASE_DIR, "sessions")
 
 if not os.path.exists(SESSIONS_DIR):
     os.makedirs(SESSIONS_DIR)
+
+# ─────────────────────────────────────────────────────────────────
+# ENCRYPTION HELPERS
+# ─────────────────────────────────────────────────────────────────
+def _get_fernet():
+    """Returns a Fernet instance using MIRO_SECRET_TOKEN, or None if unavailable."""
+    if not ENCRYPTION_AVAILABLE or not derive_fernet_key:
+        return None
+    try:
+        key = derive_fernet_key()
+        return Fernet(key)
+    except Exception as e:
+        print(f"⚠️ Encryption key derivation failed: {e}")
+        return None
+
+
+def _encrypted_load(filepath: str) -> dict:
+    """Load brain.json — tries encrypted first, falls back to plain JSON."""
+    fernet = _get_fernet()
+    
+    if not os.path.exists(filepath):
+        return {"user_name": None, "history": [], "profile": {"facts": [], "structured": {}}}
+    
+    try:
+        with open(filepath, "rb") as f:
+            raw = f.read()
+    except Exception:
+        return {"user_name": None, "history": [], "profile": {"facts": [], "structured": {}}}
+    
+    # Try decrypting first (binary encrypted data)
+    if fernet and raw:
+        try:
+            decrypted = fernet.decrypt(raw)
+            return json.loads(decrypted.decode("utf-8"))
+        except (InvalidToken, Exception):
+            pass  # Not encrypted or different key, try plain JSON
+    
+    # Fallback: try reading as plain JSON (legacy / pre-encryption)
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        print("⚠️ brain.json is corrupted or uses a different encryption key")
+        return {"user_name": None, "history": [], "profile": {"facts": [], "structured": {}}}
+
+
+def _encrypted_save(filepath: str, data: dict):
+    """Save brain.json — encrypted if possible, plain JSON fallback."""
+    fernet = _get_fernet()
+    json_bytes = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
+    
+    if fernet:
+        encrypted = fernet.encrypt(json_bytes)
+        with open(filepath, "wb") as f:
+            f.write(encrypted)
+    else:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 # ─────────────────────────────────────────────────────────────────
 # LEARNING PATTERNS — structured extraction rules
@@ -43,6 +123,7 @@ _PREFERENCE_PATTERNS = [
 class MemoryManager:
     """
     Manages the global brain.json for user facts and long-term learning.
+    Now with Fernet encryption using MIRO_SECRET_TOKEN.
     
     Storage schema:
     {
@@ -75,18 +156,11 @@ class MemoryManager:
 
     def _load(self):
         with self._lock:
-            if os.path.exists(MEMORY_FILE):
-                try:
-                    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-                        return json.load(f)
-                except Exception:
-                    pass
-        return {"user_name": None, "history": [], "profile": {"facts": [], "structured": {}}}
+            return _encrypted_load(MEMORY_FILE)
 
     def save(self):
         with self._lock:
-            with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.data, f, indent=2, ensure_ascii=False)
+            _encrypted_save(MEMORY_FILE, self.data)
 
     def set_name(self, name: str):
         self.data["user_name"] = name

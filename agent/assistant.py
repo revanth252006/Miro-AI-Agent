@@ -28,9 +28,24 @@ import openai
 import requests as _requests  # for Ollama local API
 # from google import genai
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+
+# SECURITY MODULE
+try:
+    from security import (
+        InputSanitizer, RateLimiter, SecurityLogger, check_credentials,
+        verify_token, is_command_allowed
+    )
+except ImportError:
+    from agent.security import (
+        InputSanitizer, RateLimiter, SecurityLogger, check_credentials,
+        verify_token, is_command_allowed
+    )
+
+# Global security instances
+_rate_limiter = RateLimiter(max_requests=30, window_seconds=60)
 
 # IMPORT MEMORY
 try:
@@ -310,7 +325,7 @@ You adapt continuously based on feedback and context.
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -1536,8 +1551,8 @@ class VoiceAssistant:
         return ""
 
     def run(self):
-        print("🚀 Miro Server running on ws://localhost:8000/ws")
-        uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
+        print("🚀 Miro Server running on ws://127.0.0.1:8000/ws (localhost only)")
+        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
 
 # --- SINGLETON ASSISTANT ---
 _assistant_instance = None
@@ -1554,6 +1569,9 @@ def get_assistant():
 # ==========================================
 @app.on_event("startup")
 async def _on_startup():
+    # Security: verify all credentials are present
+    check_credentials()
+    SecurityLogger.log_event("SERVER_STARTUP")
     assistant = get_assistant()
     assistant._event_loop = asyncio.get_running_loop()
     # Start daily briefing scheduler
@@ -1592,18 +1610,43 @@ async def google_callback(request: Request, code: str = ""):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    # --- SECURITY: Token Authentication ---
+    remote = str(websocket.client) if websocket.client else "unknown"
+    token = websocket.query_params.get("token", "")
+    if not verify_token(token):
+        SecurityLogger.log_connection(remote, "REJECTED:invalid_token")
+        await websocket.close(code=1008, reason="Unauthorized")
+        return
+
     await websocket.accept()
+    SecurityLogger.log_connection(remote, "ACCEPTED")
+
     assistant = get_assistant()
     # Track event loop and active connections for wake word broadcast
     import asyncio as _aio
     if assistant._event_loop is None:
         assistant._event_loop = _aio.get_event_loop()
     assistant._active_ws.append(websocket)
+    connection_id = str(id(websocket))
     try:
         while True:
             raw = await websocket.receive_text()
             if not raw:
                 continue
+
+            # --- SECURITY: Rate Limiting ---
+            if not _rate_limiter.is_allowed(connection_id):
+                SecurityLogger.log_rate_limit(remote)
+                await websocket.send_text("⚠️ Rate limit exceeded — max 30 messages per minute. Please wait.")
+                continue
+
+            # --- SECURITY: Input Sanitization ---
+            is_safe, sanitized = InputSanitizer.sanitize(raw)
+            if not is_safe:
+                SecurityLogger.log_blocked_input(remote)
+                await websocket.send_text(sanitized)
+                continue
+
             # Store current websocket for streaming
             assistant._current_ws = websocket
             response = await assistant.process_message(raw)
@@ -1611,9 +1654,13 @@ async def websocket_endpoint(websocket: WebSocket):
             if response and not getattr(assistant, '_was_streamed', False):
                 await websocket.send_text(response)
             assistant._was_streamed = False
+    except WebSocketDisconnect:
+        SecurityLogger.log_disconnect(remote)
     except Exception as e:
         print(f"⚠️ WebSocket error: {e}")
+        SecurityLogger.log_disconnect(remote)
     finally:
+        _rate_limiter.cleanup(connection_id)
         if websocket in assistant._active_ws:
             assistant._active_ws.remove(websocket)
         if getattr(assistant, '_current_ws', None) == websocket:

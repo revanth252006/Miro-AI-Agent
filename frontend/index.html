@@ -387,16 +387,33 @@
             // --- SESSION HISTORY STATE ---
             const [sessionHistory, setSessionHistory] = useState([]);
 
-            // 1. WEBSOCKET
+            // 1. WEBSOCKET (with token authentication)
             useEffect(() => {
                 const connect = () => {
-                    ws.current = new WebSocket('ws://localhost:8000/ws');
+                    // SECURITY: Read token from localStorage or prompt user
+                    let token = localStorage.getItem('MIRO_SECRET_TOKEN');
+                    if (!token) {
+                        token = prompt('Enter your MIRO_SECRET_TOKEN to connect:');
+                        if (token) localStorage.setItem('MIRO_SECRET_TOKEN', token);
+                    }
+                    const wsUrl = token
+                        ? `ws://localhost:8000/ws?token=${encodeURIComponent(token)}`
+                        : 'ws://localhost:8000/ws';
+                    ws.current = new WebSocket(wsUrl);
                     ws.current.onopen = () => {
                         setWsStatus("Online");
                         // FIXED: Load session history sidebar on connect
                         ws.current.send(JSON.stringify({ type: "get_history" }));
                     };
-                    ws.current.onclose = () => { setWsStatus("Offline"); setTimeout(connect, 3000); };
+                    ws.current.onclose = (event) => {
+                        setWsStatus("Offline");
+                        // If closed with 1008 (Unauthorized), clear stored token
+                        if (event.code === 1008) {
+                            localStorage.removeItem('MIRO_SECRET_TOKEN');
+                            alert('Authentication failed. Please check your MIRO_SECRET_TOKEN.');
+                        }
+                        setTimeout(connect, 3000);
+                    };
                     ws.current.onmessage = (event) => {
                         const data = event.data;
 

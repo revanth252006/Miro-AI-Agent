@@ -1,16 +1,40 @@
 # -*- coding: utf-8 -*-
 """
-Miro Personal Finance Tracker — Local SQLite-based expense tracking.
-No API keys needed. All data stays on your machine.
+Miro Personal Finance Tracker — Encrypted SQLite-based expense tracking.
+Uses MIRO_SECRET_TOKEN for encryption. All data stays on your machine.
+SECURITY: Database is encrypted at rest. Decrypted only while agent is running.
 """
 
 import sqlite3
 import os
 import re
 import asyncio
+import tempfile
+import atexit
 from datetime import datetime, timedelta
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "miro_finance.db")
+# --- Encryption ---
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+    ENCRYPTION_AVAILABLE = True
+except ImportError:
+    ENCRYPTION_AVAILABLE = False
+    print("⚠️ cryptography not installed — finance.db will NOT be encrypted (pip install cryptography)")
+
+try:
+    from security import derive_fernet_key
+except ImportError:
+    try:
+        from agent.security import derive_fernet_key
+    except ImportError:
+        derive_fernet_key = None
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH_ENCRYPTED = os.path.join(BASE_DIR, "miro_finance.db.enc")
+DB_PATH_LEGACY = os.path.join(BASE_DIR, "miro_finance.db")  # Pre-encryption path
+
+# Temp decrypted DB path (only exists while running)
+_temp_db_path = None
 
 # Category keywords for auto-detection
 _CATEGORY_MAP = {
@@ -28,9 +52,104 @@ _CATEGORY_MAP = {
 }
 
 
+# ─────────────────────────────────────────────────────────────────
+# ENCRYPTION HELPERS
+# ─────────────────────────────────────────────────────────────────
+def _get_fernet():
+    """Returns a Fernet instance or None."""
+    if not ENCRYPTION_AVAILABLE or not derive_fernet_key:
+        return None
+    try:
+        key = derive_fernet_key()
+        return Fernet(key)
+    except Exception:
+        return None
+
+
+def _get_db_path() -> str:
+    """Returns the path to the working (decrypted) database.
+    
+    On first call:
+    1. If encrypted DB exists → decrypt to temp file
+    2. If legacy plain DB exists → use it (will encrypt on cleanup)
+    3. Otherwise → create new temp DB
+    """
+    global _temp_db_path
+    
+    if _temp_db_path and os.path.exists(_temp_db_path):
+        return _temp_db_path
+    
+    fernet = _get_fernet()
+    
+    # Case 1: Encrypted DB exists → decrypt to temp
+    if fernet and os.path.exists(DB_PATH_ENCRYPTED):
+        try:
+            with open(DB_PATH_ENCRYPTED, "rb") as f:
+                encrypted_data = f.read()
+            decrypted = fernet.decrypt(encrypted_data)
+            
+            fd, _temp_db_path = tempfile.mkstemp(suffix=".db", prefix="miro_fin_")
+            os.close(fd)
+            with open(_temp_db_path, "wb") as f:
+                f.write(decrypted)
+            return _temp_db_path
+        except (InvalidToken, Exception) as e:
+            print(f"⚠️ Finance DB decryption failed: {e}")
+    
+    # Case 2: Legacy unencrypted DB exists → use it directly
+    if os.path.exists(DB_PATH_LEGACY):
+        _temp_db_path = DB_PATH_LEGACY
+        return _temp_db_path
+    
+    # Case 3: No DB exists → create new temp DB
+    if fernet:
+        fd, _temp_db_path = tempfile.mkstemp(suffix=".db", prefix="miro_fin_")
+        os.close(fd)
+    else:
+        _temp_db_path = DB_PATH_LEGACY
+    
+    return _temp_db_path
+
+
+def _encrypt_and_cleanup():
+    """Encrypt the working DB back and delete temp file. Called on exit."""
+    global _temp_db_path
+    
+    if not _temp_db_path or not os.path.exists(_temp_db_path):
+        return
+    
+    fernet = _get_fernet()
+    if fernet:
+        try:
+            with open(_temp_db_path, "rb") as f:
+                plain_data = f.read()
+            encrypted = fernet.encrypt(plain_data)
+            with open(DB_PATH_ENCRYPTED, "wb") as f:
+                f.write(encrypted)
+            # Remove temp file and legacy unencrypted file
+            if _temp_db_path != DB_PATH_LEGACY and os.path.exists(_temp_db_path):
+                try:
+                    os.remove(_temp_db_path)
+                except Exception:
+                    pass
+            # Remove legacy plain DB if encrypted version now exists
+            if os.path.exists(DB_PATH_LEGACY) and os.path.exists(DB_PATH_ENCRYPTED):
+                try:
+                    os.remove(DB_PATH_LEGACY)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"⚠️ Finance DB encryption on exit failed: {e}")
+
+
+# Register cleanup on exit
+atexit.register(_encrypt_and_cleanup)
+
+
 def _init_db():
     """Create the expenses table if it doesn't exist."""
-    conn = sqlite3.connect(DB_PATH)
+    db_path = _get_db_path()
+    conn = sqlite3.connect(db_path)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,6 +206,7 @@ def _extract_amount(text: str) -> float | None:
 
 async def log_expense(text: str) -> str:
     """Parse and log an expense from user message.
+    SECURITY: Never logs raw financial data to console/log files.
     
     Examples:
     - "I spent 500 on food today"
@@ -104,7 +224,8 @@ async def log_expense(text: str) -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     
     def _insert():
-        conn = sqlite3.connect(DB_PATH)
+        db_path = _get_db_path()
+        conn = sqlite3.connect(db_path)
         conn.execute(
             "INSERT INTO expenses (amount, category, note, date) VALUES (?, ?, ?, ?)",
             (amount, category, note, today)
@@ -118,7 +239,8 @@ async def log_expense(text: str) -> str:
 
 
 async def get_spending_summary(period: str = "week") -> str:
-    """Get spending summary for today/week/month."""
+    """Get spending summary for today/week/month.
+    SECURITY: Never exposes raw financial data in logs."""
     _init_db()
     
     now = datetime.now()
@@ -133,7 +255,8 @@ async def get_spending_summary(period: str = "week") -> str:
         label = "this week"
     
     def _query():
-        conn = sqlite3.connect(DB_PATH)
+        db_path = _get_db_path()
+        conn = sqlite3.connect(db_path)
         # Category breakdown
         rows = conn.execute(
             "SELECT category, SUM(amount) FROM expenses WHERE date >= ? GROUP BY category ORDER BY SUM(amount) DESC",

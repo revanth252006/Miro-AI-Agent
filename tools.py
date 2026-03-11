@@ -69,15 +69,38 @@ async def minimize_windows() -> str:
     await loop.run_in_executor(None, lambda: pyautogui.hotkey('win', 'd'))
     return "Desktop visible."
 
+# SECURITY: Command whitelist — only these apps can be launched
+_APP_WHITELIST = {
+    "notepad": ["notepad"],
+    "calc": ["calc"],
+    "calculator": ["calc"],
+    "chrome": ["cmd", "/c", "start", "chrome"],
+    "code": ["cmd", "/c", "start", "code"],
+    "vscode": ["cmd", "/c", "start", "code"],
+    "explorer": ["explorer"],
+    "cmd": ["cmd"],
+    "terminal": ["cmd", "/c", "start", "wt"],
+    "settings": ["cmd", "/c", "start", "ms-settings:"],
+    "edge": ["cmd", "/c", "start", "msedge"],
+    "firefox": ["cmd", "/c", "start", "firefox"],
+    "brave": ["cmd", "/c", "start", "brave"],
+    "spotify": ["cmd", "/c", "start", "spotify:"],
+    "discord": ["cmd", "/c", "start", "discord:"],
+    "powershell": ["powershell"],
+}
+
 async def open_application(app_name: str) -> str:
     app_name = app_name.lower().strip()
-    app_map = {"chrome": "start chrome", "notepad": "notepad", "calc": "calc", "code": "code"}
+    # SECURITY: Block anything not on the whitelist
+    if app_name not in _APP_WHITELIST:
+        return f"⚠️ Blocked: '{app_name}' is not in the allowed applications list."
+    cmd_args = _APP_WHITELIST[app_name]
     def _perform_open():
-        if app_map.get(app_name):
-            os.system(app_map[app_name])
+        try:
+            subprocess.Popen(cmd_args, shell=False)
             return f"Opened {app_name}"
-        pyautogui.press("win"); time.sleep(0.2); pyautogui.write(app_name); time.sleep(0.2); pyautogui.press("enter")
-        return f"Launched {app_name}"
+        except Exception as e:
+            return f"Failed to open {app_name}: {e}"
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _perform_open)
 
