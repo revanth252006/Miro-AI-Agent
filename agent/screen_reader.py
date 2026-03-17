@@ -20,6 +20,10 @@ except ImportError:
 try:
     import pytesseract
     OCR_AVAILABLE = True
+    # F9 Fix: Automatically set the path for Windows users if not in PATH
+    import os
+    if os.name == 'nt' and os.path.exists(r"C:\Program Files\Tesseract-OCR\tesseract.exe"):
+        pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 except ImportError:
     OCR_AVAILABLE = False
 

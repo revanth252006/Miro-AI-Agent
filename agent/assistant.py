@@ -829,7 +829,7 @@ class VoiceAssistant:
         try:
             print("🚀 Loading Gemini 1.5 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-1.5-flash",
+                "gemini-2.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -842,7 +842,7 @@ class VoiceAssistant:
         except Exception as e:
             print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 1.5 Pro.")
             model_fast = genai.GenerativeModel(
-                "gemini-1.5-pro",
+                "gemini-2.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
@@ -852,7 +852,7 @@ class VoiceAssistant:
         try:
             print("🧠 Loading Gemini 1.5 Flash (smart)...")
             model_smart = genai.GenerativeModel(
-                "gemini-1.5-flash",
+                "gemini-2.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -865,7 +865,7 @@ class VoiceAssistant:
         except Exception as e:
             print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 1.5 Pro.")
             model_smart = genai.GenerativeModel(
-                "gemini-1.5-pro",
+                "gemini-2.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_smart = model_smart.start_chat(history=[])
