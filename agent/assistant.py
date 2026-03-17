@@ -656,7 +656,7 @@ class VoiceAssistant:
             """Stream Gemini response token-by-token via WebSocket."""
             try:
                 # Get the model from the chat session
-                model = target_chat._model
+                model = target_chat.model
                 ws = self._current_ws
 
                 # Build the actual message for send_message (non-streaming, for history)
