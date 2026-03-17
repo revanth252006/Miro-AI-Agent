@@ -336,11 +336,8 @@ async def get_realtime_data(query: str) -> str | None:
     WS error 1001/1012 was caused by this being a blocking sync call."""
     def _blocking_search():
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        triggers = ["price", "stock", "score", "match", "weather", "vs",
-                    "news", "latest", "current", "today", "right now"]
-        search_query = query
-        if any(kw in query.lower() for kw in triggers):
-            search_query += f" {datetime.datetime.now().year}"
+        # BF1 FIX: Always append year — search fires on ALL factual questions now
+        search_query = f"{query} {datetime.datetime.now().year}"
         print(f"🌍 Live Search: {search_query}")
         results = DDGS().text(search_query, region='in-en', max_results=5)
         if not results:
@@ -384,11 +381,11 @@ class VoiceAssistant:
         # 3. Initialize Session
         self.current_session_id = self.session_manager.create_session()
 
-        # 4. Ollama disabled — using Google Gemini API only (per user preference)
+        # 4. Ollama as FALLBACK (F5: enabled, but only used when Gemini hits 429)
         self.current_persona = "default"
         self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
-        self.ollama_available = False  # DISABLED: Use Gemini only
+        self.ollama_available = self._check_ollama()  # F5: re-enabled as fallback
 
         # 5. Initialize Gemini (Fallback for images + complex tasks)
         self.fast_chat, self.smart_chat = self._init_models()
@@ -419,34 +416,75 @@ class VoiceAssistant:
         self._was_streamed = False          # Flag: last response was streamed
         self._greeted = False              # Flag: first-message greeting sent
 
+        # F10: Initialize Vector Memory (ChromaDB)
+        self.vector_memory = None
+        if VECTOR_MEMORY_AVAILABLE:
+            try:
+                self.vector_memory = VectorMemory()
+                print(f"\U0001f9e0 Vector memory: {self.vector_memory.count()} memories stored")
+            except Exception as e:
+                print(f"\u26a0\ufe0f Vector memory init failed: {e}")
+
+        # F9: Start background screen reader (if available)
+        if describe_screen is not None:
+            try:
+                from agent.screen_reader import start_background_reader
+                start_background_reader()
+            except Exception:
+                try:
+                    from screen_reader import start_background_reader
+                    start_background_reader()
+                except Exception as e:
+                    print(f"\u26a0\ufe0f Background screen reader start failed: {e}")
+
     # ==========================================
     # FEATURE: AUTO DAILY BRIEFING (8 AM)
     # ==========================================
     async def _generate_daily_briefing(self) -> str:
-        """Generates a morning briefing: weather + news + email summary."""
+        """Generates a morning briefing: weather + news + email summary + motivation."""
+        # F3 FIX: import tools at method level since they're not available at class level
+        try:
+            from tools import get_weather, get_news, read_inbox
+        except ImportError:
+            get_weather = get_news = read_inbox = None
+
         parts = ["## ☀️ Good Morning, Sir! Here's your daily briefing:\n"]
         
         try:
-            weather = await get_weather("Hyderabad")
-            parts.append(f"### 🌡️ Weather\n{weather}\n")
+            if get_weather:
+                weather = await get_weather("Hyderabad")
+                parts.append(f"### 🌡️ Weather in Hyderabad\n{weather}\n")
         except Exception:
             parts.append("### 🌡️ Weather\nCouldn't fetch weather.\n")
         
         try:
-            news = await get_news("latest")
-            if news:
-                parts.append(f"### 📰 Top Headlines\n{news[:1000]}\n")
+            if get_news:
+                news = await get_news("latest")
+                if news:
+                    parts.append(f"### 📰 Top Headlines\n{news[:1000]}\n")
         except Exception:
             parts.append("### 📰 News\nCouldn't fetch news.\n")
         
         try:
-            from tools import read_inbox
-            emails = await read_inbox(max_emails=5)
-            if emails:
-                parts.append(f"### 📧 Email Summary\n{emails[:800]}\n")
+            if read_inbox:
+                emails = await read_inbox(max_emails=5)
+                if emails:
+                    parts.append(f"### 📧 Email Summary\n{emails[:800]}\n")
         except Exception:
             pass
         
+        # F3: Add motivational message
+        import random
+        motivational_quotes = [
+            "*\"The only way to do great work is to love what you do.\" — Steve Jobs* 🚀",
+            "*\"Success is not final, failure is not fatal: it is the courage to continue that counts.\" — Churchill* 💪",
+            "*\"The future belongs to those who believe in the beauty of their dreams.\" — Eleanor Roosevelt* ✨",
+            "*\"Don't watch the clock; do what it does. Keep going.\" — Sam Levenson* ⏰",
+            "*\"Your limitation—it's only your imagination.\"* 🧠",
+            "*\"Push yourself, because no one else is going to do it for you.\"* 🔥",
+            "*\"Great things never come from comfort zones.\"* 🌟",
+        ]
+        parts.append(f"\n### 💡 Motivation\n{random.choice(motivational_quotes)}")
         parts.append("\n*Have a productive day! 🚀*")
         return "\n".join(parts)
 
@@ -597,12 +635,12 @@ class VoiceAssistant:
         return "".join(full_response)
 
     async def _send_message_with_retry(self, chat, message, max_retries=2):
-        """Hybrid AI routing: Ollama (local) → Gemini (cloud) → OpenAI (last resort).
+        """Hybrid AI routing: Gemini (cloud) → Ollama (local fallback) → OpenAI (last resort).
 
-        Strategy:
-        1. If message is text and Ollama is available → try Ollama first (free, unlimited).
-        2. If Ollama fails or message has images → try Gemini.
-        3. If Gemini fails → try OpenAI.
+        Strategy (F1 + F5):
+        1. Try Gemini first (primary). Stream tokens if WebSocket is available.
+        2. If Gemini hits 429 → try Ollama (local, free, unlimited).
+        3. If Ollama fails → try OpenAI.
         4. User never sees the switching.
         """
         loop = asyncio.get_running_loop()
@@ -613,11 +651,117 @@ class VoiceAssistant:
             def __init__(self, text):
                 self.text = text
 
-        # === STEP 1: Try Ollama (local, free, unlimited) ===
+        # === STEP 1: Try Gemini with STREAMING (F1) ===
+        async def _try_gemini_stream(target_chat, label):
+            """Stream Gemini response token-by-token via WebSocket."""
+            try:
+                # Get the model from the chat session
+                model = target_chat._model
+                ws = self._current_ws
+
+                # Build the actual message for send_message (non-streaming, for history)
+                # We use generate_content for streaming but need to manage history ourselves
+                if isinstance(message, str):
+                    # For streaming, use the model directly with generate_content
+                    def _stream_call():
+                        return model.generate_content(message, stream=True)
+
+                    stream_response = await loop.run_in_executor(None, _stream_call)
+
+                    if ws:
+                        try:
+                            await ws.send_json({"type": "stream_start"})
+                        except Exception:
+                            pass
+
+                    full_text = []
+                    for chunk in stream_response:
+                        if hasattr(chunk, 'text') and chunk.text:
+                            full_text.append(chunk.text)
+                            if ws:
+                                # Split chunk into individual words for typewriter effect
+                                # Gemini returns large chunks (sentences), we want word-by-word
+                                words = chunk.text.split(' ')
+                                for i, word in enumerate(words):
+                                    try:
+                                        # Add space back (except for first word)
+                                        text_to_send = (' ' + word) if i > 0 else word
+                                        await ws.send_json({"type": "stream_chunk", "text": text_to_send})
+                                        await asyncio.sleep(0.03)  # 30ms delay per word for smooth typing
+                                    except Exception:
+                                        pass
+
+                    if ws:
+                        try:
+                            await ws.send_json({"type": "stream_end"})
+                        except Exception:
+                            pass
+
+                    joined = "".join(full_text)
+                    if joined.strip():
+                        self._was_streamed = True
+                        # Also update chat history so context is maintained
+                        try:
+                            target_chat.history.append({"role": "user", "parts": [message]})
+                            target_chat.history.append({"role": "model", "parts": [joined]})
+                        except Exception:
+                            pass
+                        return MockResponse(joined)
+                    return None
+                else:
+                    # Non-text (images) — can't stream, use regular send
+                    resp = await loop.run_in_executor(
+                        None, lambda: target_chat.send_message(message)
+                    )
+                    return resp
+            except ResourceExhausted as e:
+                errors.append(f"{label}: quota exceeded (429)")
+                print(f"⚠️ {label} quota exceeded: {e}")
+                return None
+            except Exception as e:
+                errors.append(f"{label}: {str(e)[:100]}")
+                print(f"❌ {label} error: {e}")
+                return None
+
+        async def _try_gemini(target_chat, label):
+            """Non-streaming Gemini call (used when no WebSocket or for images)."""
+            try:
+                resp = await loop.run_in_executor(
+                    None, lambda: target_chat.send_message(message)
+                )
+                return resp
+            except ResourceExhausted as e:
+                errors.append(f"{label}: quota exceeded (429)")
+                print(f"⚠️ {label} quota exceeded: {e}")
+                return None
+            except Exception as e:
+                errors.append(f"{label}: {str(e)[:100]}")
+                print(f"❌ {label} error: {e}")
+                return None
+
+        # Try primary Gemini model (with streaming if WebSocket available)
+        print("☁️ Cloud: Sending to Gemini...")
+        if self._current_ws and isinstance(message, str):
+            result = await _try_gemini_stream(chat, "Gemini primary (stream)")
+        else:
+            result = await _try_gemini(chat, "Gemini primary")
+        if result:
+            return result
+
+        # Try alternate Gemini model
+        alt_chat = self.smart_chat if chat is self.fast_chat else self.fast_chat
+        print(f"🔀 Trying alternate Gemini model...")
+        if self._current_ws and isinstance(message, str):
+            result = await _try_gemini_stream(alt_chat, "Gemini alt (stream)")
+        else:
+            result = await _try_gemini(alt_chat, "Gemini alt")
+        if result:
+            return result
+
+        # === STEP 2: Try Ollama as FALLBACK (F5: only on Gemini 429) ===
         if self.ollama_available and isinstance(message, str):
             try:
-                print("🏠 Local: Sending to Ollama...")
-                # Use streaming if WebSocket available
+                print("🏠 Fallback: Sending to Ollama (local)...")
                 if self._current_ws:
                     text = await self._ask_ollama_stream(message, websocket=self._current_ws)
                     self._was_streamed = True
@@ -629,39 +773,7 @@ class VoiceAssistant:
             except Exception as e:
                 errors.append(f"Ollama: {str(e)[:100]}")
                 print(f"⚠️ Ollama failed: {e}")
-                # Mark offline so future calls skip the timeout
                 self.ollama_available = False
-                print("⚠️ Ollama marked offline — switching to Gemini")
-
-        # === STEP 2: Try Gemini (cloud, quota-limited) ===
-        async def _try_gemini(target_chat, label):
-            try:
-                resp = await loop.run_in_executor(
-                    None, lambda: target_chat.send_message(message)
-                )
-                return resp
-            except ResourceExhausted as e:
-                errors.append(f"{label}: quota exceeded")
-                print(f"⚠️ {label} quota exceeded: {e}")
-                return None
-            except Exception as e:
-                errors.append(f"{label}: {str(e)[:100]}")
-                print(f"❌ {label} error: {e}")
-                return None
-
-        # Try primary Gemini model
-        print("☁️ Cloud: Sending to Gemini...")
-        result = await _try_gemini(chat, "Gemini primary")
-        if result:
-            return result
-
-        # Try alternate Gemini model
-        alt_chat = self.smart_chat if chat is self.fast_chat else self.fast_chat
-        alt_label = "Gemini alt"
-        print(f"🔀 Trying alternate Gemini model...")
-        result = await _try_gemini(alt_chat, alt_label)
-        if result:
-            return result
 
         # === STEP 3: Try OpenAI (last resort) ===
         if self.openai_client and isinstance(message, str):
@@ -683,7 +795,6 @@ class VoiceAssistant:
         # === STEP 4: Try Ollama one more time (may have recovered) ===
         if isinstance(message, str) and not self.ollama_available:
             try:
-                # Re-check if Ollama came back online
                 self.ollama_available = self._check_ollama()
                 if self.ollama_available:
                     text = await self._ask_ollama(message)
@@ -713,12 +824,12 @@ class VoiceAssistant:
 {profile_ctx}
 """
 
-        # 1. FAST BRAIN (Voice) -> Gemini 2.0 Flash (generous free quota)
+        # 1. FAST BRAIN (Voice) -> Gemini 1.5 Flash (BF3: user-requested default)
         genai.configure(api_key=key_fast)
         try:
-            print("🚀 Loading Gemini 2.0 Flash...")
+            print("🚀 Loading Gemini 1.5 Flash...")
             model_fast = genai.GenerativeModel(
-                "gemini-2.0-flash",
+                "gemini-1.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -727,21 +838,21 @@ class VoiceAssistant:
                 )
             )
             chat_fast = model_fast.start_chat(history=[])
-            print("✅ Gemini 2.0 Flash Online")
+            print("✅ Gemini 1.5 Flash Online")
         except Exception as e:
-            print(f"⚠️ Gemini 2.0 Flash Unavailable ({e}). Fallback to 2.5 Flash.")
+            print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 1.5 Pro.")
             model_fast = genai.GenerativeModel(
-                "gemini-2.5-flash",
+                "gemini-1.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_fast = model_fast.start_chat(history=[])
 
-        # 2. SMART BRAIN (Chat) -> Gemini 2.5 Flash (primary, saves quota vs Pro)
+        # 2. SMART BRAIN (Chat) -> Gemini 1.5 Flash (BF3: with fallback to 1.5 Pro on 429)
         if key_smart != key_fast: genai.configure(api_key=key_smart)
         try:
-            print("🧠 Loading Gemini 2.5 Flash (smart)...")
+            print("🧠 Loading Gemini 1.5 Flash (smart)...")
             model_smart = genai.GenerativeModel(
-                "gemini-2.5-flash",
+                "gemini-1.5-flash",
                 system_instruction=(
                     PERSONALITIES[self.current_persona]
                     + memory_block
@@ -750,11 +861,11 @@ class VoiceAssistant:
                 )
             )
             chat_smart = model_smart.start_chat(history=[])
-            print("✅ Gemini 2.5 Flash (smart) Online")
+            print("✅ Gemini 1.5 Flash (smart) Online")
         except Exception as e:
-            print(f"⚠️ Gemini 2.5 Flash Unavailable ({e}). Fallback to 2.5 Pro.")
+            print(f"⚠️ Gemini 1.5 Flash Unavailable ({e}). Fallback to 1.5 Pro.")
             model_smart = genai.GenerativeModel(
-                "gemini-2.5-pro",
+                "gemini-1.5-pro",
                 system_instruction=PERSONALITIES[self.current_persona] + memory_block + "\n\n" + SESSION_INSTRUCTION
             )
             chat_smart = model_smart.start_chat(history=[])
@@ -1345,20 +1456,82 @@ class VoiceAssistant:
             else:
                 return await get_spending_summary("week")
 
-        # --- WHATSAPP HANDLER ---
+        # --- WHATSAPP HANDLER (F4: now supports name-based sending) ---
+        # Contact map: name → phone (add your contacts here)
+        WHATSAPP_CONTACTS = {
+            "manoj": "+91XXXXXXXXXX",   # Replace with actual numbers
+            "manoj kumar": "+91XXXXXXXXXX",
+            "amit": "+91XXXXXXXXXX",
+            "amit kumar": "+91XXXXXXXXXX",
+            "jaideep": "+91XXXXXXXXXX",
+            "revanth": "+91XXXXXXXXXX",
+            # Add more contacts as needed
+        }
+        
         whatsapp_triggers = ["send on whatsapp", "whatsapp", "message on whatsapp",
-                            "send whatsapp", "send a whatsapp"]
+                            "send whatsapp", "send a whatsapp", "on whatsapp"]
         if WHATSAPP_AVAILABLE and any(t in clean_text for t in whatsapp_triggers):
-            # Extract phone number and message
+            phone = None
+            contact_name = None
+            
+            # F4: Try phone number first
             phone_match = re.search(r'(\+?\d{10,13})', clean_text)
             if phone_match:
                 phone = phone_match.group(1)
                 if not phone.startswith("+"):
-                    phone = "+91" + phone  # Default to India
-                # Extract message: everything after the phone number
-                msg_text = clean_text.split(phone_match.group(1))[-1].strip()
-                if not msg_text:
-                    msg_text = re.sub(r'send|whatsapp|message|on|to|\+?\d{10,13}', '', clean_text).strip()
+                    phone = "+91" + phone
+            else:
+                # F4: Try name-based lookup
+                # Pattern: "send [name] [message] on whatsapp" or "send [message] to [name] on whatsapp"
+                # Try extracting name from common patterns
+                name_patterns = [
+                    r'send\s+([a-z]+(?:\s+[a-z]+)?)\s+(?:the|a)?\s*(.+?)\s+on\s+whatsapp',
+                    r'send\s+(.+?)\s+to\s+([a-z]+(?:\s+[a-z]+)?)\s+on\s+whatsapp',
+                    r'whatsapp\s+([a-z]+(?:\s+[a-z]+)?)\s+(.+)',
+                    r'message\s+([a-z]+(?:\s+[a-z]+)?)\s+(.+?)\s+on\s+whatsapp',
+                ]
+                for pat in name_patterns:
+                    m = re.search(pat, clean_text)
+                    if m:
+                        possible_name = m.group(1).strip()
+                        possible_msg = m.group(2).strip()
+                        # Check if first group is a known contact
+                        if possible_name in WHATSAPP_CONTACTS:
+                            contact_name = possible_name
+                            phone = WHATSAPP_CONTACTS[contact_name]
+                            msg_text = possible_msg
+                            break
+                        # Maybe second group is the name (for "send X to name" pattern)
+                        if possible_msg in WHATSAPP_CONTACTS:
+                            contact_name = possible_msg
+                            phone = WHATSAPP_CONTACTS[contact_name]
+                            msg_text = possible_name
+                            break
+                
+                if not phone:
+                    # Check if any known name appears in the text
+                    for name, num in WHATSAPP_CONTACTS.items():
+                        if name in clean_text:
+                            contact_name = name
+                            phone = num
+                            break
+            
+            if phone:
+                if not contact_name:
+                    # Extract message from phone-number-based command
+                    if phone_match:
+                        msg_text = clean_text.split(phone_match.group(1))[-1].strip()
+                    else:
+                        msg_text = ""
+                    if not msg_text:
+                        msg_text = re.sub(r'send|whatsapp|message|on|to|\+?\d{10,13}', '', clean_text).strip()
+                elif 'msg_text' not in dir():
+                    # Extract message: remove the contact name and whatsapp keywords
+                    msg_text = clean_text
+                    for kw in ['send', 'whatsapp', 'message', 'on', 'to', 'the', 'a', contact_name]:
+                        msg_text = msg_text.replace(kw, '')
+                    msg_text = msg_text.strip()
+                
                 if msg_text:
                     try:
                         loop = asyncio.get_running_loop()
@@ -1370,13 +1543,14 @@ class VoiceAssistant:
                                 now.hour, now.minute + 2
                             )
                         )
-                        return f"✅ WhatsApp message scheduled to **{phone}**: \"{msg_text}\""
+                        display_name = contact_name.title() if contact_name else phone
+                        return f"✅ WhatsApp message scheduled to **{display_name}**: \"{msg_text}\""
                     except Exception as e:
                         return f"❌ WhatsApp error: {str(e)}"
                 else:
                     return "What message should I send? Please include the message text."
             else:
-                return "Please include a phone number. Example: 'send +919876543210 hello on whatsapp'"
+                return "I don't recognize that contact. Please use a phone number or add the contact to WHATSAPP_CONTACTS. Example: 'send +919876543210 hello on whatsapp'"
 
         # --- CREATIVE GENERATION (Pillar 3) ---
         creative_mode = self._detect_creative_mode(clean_text)
@@ -1461,9 +1635,30 @@ class VoiceAssistant:
             # Emotion detection
             emotion, emotion_tone = self._detect_emotion(user_text)
             emotion_ctx = f" | MOOD: {emotion} — {emotion_tone}" if emotion_tone else ""
+            
+            # F10: Recall relevant memories from vector store
+            vector_ctx = ""
+            if self.vector_memory:
+                try:
+                    vector_ctx = await self.vector_memory.recall_formatted(user_text, n_results=3)
+                except Exception as vm_err:
+                    print(f"⚠️ Vector recall error: {vm_err}")
+            
             context_header = f"[SYSTEM: {RealTimeContext.get_context()} | USER: {self.memory.get_profile_context()}{emotion_ctx}]"
+            if vector_ctx:
+                context_header += f"\n{vector_ctx}"
             if emotion != "neutral":
                 print(f"💭 Detected emotion: {emotion}")
+            
+            # F10: Store user message in vector memory
+            if self.vector_memory and user_text and len(user_text.strip()) > 5:
+                try:
+                    await self.vector_memory.store(
+                        f"User said: {user_text}",
+                        metadata={"role": "user", "emotion": emotion}
+                    )
+                except Exception:
+                    pass
 
             if user_image:
                 print("📸 Processing Image with Gemini multimodal...")
@@ -1520,9 +1715,10 @@ class VoiceAssistant:
                 tool_result = await search_web(query)
 
             if tool_result:
+                # BF2 FIX: inject real_time_context into tool-result prompt too
                 response = await self._send_message_with_retry(
                     selected_chat,
-                    f"{context_header}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
+                    f"{context_header}{real_time_context}\nUser: {user_text}\nTool Result: {tool_result}\nSummarize naturally."
                 )
                 clean_resp = self.clean_response(response.text)
                 self.memory.add_message("model", clean_resp)
@@ -1533,7 +1729,7 @@ class VoiceAssistant:
                 # File Q&A: embed full extracted text so Gemini can't refuse
                 kb_snippet = self.knowledge_base[:30_000]
                 prompt = (
-                    f"{context_header}\n\n"
+                    f"{context_header}{real_time_context}\n\n"
                     f"=== FILE: '{self.knowledge_base_name}' ===\n"
                     f"{kb_snippet}\n"
                     f"=== END OF FILE ===\n\n"
@@ -1542,8 +1738,9 @@ class VoiceAssistant:
                 )
             elif self._complexity_score(user_text) >= 3:
                 # Complex question: use chain-of-thought reasoning mode
-                prompt = self._build_reasoning_prompt(context_header, user_text)
-                selected_chat = self.smart_chat  # always use Pro for reasoning
+                # BF2 FIX: inject real_time_context into reasoning prompt
+                prompt = self._build_reasoning_prompt(context_header + real_time_context, user_text)
+                selected_chat = self.smart_chat  # always use smart for reasoning
             else:
                 prompt = context_header + real_time_context + " " + user_text
 
